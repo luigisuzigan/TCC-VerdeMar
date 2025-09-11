@@ -1,0 +1,91 @@
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
+  theme: {
+    extend: {
+      colors: {
+        primary: {
+          50: 'var(--color-primary-50)',
+          100: 'var(--color-primary-100)',
+          200: 'var(--color-primary-200)',
+          300: 'var(--color-primary-300)',
+          400: 'var(--color-primary-400)',
+          500: 'var(--color-primary-500)',
+          600: 'var(--color-primary-600)',
+          700: 'var(--color-primary-700)',
+          800: 'var(--color-primary-800)',
+          900: 'var(--color-primary-900)',
+          950: 'var(--color-primary-950)',
+        },
+        secondary: {
+          50: 'var(--color-secondary-50)',
+          100: 'var(--color-secondary-100)',
+          200: 'var(--color-secondary-200)',
+          300: 'var(--color-secondary-300)',
+          400: 'var(--color-secondary-400)',
+          500: 'var(--color-secondary-500)',
+          600: 'var(--color-secondary-600)',
+          700: 'var(--color-secondary-700)',
+          800: 'var(--color-secondary-800)',
+          900: 'var(--color-secondary-900)',
+          950: 'var(--color-secondary-950)',
+        },
+        ocean: {
+          50: 'var(--color-ocean-50)',
+          100: 'var(--color-ocean-100)',
+          200: 'var(--color-ocean-200)',
+          300: 'var(--color-ocean-300)',
+          400: 'var(--color-ocean-400)',
+          500: 'var(--color-ocean-500)',
+          600: 'var(--color-ocean-600)',
+          700: 'var(--color-ocean-700)',
+          800: 'var(--color-ocean-800)',
+          900: 'var(--color-ocean-900)',
+          950: 'var(--color-ocean-950)',
+        },
+        neutral: {
+          50: 'var(--color-neutral-50)',
+          100: 'var(--color-neutral-100)',
+          200: 'var(--color-neutral-200)',
+          300: 'var(--color-neutral-300)',
+          400: 'var(--color-neutral-400)',
+          500: 'var(--color-neutral-500)',
+          600: 'var(--color-neutral-600)',
+          700: 'var(--color-neutral-700)',
+          800: 'var(--color-neutral-800)',
+          900: 'var(--color-neutral-900)',
+          950: 'var(--color-neutral-950)',
+        },
+      },
+      fontFamily: {
+        sans: ['var(--font-family-sans)'],
+        display: ['var(--font-family-display)'],
+      },
+      spacing: {
+        '76': '19rem', // Header height
+      },
+      zIndex: {
+        dropdown: 'var(--z-dropdown)',
+        sticky: 'var(--z-sticky)',
+        fixed: 'var(--z-fixed)',
+        'modal-backdrop': 'var(--z-modal-backdrop)',
+        modal: 'var(--z-modal)',
+        popover: 'var(--z-popover)',
+        tooltip: 'var(--z-tooltip)',
+        toast: 'var(--z-toast)',
+      },
+      transitionTimingFunction: {
+        'ease-in-out': 'ease-in-out',
+      },
+      transitionDuration: {
+        fast: 'var(--transition-fast)',
+        base: 'var(--transition-base)',
+        slow: 'var(--transition-slow)',
+      },
+      backdropBlur: {
+        header: 'var(--header-blur)',
+      },
+    },
+  },
+  plugins: [],
+};
