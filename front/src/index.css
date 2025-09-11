@@ -1,3 +1,11 @@
+@import './styles/tokens.css';
+@import './styles/base.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Text balance utility */
+.text-balance {
+  text-wrap: balance;
+}
