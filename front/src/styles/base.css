@@ -1,4 +1,2 @@
-/* Base additions */
-html, body, #root { height: 100%; }
-/* Body styling is applied via Tailwind classes on body in index.html */
- :root { color-scheme: light; }
+/* Base mínima para não quebrar os imports */
+html, body { height: 100%; }
