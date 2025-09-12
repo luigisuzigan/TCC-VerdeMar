@@ -1,0 +1,20 @@
+/* Design tokens: colors, spacing, radii, shadows */
+:root {
+  /* brand */
+  --brand: 28 60% 26%; /* #1e645a approx in HSL */
+  --brand-600: 28 60% 26%;
+  --brand-500: 28 55% 34%;
+  --brand-400: 28 50% 44%;
+
+  /* neutrals */
+  --bg: 210 20% 98%;
+  --text: 220 15% 20%;
+
+  /* radii */
+  --radius-lg: 30px;
+  --radius-md: 16px;
+  --radius-sm: 10px;
+
+  /* shadows */
+  --shadow-card: 0 10px 20px rgba(0,0,0,0.06);
+}

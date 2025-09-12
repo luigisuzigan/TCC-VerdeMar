@@ -1,3 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* design tokens and base additions */
+@import './styles/tokens.css';
+@import './styles/base.css';
