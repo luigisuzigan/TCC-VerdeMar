@@ -1,45 +1,36 @@
-import './index.css';
+const items = [
+    {
+        img: 'https://source.unsplash.com/random/400x180/?beach-surf',
+        title: 'Surf e Aventura',
+        text: 'Perfeito para quem busca emoções fortes e contato direto com a natureza.'
+    },
+    {
+        img: 'https://source.unsplash.com/random/400x180/?beach-relax',
+        title: 'Relax e Bem-estar',
+        text: 'Ambientes tranquilos para uma vida leve, com qualidade e saúde em foco.'
+    },
+    {
+        img: 'https://source.unsplash.com/random/400x180/?beach-family',
+        title: 'Família e Comunidade',
+        text: 'Bairros acolhedores com escolas, praças e serviços para toda a família.'
+    }
+];
 
-const EstilosVidaCards = () => {
+export default function EstilosVidaCards() {
     return (
-        <section className="category-section container">
-            <h2>Explore Diferentes Estilos de Vida na Praia</h2>
-            <div className="card-grid">
-                <div className="card">
-                    <img src="https://source.unsplash.com/random/400x220/?luxury-beach-villa" alt="Casas de Luxo" />
-                    <div className="card-content">
-                        <h3>Casas de Luxo</h3>
-                        <p>O que há de melhor em conforto e exclusividade à beira-mar.</p>
-                        <a href="#" className="button">Ver Mais</a>
+        <section className="container py-12">
+            <h2 className="text-2xl font-semibold mb-6">Estilos de Vida no Litoral</h2>
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {items.map((c, i) => (
+                    <div key={i} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                        <img src={c.img} alt="" className="w-full h-44 object-cover" />
+                        <div className="p-4">
+                            <h3 className="font-medium text-gray-900">{c.title}</h3>
+                            <p className="text-sm text-gray-600 mt-2">{c.text}</p>
+                        </div>
                     </div>
-                </div>
-                <div className="card">
-                    <img src="https://source.unsplash.com/random/400x220/?oceanfront-apartment" alt="Apartamentos Pé na Areia" />
-                    <div className="card-content">
-                        <h3>Apartamentos Pé na Areia</h3>
-                        <p>Acorde com a brisa do mar e a vista deslumbrante.</p>
-                        <a href="#" className="button">Ver Mais</a>
-                    </div>
-                </div>
-                <div className="card">
-                    <img src="https://source.unsplash.com/random/400x220/?beach-land-view" alt="Terrenos para Construir" />
-                    <div className="card-content">
-                        <h3>Terrenos para Construir</h3>
-                        <p>Crie o lar dos seus sonhos do zero, com a sua cara.</p>
-                        <a href="#" className="button">Ver Mais</a>
-                    </div>
-                </div>
-                <div className="card">
-                    <img src="https://source.unsplash.com/random/400x220/?beach-seasonal-rental" alt="Imóveis para Temporada" />
-                    <div className="card-content">
-                        <h3>Imóveis para Temporada</h3>
-                        <p>Escapadas perfeitas para curtir feriados e férias com estilo.</p>
-                        <a href="#" className="button">Ver Mais</a>
-                    </div>
-                </div>
+                ))}
             </div>
         </section>
     );
-};
-
-export default EstilosVidaCards;
+}
