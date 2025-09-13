@@ -1,2 +1,2 @@
-/* Base mínima para não quebrar os imports */
+/* Base mínima para complementar o Tailwind e evitar erros de import */
 html, body { height: 100%; }

@@ -4,21 +4,20 @@ import ObjetivoCards from '../../components/ObjetivoCards';
 import EstilosVidaCards from '../../components/EstilosVidaCards';
 import Testimonials from '../../components/Testimonials';
 import BlogSection from '../../components/BlogSection';
-import NearbyProperties from '../../components/section1';
+import NearbyProperties from '../../components/section1'; // Section 1 — Imóveis próximos
 
 function Home() {
-    return (
-        <>
-            <Header />
-            <HeroSection />
-            <NearbyProperties />
-            <NearbyProperties />
-            <ObjetivoCards />
-            <EstilosVidaCards />
-            <Testimonials />
-            <BlogSection />
-        </>
-    );
+  return (
+    <>
+      <Header />
+      <HeroSection />
+      <NearbyProperties />
+      <ObjetivoCards />
+      <EstilosVidaCards />
+      <Testimonials />
+      <BlogSection />
+    </>
+  );
 }
 
 export default Home;

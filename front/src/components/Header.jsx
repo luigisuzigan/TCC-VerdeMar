@@ -1,31 +1,70 @@
+import { Link, NavLink } from 'react-router-dom';
+import { UserRound } from 'lucide-react';
+
 export default function Header() {
-    return (
-      <header className="w-full flex items-center justify-between px-6 py-4 bg-white border-b border-gray-200 rounded-t-[30px]">
-        {/* Logo */}
-        <div className="flex items-center gap-2 text-[#1e645a] font-bold text-xl">
-          <i className="fas fa-leaf"></i>
-          Verde Mar
-        </div>
-  
-        {/* Menu de navegação */}
-        <nav className="hidden md:flex gap-8 text-gray-700 font-medium text-base">
-          <a href="#" className="hover:text-[#1e645a] transition">Home</a>
-          <a href="#" className="hover:text-[#1e645a] transition">Discover</a>
-          <a href="#" className="hover:text-[#1e645a] transition">Activities</a>
-          <a href="#" className="hover:text-[#1e645a] transition">About</a>
-          <a href="#" className="hover:text-[#1e645a] transition">Contact</a>
+  const nav = [
+    { label: 'Home', to: '/' },
+    { label: 'Explorar', to: '/explorar' },
+    { label: 'Novidades', to: '/novidades' },
+    { label: 'Blog', to: '/blog' },
+  ];
+
+  return (
+    <header className="fixed inset-x-0 top-0 z-50 bg-white/90 backdrop-blur border-b border-slate-200 shadow-sm">
+      <div className="mx-auto flex h-[68px] w-[min(96vw,1280px)] items-center justify-between gap-4">
+        {/* Logo esquerda */}
+        <Link to="/" className="flex items-center gap-2 pl-3" aria-label="Início">
+          <span className="inline-block h-8 w-8 rounded-lg bg-gradient-to-br from-sky-300 to-blue-600 ring-1 ring-black/5" />
+          <span className="text-[17px] font-bold tracking-wide text-slate-900">Verde Mar</span>
+        </Link>
+
+        {/* Navegação central */}
+        <nav className="hidden md:flex items-center justify-center gap-8 text-[0.95rem] font-semibold">
+          {nav.map((item) => (
+            <NavLink
+              key={item.to}
+              end={item.to === '/'}
+              to={item.to}
+              className={({ isActive }) =>
+                [
+                  'px-1 py-1 transition relative',
+                  isActive ? 'text-slate-900' : 'text-slate-600 hover:text-slate-900',
+                ].join(' ')
+              }
+            >
+              {item.label}
+            </NavLink>
+          ))}
         </nav>
-  
-        {/* Ícones */}
-        <div className="flex items-center gap-4">
-          <button className="text-gray-500 hover:text-[#1e645a] text-xl">
-            <i className="fas fa-search"></i>
-          </button>
-          <button className="text-gray-300 hover:text-[#1e645a] text-2xl">
-            <i className="fas fa-user-circle"></i>
-          </button>
+
+        {/* Ações direita */}
+        <div className="flex items-center gap-3 pr-3">
+          <Link
+            to="/login"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-sky-50 text-sky-700 ring-1 ring-sky-200 hover:bg-sky-100"
+            aria-label="Ir para login"
+            title="Entrar"
+          >
+            <UserRound size={20} />
+          </Link>
         </div>
-      </header>
-    );
-  }
-  
+      </div>
+
+      {/* Onda sutil na base do header (apenas decorativo, vibe praia) */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-[-1px]">
+        <svg viewBox="0 0 1440 40" className="w-full h-6">
+          <defs>
+            <linearGradient id="waveGrad" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0%" stopColor="#E0F7FA" stopOpacity="0.8" />
+              <stop offset="100%" stopColor="#E0F7FA" stopOpacity="0" />
+            </linearGradient>
+          </defs>
+          <path
+            d="M0,20 C180,40 360,0 540,20 C720,40 900,0 1080,20 C1260,40 1440,0 1440,0 L1440,40 L0,40 Z"
+            fill="url(#waveGrad)"
+          />
+        </svg>
+      </div>
+    </header>
+  );
+}
