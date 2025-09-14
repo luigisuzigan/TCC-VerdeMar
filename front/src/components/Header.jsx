@@ -5,8 +5,9 @@ export default function Header() {
   const nav = [
     { label: 'Home', to: '/' },
     { label: 'Explorar', to: '/explorar' },
-    { label: 'Novidades', to: '/novidades' },
     { label: 'Blog', to: '/blog' },
+    { label: 'Novidades', to: '/novidades' },
+    { label: 'Sobre', to: '/sobre' }, // incluído para igualar o menu da Home
   ];
 
   return (

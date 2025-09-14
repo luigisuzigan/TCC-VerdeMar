@@ -1,22 +1,61 @@
 import { useEffect, useRef, useState } from 'react';
-import { X, MapPin, CalendarDays, Clock, Users, Compass } from 'lucide-react';
+import { X, Compass, MapPin, CalendarDays, Users, Search as SearchIcon } from 'lucide-react';
 
-function Chip({ label, active }) {
+// Hero com botão "Explorar" central. Ao clicar, abre a barra de pesquisa em um painel leve.
+export default function HeroSection() {
+  const [open, setOpen] = useState(false);
   return (
-    <button
-      type="button"
-      className={[
-        'rounded-full px-3 py-1.5 text-xs font-semibold',
-        active ? 'bg-sky-50 text-sky-700 ring-1 ring-sky-200' : 'bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50',
-      ].join(' ')}
-      aria-pressed={active ? 'true' : 'false'}
-    >
-      {label}
-    </button>
+    <section className="relative mx-auto w-[min(94vw,1280px)] rounded-[28px] overflow-hidden shadow-[0_10px_30px_rgba(2,48,71,.15)] ring-1 ring-white/30">
+      {/* Fundo e overlay */}
+      <div
+        className="absolute inset-0 -z-10 bg-cover bg-center"
+        style={{
+          backgroundImage:
+            "url('/hero.jpg'), url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1920&auto=format&fit=crop')",
+        }}
+        aria-hidden="true"
+      />
+      <div className="absolute inset-0 -z-10 bg-gradient-to-b from-black/45 via-black/25 to-black/55" />
+
+      {/* Backdrop suave quando o painel estiver aberto */}
+      {open && (
+        <button
+          type="button"
+          aria-label="Fechar explorar"
+          onClick={() => setOpen(false)}
+          className="absolute inset-0 z-30 bg-black/20 backdrop-blur-[1px] transition-opacity"
+        />
+      )}
+
+      {/* Conteúdo do hero */}
+      <div className="px-6 sm:px-8 pt-20 pb-40 text-white text-center">
+        <h1 className="mx-auto max-w-[900px] text-3xl sm:text-4xl md:text-5xl font-extrabold leading-tight drop-shadow">
+          Construa seus sonhos à beira-mar
+        </h1>
+        <p className="mt-3 mx-auto max-w-[780px] text-white/95">
+          Encontre casas, apartamentos, condomínios e fazendas no litoral com a curadoria Verde Mar.
+        </p>
+
+        {/* ÚNICO botão no hero */}
+        <div className="mt-8">
+          <button
+            type="button"
+            onClick={() => setOpen(true)}
+            className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-6 py-3 font-semibold text-white shadow-[0_10px_20px_rgba(16,185,129,.35)] ring-1 ring-white/60 transition hover:bg-emerald-700"
+          >
+            <Compass size={18} className="opacity-95" />
+            Explorar
+          </button>
+        </div>
+      </div>
+
+      {/* Painel de pesquisa no estilo da segunda imagem (apenas a barra) */}
+      <ExploreSearchPanel open={open} onClose={() => setOpen(false)} />
+    </section>
   );
 }
 
-function ExplorePanel({ open, onClose }) {
+function ExploreSearchPanel({ open, onClose }) {
   const ref = useRef(null);
 
   // Fechar com ESC e clique fora
@@ -48,199 +87,83 @@ function ExplorePanel({ open, onClose }) {
       <div
         ref={ref}
         className={[
-          'rounded-2xl bg-white shadow-[0_30px_70px_rgba(2,48,71,.20)] ring-1 ring-slate-200 overflow-hidden',
+          'relative rounded-2xl bg-white/95 shadow-[0_20px_50px_rgba(2,48,71,.22)] ring-1 ring-black/5 overflow-hidden',
           'transition duration-200 ease-out',
           open ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-2 scale-[0.98]',
         ].join(' ')}
         role="dialog"
         aria-modal="true"
+        aria-label="Barra de pesquisa"
       >
-        {/* Cabeçalho do popover */}
-        <div className="flex items-center gap-2 border-b border-slate-200 px-4 py-3">
-          <div className="text-sm font-semibold text-slate-900">Explorar opções</div>
-          <div className="ml-3 hidden md:flex items-center gap-2">
-            <Chip label="Popular" active />
-            <Chip label="Trending" />
-            <Chip label="Budget" />
+        {/* Botão fechar discreto */}
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Fechar"
+          className="absolute right-2 top-2 z-10 inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100"
+        >
+          <X size={18} />
+        </button>
+
+        {/* Barra de pesquisa (Destination / Check‑in / Check‑out / Travelers / Search) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_1fr_140px]">
+          {/* Destino */}
+          <div className="flex items-center gap-2 px-5 py-4 border-b sm:border-b-0 lg:border-r border-slate-200 bg-white/95">
+            <MapPin size={16} className="text-sky-600" />
+            <div>
+              <div className="text-[12px] font-semibold text-slate-500">Destino</div>
+              <div className="text-[15px] text-slate-900/85">Cidade ou destino</div>
+            </div>
           </div>
-          <div className="ml-auto flex items-center gap-2">
+
+          {/* Check-in */}
+          <div className="flex items-center gap-2 px-5 py-4 border-b sm:border-b-0 lg:border-r border-slate-200 bg-white/95">
+            <CalendarDays size={16} className="text-sky-600" />
+            <div>
+              <div className="text-[12px] font-semibold text-slate-500">Check‑in</div>
+              <div className="text-[15px] text-slate-900/85">Adicionar data</div>
+            </div>
+          </div>
+
+          {/* Check-out */}
+          <div className="flex items-center gap-2 px-5 py-4 border-b sm:border-b-0 lg:border-r border-slate-200 bg-white/95">
+            <CalendarDays size={16} className="text-sky-600" />
+            <div>
+              <div className="text-[12px] font-semibold text-slate-500">Check‑out</div>
+              <div className="text-[15px] text-slate-900/85">Adicionar data</div>
+            </div>
+          </div>
+
+          {/* Viajantes */}
+          <div className="flex items-center gap-2 px-5 py-4 border-b lg:border-b-0 lg:border-r border-slate-200 bg-white/95">
+            <Users size={16} className="text-sky-600" />
+            <div>
+              <div className="text-[12px] font-semibold text-slate-500">Viajantes</div>
+              <div className="text-[15px] text-slate-900/85">Adicionar hóspedes</div>
+            </div>
+          </div>
+
+          {/* Botão Search */}
+          <div className="p-3 lg:p-2 flex bg-white/95">
             <button
               type="button"
-              className="hidden sm:inline-flex items-center gap-2 rounded-xl bg-sky-600 px-3 py-2 text-sm font-semibold text-white hover:bg-sky-700 shadow-sm"
               onClick={onClose}
-              title="Explorar"
+              className="w-full lg:w-auto lg:min-w-[120px] h-12 ml-auto rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-semibold shadow-[0_10px_20px_rgba(2,132,199,.35)] transition inline-flex items-center justify-center gap-2 px-5"
             >
-              <Compass size={16} />
-              Explorar
+              <SearchIcon size={16} />
+              Search
             </button>
-            <button
-              type="button"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100"
-              aria-label="Fechar"
-              onClick={onClose}
-            >
-              <X size={18} />
-            </button>
-          </div>
-        </div>
-
-        {/* Corpo com filtros simples (mock visual) */}
-        <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr]">
-          {/* Sidebar categorias */}
-          <aside className="border-b lg:border-b-0 lg:border-r border-slate-200 p-3">
-            <div className="text-xs font-semibold text-slate-500 mb-2">Categorias</div>
-            <div className="grid gap-2">
-              {['Internacional', 'Praia', 'Natureza', 'Cidades'].map((c, i) => (
-                <button
-                  key={c}
-                  className={[
-                    'w-full text-left rounded-lg border px-3 py-2 text-sm font-medium',
-                    i === 0 ? 'border-sky-300 bg-sky-50 text-sky-800' : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300',
-                  ].join(' ')}
-                >
-                  {c}
-                </button>
-              ))}
-            </div>
-          </aside>
-
-          {/* Conteúdo: cards de destino mock */}
-          <div className="p-3">
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-              {[
-                { title: 'Bali', img: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=1200&auto=format&fit=crop' },
-                { title: 'Cancún', img: 'https://images.unsplash.com/photo-1493558103817-58b2924bce98?q=80&w=1200&auto=format&fit=crop' },
-                { title: 'Noronha', img: 'https://images.unsplash.com/photo-1516375199440-499f02a5a3de?q=80&w=1200&auto=format&fit=crop' },
-                { title: 'Malibu', img: 'https://images.unsplash.com/photo-1526481280698-8fcc13fd2410?q=80&w=1200&auto=format&fit=crop' },
-                { title: 'Patagônia', img: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=1200&auto=format&fit=crop' },
-                { title: 'Iceland', img: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=1200&auto=format&fit=crop' },
-                { title: 'Paris', img: 'https://images.unsplash.com/photo-1508057198894-247b23fe5ade?q=80&w=1200&auto=format&fit=crop' },
-                { title: 'NYC', img: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?q=80&w=1200&auto=format&fit=crop' },
-              ].map((d) => (
-                <button
-                  key={d.title}
-                  className="group relative overflow-hidden rounded-xl border border-slate-200 shadow-sm"
-                  title={`Selecionar ${d.title}`}
-                >
-                  <img src={d.img} alt={d.title} className="h-[110px] w-full object-cover transition duration-500 group-hover:scale-[1.03]" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/25 to-transparent" aria-hidden="true" />
-                  <span className="absolute left-2 top-2 rounded-full bg-black/55 px-2 py-0.5 text-[10px] font-semibold text-white">
-                    40+ pacotes
-                  </span>
-                  <div className="absolute left-2 bottom-2 text-xs font-semibold text-white drop-shadow">{d.title}</div>
-                </button>
-              ))}
-            </div>
           </div>
         </div>
 
         {/* Rodapé com dica */}
-        <div className="flex items-center justify-between border-t border-slate-200 px-4 py-2">
+        <div className="border-t border-slate-200 px-4 py-2 bg-white/95">
           <span className="text-xs text-slate-500">Pressione Esc para fechar</span>
-          <button
-            type="button"
-            className="inline-flex items-center gap-2 rounded-xl bg-sky-600 px-3 py-2 text-sm font-semibold text-white hover:bg-sky-700 shadow-sm"
-            onClick={onClose}
-          >
-            <Compass size={16} />
-            Explorar
-          </button>
         </div>
       </div>
     </div>
   );
 }
-
-export default function HeroSection() {
-  const [open, setOpen] = useState(false);
-
-  return (
-    <section className="relative mx-auto mt-[88px] w-[min(94vw,1280px)] rounded-[28px] overflow-hidden shadow-[0_10px_30px_rgba(2,48,71,.15)]">
-      {/* Fundo e overlay */}
-      <div
-        className="absolute inset-0 -z-10 bg-cover bg-center"
-        style={{
-          backgroundImage:
-            "url('https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?q=80&w=1920&auto=format&fit=crop')",
-        }}
-        aria-hidden="true"
-      />
-      <div className="absolute inset-0 -z-10 bg-gradient-to-b from-black/45 via-black/25 to-black/55" />
-
-      {/* Conteúdo hero */}
-      <div className="px-6 sm:px-8 py-24 text-white text-center">
-        <h1 className="mx-auto max-w-[900px] text-3xl sm:text-4xl md:text-5xl font-extrabold leading-tight drop-shadow">
-          Construa seus sonhos à beira-mar
-        </h1>
-        <p className="mt-3 mx-auto max-w-[780px] text-white/95">
-          Encontre casas, apartamentos, condomínios e fazendas no litoral com a curadoria Verde Mar.
-        </p>
-
-        {/* Botão Explorar bonito */}
-        <div className="mt-8">
-          <button
-            type="button"
-            onClick={() => setOpen(true)}
-            className="inline-flex items-center gap-2 rounded-full bg-white/95 px-6 py-3 font-semibold text-slate-900 shadow-[0_10px_20px_rgba(2,48,71,.25)] ring-1 ring-black/5 transition hover:bg-white"
-          >
-            <Compass size={18} />
-            Explorar
-          </button>
-        </div>
-      </div>
-
-      {/* Barra rápida de busca visual (estática) */}
-      <div className="absolute left-1/2 bottom-6 z-10 w-[min(92%,1040px)] -translate-x-1/2">
-        <div className="rounded-2xl bg-white/95 shadow-[0_20px_40px_rgba(2,48,71,.18)] ring-1 ring-black/5">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_1fr_140px]">
-            <div className="flex items-center gap-2 px-5 py-4 border-b sm:border-b-0 lg:border-r border-slate-200">
-              <MapPin size={16} className="text-sky-600" />
-              <div>
-                <div className="text-[12px] font-semibold text-slate-500">Destino</div>
-                <div className="text-[15px] text-slate-900/85">Cidade ou destino</div>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 px-5 py-4 border-b sm:border-b-0 lg:border-r border-slate-200">
-              <CalendarDays size={16} className="text-sky-600" />
-              <div>
-                <div className="text-[12px] font-semibold text-slate-500">Check‑in</div>
-                <div className="text-[15px] text-slate-900/85">Selecione a data</div>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 px-5 py-4 border-b sm:border-b-0 lg:border-r border-slate-200">
-              <Clock size={16} className="text-sky-600" />
-              <div>
-                <div className="text-[12px] font-semibold text-slate-500">Check‑out</div>
-                <div className="text-[15px] text-slate-900/85">Selecione a data</div>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 px-5 py-4 border-b lg:border-b-0 lg:border-r border-slate-200">
-              <Users size={16} className="text-sky-600" />
-              <div>
-                <div className="text-[12px] font-semibold text-slate-500">Hóspedes</div>
-                <div className="text-[15px] text-slate-900/85">2 adultos, 0 crianças</div>
-              </div>
-            </div>
-            <div className="p-3 lg:p-2 flex">
-              <button
-                type="button"
-                onClick={() => setOpen(true)}
-                className="w-full lg:w-auto lg:min-w-[120px] h-12 ml-auto rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-semibold shadow-[0_10px_20px_rgba(2,132,199,.35)] transition inline-flex items-center justify-center gap-2 px-5"
-              >
-                <Compass size={16} />
-                Explorar
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Popover de Explorar com efeito suave */}
-      <ExplorePanel open={open} onClose={() => setOpen(false)} />
-    </section>
-  );
-}
-
 
 
 

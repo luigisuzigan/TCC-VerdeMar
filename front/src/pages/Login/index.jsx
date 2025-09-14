@@ -1,13 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 
 export default function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
+  const [remember, setRemember] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -22,13 +21,14 @@ export default function Login() {
       const res = await axios.post(`${API_BASE}/auth/login`, { email, password });
       const { token, user } = res.data || {};
       if (!token) throw new Error('Resposta inválida do servidor.');
-      localStorage.setItem('token', token);
+      // Persist token (padrão: localStorage). Poderíamos trocar para sessionStorage quando remember=false.
+      (remember ? localStorage : sessionStorage).setItem('token', token);
       if (user) localStorage.setItem('user', JSON.stringify(user));
       navigate('/');
     } catch (err) {
       // Fallback mock (apenas para dev quando backend não estiver pronto)
       if (email === 'demo@verdemar.com' && password === '123456') {
-        localStorage.setItem('token', 'dev-mock-token');
+        (remember ? localStorage : sessionStorage).setItem('token', 'dev-mock-token');
         localStorage.setItem('user', JSON.stringify({ email }));
         navigate('/');
       } else {
@@ -41,122 +41,114 @@ export default function Login() {
   }
 
   return (
-    <main className="relative min-h-dvh overflow-hidden bg-gradient-to-b from-[#cfe9ff] via-[#eaf5ff] to-white">
+    <main
+      className="relative min-h-dvh bg-cover bg-center"
+      style={{
+        // Você pode trocar esta imagem depois
+        backgroundImage:
+          "url('https://images.unsplash.com/photo-1521207418485-99c705420785?q=80&w=1600&auto=format&fit=crop')",
+      }}
+    >
+      {/* overlay leve */}
+      <div className="absolute inset-0 bg-white/30 backdrop-blur-[2px]" />
+
       {/* Brand simples topo-esquerda */}
-      <div className="pointer-events-none absolute left-6 top-6 z-10 select-none">
-        <div className="inline-flex items-center gap-2 rounded-full bg-white/70 px-3 py-2 text-sm font-semibold text-slate-800 shadow-sm ring-1 ring-black/5 backdrop-blur">
-          <span className="inline-block h-6 w-6 rounded-md bg-gradient-to-br from-sky-300 to-blue-600 ring-1 ring-white/40" aria-hidden="true" />
+      <div className="relative z-10 p-4">
+        <div className="inline-flex items-center gap-2 text-slate-800 font-semibold">
+          <span className="inline-block h-5 w-5 rounded-md bg-slate-800" aria-hidden="true" />
           <span>Verde Mar</span>
         </div>
       </div>
 
       {/* Conteúdo central */}
-      <div className="container mx-auto grid min-h-dvh place-items-center px-6 py-16">
-        <div className="relative w-full max-w-[520px] rounded-[28px] border border-white/50 bg-white/60 p-6 shadow-[0_10px_30px_rgba(2,48,71,.12)] backdrop-blur-md">
-          {/* Emblema no topo */}
-          <div className="absolute left-1/2 -top-6 -translate-x-1/2">
-            <div className="h-12 w-12 rounded-2xl bg-white shadow ring-1 ring-black/5 grid place-items-center">
-              <span className="inline-block h-6 w-6 rounded-md bg-gradient-to-br from-sky-300 to-blue-600 ring-1 ring-white/40" aria-hidden="true" />
-            </div>
-          </div>
-
-          <div className="pt-6 text-center">
-            <h1 className="text-2xl font-bold text-slate-900">Entrar com e-mail</h1>
-            <p className="mt-1 text-sm text-slate-600">Acesse sua conta para continuar.</p>
-          </div>
+      <div className="relative z-10 grid min-h-[calc(100dvh-56px)] place-items-center px-4 py-8">
+        <div className="w-full max-w-[460px] rounded-2xl border border-gray-200 bg-white/95 p-8 shadow-sm">
+          <h1 className="text-center text-2xl font-semibold text-gray-900">Sign in</h1>
 
           {/* Mensagem de erro */}
           {error && (
-            <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            <div className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
               {error}
             </div>
           )}
 
-          {/* Formulário */}
           <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
             {/* Email */}
-            <label className="block">
-              <span className="sr-only">Email</span>
-              <div className="relative">
-                <Mail className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} aria-hidden="true" />
-                <input
-                  type="email"
-                  name="email"
-                  placeholder="Email"
-                  className="w-full rounded-xl border border-slate-200 bg-white/90 px-10 py-3 text-[15px] text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-200"
-                  autoComplete="email"
-                  required
-                  aria-label="Email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
-            </label>
-
-            {/* Password + link */}
-            <div>
-              <label className="block">
-                <span className="sr-only">Senha</span>
-                <div className="relative">
-                  <Lock className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} aria-hidden="true" />
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    name="password"
-                    placeholder="Senha"
-                    className="w-full rounded-xl border border-slate-200 bg-white/90 px-10 pr-10 py-3 text-[15px] text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-200"
-                    autoComplete="current-password"
-                    required
-                    aria-label="Senha"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword((s) => !s)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                    aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
-                  >
-                    {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
-                  </button>
-                </div>
-              </label>
-              <div className="mt-2 text-right">
-                <a href="#" className="text-sm font-medium text-slate-600 hover:text-slate-800">
-                  Esqueceu a senha?
-                </a>
-              </div>
+            <div className="space-y-1">
+              <label htmlFor="email" className="text-sm text-gray-700">Email address</label>
+              <input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                autoComplete="email"
+                required
+                className="w-full rounded-md border border-gray-300 bg-gray-100 px-3 py-2 text-gray-900 outline-none focus:border-blue-500 focus:bg-white"
+              />
             </div>
 
-            {/* CTA */}
+            {/* Password */}
+            <div className="space-y-1">
+              <label htmlFor="password" className="text-sm text-gray-700">Password</label>
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                autoComplete="current-password"
+                required
+                className="w-full rounded-md border border-gray-300 bg-gray-100 px-3 py-2 text-gray-900 outline-none focus:border-blue-500 focus:bg-white"
+              />
+            </div>
+
+            {/* Remember + forgot */}
+            <div className="flex items-center justify-between text-sm">
+              <label className="inline-flex items-center gap-2 text-gray-700">
+                <input
+                  type="checkbox"
+                  checked={remember}
+                  onChange={(e) => setRemember(e.target.checked)}
+                  className="size-4 rounded border-gray-300 text-blue-600 focus:ring-blue-600"
+                />
+                Keep me signed in
+              </label>
+              <a href="#" className="text-blue-600 hover:underline">Forgot password?</a>
+            </div>
+
+            {/* Primary CTA */}
             <button
               type="submit"
               disabled={loading}
-              className="mt-1 w-full rounded-2xl bg-gradient-to-b from-neutral-900 to-black py-3.5 text-center text-[15px] font-semibold text-white shadow-[0_10px_20px_rgba(0,0,0,.25)] transition hover:brightness-110 active:translate-y-[1px] disabled:cursor-not-allowed disabled:opacity-70"
+              className="w-full rounded-md bg-blue-600 py-2.5 text-white font-medium hover:bg-blue-700 transition disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              {loading ? 'Entrando...' : 'Entrar'}
+              {loading ? 'Signing in...' : 'Continue with email'}
             </button>
 
-            {/* Separador */}
-            <div className="flex items-center gap-3 py-2">
-              <span className="h-px flex-1 bg-gradient-to-r from-transparent via-slate-300 to-transparent" />
-              <span className="text-xs font-medium text-slate-500">ou entre com</span>
-              <span className="h-px flex-1 bg-gradient-to-r from-transparent via-slate-300 to-transparent" />
+            {/* Divider */}
+            <div className="flex items-center gap-3 py-1 text-xs text-gray-500">
+              <span className="h-px flex-1 bg-gray-200" />
+              <span>or use one of these options</span>
+              <span className="h-px flex-1 bg-gray-200" />
             </div>
 
-            {/* Socials (placeholders) */}
-            <div className="grid grid-cols-3 gap-3">
-              <button type="button" className="rounded-xl border border-slate-200 bg-white/90 py-2.5 text-sm font-semibold text-slate-800 shadow-sm hover:border-slate-300">Google</button>
-              <button type="button" className="rounded-xl border border-slate-200 bg-white/90 py-2.5 text-sm font-semibold text-slate-800 shadow-sm hover:border-slate-300">Facebook</button>
-              <button type="button" className="rounded-xl border border-slate-200 bg-white/90 py-2.5 text-sm font-semibold text-slate-800 shadow-sm hover:border-slate-300">Apple</button>
+            {/* Socials */}
+            <div className="grid grid-cols-1 gap-3">
+              <button type="button" className="inline-flex items-center justify-center gap-2 rounded-md border border-gray-300 bg-white py-2.5 text-sm font-medium text-gray-800 hover:bg-gray-50">
+                {/* simple G */}
+                <span className="inline-block size-4 rounded-sm bg-gradient-to-br from-yellow-400 via-red-500 to-blue-600" aria-hidden="true" />
+                Continue with Google
+              </button>
+              <button type="button" className="inline-flex items-center justify-center gap-2 rounded-md bg-[#1877F2] py-2.5 text-sm font-medium text-white hover:brightness-105">
+                <span className="inline-block size-4 rounded-sm bg-white" aria-hidden="true" />
+                Continue with Facebook
+              </button>
             </div>
           </form>
 
-          {/* Rodapé */}
-          <p className="mt-6 text-center text-sm text-slate-600">
-            Não tem conta?{' '}
-            <a href="/register" className="font-semibold text-blue-600 hover:text-blue-700">
-              Crie uma agora
-            </a>
+          {/* Footer */}
+          <p className="mt-6 text-center text-sm text-gray-600">
+            Don't have an account?{' '}
+            <a href="/register" className="font-medium text-blue-600 hover:underline">Register</a>
           </p>
         </div>
       </div>
