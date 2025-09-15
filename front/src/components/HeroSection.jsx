@@ -1,169 +1,117 @@
-import { useEffect, useRef, useState } from 'react';
-import { X, Compass, MapPin, CalendarDays, Users, Search as SearchIcon } from 'lucide-react';
+import React, { useState } from "react";
+import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 
-// Hero com botão "Explorar" central. Ao clicar, abre a barra de pesquisa em um painel leve.
-export default function HeroSection() {
-  const [open, setOpen] = useState(false);
+const bgUrl = "https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=1600&auto=format&fit=crop";
+
+function Pill({ children }) {
   return (
-    <section className="relative mx-auto w-[min(94vw,1280px)] rounded-[28px] overflow-hidden shadow-[0_10px_30px_rgba(2,48,71,.15)] ring-1 ring-white/30">
-      {/* Fundo e overlay */}
-      <div
-        className="absolute inset-0 -z-10 bg-cover bg-center"
-        style={{
-          backgroundImage:
-            "url('/hero.jpg'), url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1920&auto=format&fit=crop')",
-        }}
-        aria-hidden="true"
-      />
-      <div className="absolute inset-0 -z-10 bg-gradient-to-b from-black/45 via-black/25 to-black/55" />
+    <span className="inline-flex items-center rounded-full bg-white/70 px-3 py-1 text-[10px] font-semibold uppercase tracking-[.2em] text-slate-800 shadow-sm ring-1 ring-slate-200/60 backdrop-blur">{children}</span>
+  );
+}
 
-      {/* Backdrop suave quando o painel estiver aberto */}
-      {open && (
-        <button
-          type="button"
-          aria-label="Fechar explorar"
-          onClick={() => setOpen(false)}
-          className="absolute inset-0 z-30 bg-black/20 backdrop-blur-[1px] transition-opacity"
-        />
-      )}
+function Divider() {
+  return <div className="hidden h-16 w-px self-center bg-slate-200/70 md:block" />;
+}
 
-      {/* Conteúdo do hero */}
-      <div className="px-6 sm:px-8 pt-20 pb-40 text-white text-center">
-        <h1 className="mx-auto max-w-[900px] text-3xl sm:text-4xl md:text-5xl font-extrabold leading-tight drop-shadow">
-          Construa seus sonhos à beira-mar
-        </h1>
-        <p className="mt-3 mx-auto max-w-[780px] text-white/95">
-          Encontre casas, apartamentos, condomínios e fazendas no litoral com a curadoria Verde Mar.
-        </p>
+function Field({ icon, title, subtitle }) {
+  return (
+    <div className="flex min-w-[180px] flex-1 items-center gap-3 px-6 py-5">
+      <div className="grid place-items-center rounded-full border border-slate-200/70 p-2 text-slate-600">{icon}</div>
+      <div className="leading-tight">
+        <div className="text-[13px] font-semibold text-slate-900">{title}</div>
+        <div className="text-[12px] text-slate-500">{subtitle}</div>
+      </div>
+    </div>
+  );
+}
 
-        {/* ÚNICO botão no hero */}
-        <div className="mt-8">
-          <button
-            type="button"
-            onClick={() => setOpen(true)}
-            className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-6 py-3 font-semibold text-white shadow-[0_10px_20px_rgba(16,185,129,.35)] ring-1 ring-white/60 transition hover:bg-emerald-700"
-          >
-            <Compass size={18} className="opacity-95" />
-            Explorar
-          </button>
+
+export function TreviloHero() {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <section className="relative grid min-h-[92vh] place-items-center overflow-hidden" style={{ backgroundImage: `url(${bgUrl})`, backgroundSize: "cover", backgroundPosition: "center" }}>
+      <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/20 to-black/60" />
+      <div className="relative z-10 mx-auto flex w-full max-w-5xl flex-col items-center px-6 text-center text-white">
+        <div className="mb-6"><Pill>PONTON TREVILO</Pill></div>
+        <h1 className="text-4xl font-extrabold leading-[1.05] tracking-[-0.02em] sm:text-5xl md:text-6xl lg:text-7xl">Discover The Magic In<br className="hidden sm:block" />Every Destination With Us!</h1>
+        <p className="mt-6 max-w-3xl text-base leading-relaxed text-white/85">Enjoy exclusive offers and best prices for satisfying travel packages.</p>
+
+        <div className="relative mt-8 w-full max-w-4xl">
+          <LayoutGroup>
+            <motion.div layout className={`mx-auto flex w-full items-center ${open ? "justify-between gap-3" : "justify-center"}`}>
+              <AnimatePresence initial={false}>
+                {open && (
+                  <motion.div
+                    key="panel"
+                    layout
+                    initial={{ opacity: 0, width: 0 }}
+                    animate={{ opacity: 1, width: "100%" }}
+                    exit={{ opacity: 0, width: 0 }}
+                    transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                    className="overflow-hidden"
+                  >
+                    <div className="w-full rounded-[18px] md:rounded-[20px] bg-white shadow-md border border-slate-200/70 backdrop-blur-sm">
+                      <div className="flex flex-col md:flex-row">
+                        <Field icon={<span className="text-base">🏠</span>} title="Tipo de imóvel" subtitle="Casa, Apto, Terreno..." />
+                        <Divider />
+                        <Field icon={<span className="text-base">📍</span>} title="Localização" subtitle="Cidade ou bairro" />
+                        <Divider />
+                        <Field icon={<span className="text-base">💲</span>} title="Preço" subtitle="Faixa desejada" />
+                        <div className="flex items-center justify-end px-6 py-4 md:py-0">
+                          <motion.button
+                            layoutId="search-cta"
+                            transition={{ type: "spring", stiffness: 500, damping: 40 }}
+                            className="inline-flex items-center gap-2 rounded-full bg-sky-600 px-6 py-3 text-[15px] font-semibold text-white shadow-lg transition hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-offset-2 focus:ring-offset-white"
+                          >
+                            <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor" aria-hidden="true"><path d="M10.4 3.2a8 8 0 1 1-7.2 7.2 1 1 0 1 1 2 0 6 6 0 1 0 5.4-5.4 1 1 0 1 1-.2-1.8Z"/><path d="M20.3 21.7a1 1 0 0 1-1.4 0l-3.6-3.6a1 1 0 1 1 1.4-1.4l3.6 3.6a1 1 0 0 1 0 1.4Z"/></svg>
+                            Buscar
+                          </motion.button>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {!open && (
+                <motion.button
+                  key="cta-alone"
+                  layoutId="search-cta"
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.25 }}
+                  onClick={() => setOpen(true)}
+                  className="rounded-full bg-white/95 px-7 py-3 text-sm font-semibold text-slate-900 shadow-lg ring-1 ring-slate-200/80 backdrop-blur hover:bg-white"
+                >
+                  Buscar
+                </motion.button>
+              )}
+            </motion.div>
+          </LayoutGroup>
         </div>
       </div>
-
-      {/* Painel de pesquisa no estilo da segunda imagem (apenas a barra) */}
-      <ExploreSearchPanel open={open} onClose={() => setOpen(false)} />
     </section>
   );
 }
 
-function ExploreSearchPanel({ open, onClose }) {
-  const ref = useRef(null);
 
-  // Fechar com ESC e clique fora
-  useEffect(() => {
-    function onKey(e) {
-      if (e.key === 'Escape') onClose?.();
-    }
-    function onClick(e) {
-      if (ref.current && !ref.current.contains(e.target)) onClose?.();
-    }
-    if (open) {
-      document.addEventListener('keydown', onKey);
-      document.addEventListener('mousedown', onClick);
-    }
-    return () => {
-      document.removeEventListener('keydown', onKey);
-      document.removeEventListener('mousedown', onClick);
-    };
-  }, [open, onClose]);
 
+
+
+export default function TreviloLanding() {
   return (
-    <div
-      aria-hidden={!open}
-      className={[
-        'absolute left-1/2 bottom-[92px] z-40 w-[min(92vw,1040px)] -translate-x-1/2',
-        open ? 'pointer-events-auto' : 'pointer-events-none',
-      ].join(' ')}
-    >
-      <div
-        ref={ref}
-        className={[
-          'relative rounded-2xl bg-white/95 shadow-[0_20px_50px_rgba(2,48,71,.22)] ring-1 ring-black/5 overflow-hidden',
-          'transition duration-200 ease-out',
-          open ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-2 scale-[0.98]',
-        ].join(' ')}
-        role="dialog"
-        aria-modal="true"
-        aria-label="Barra de pesquisa"
-      >
-        {/* Botão fechar discreto */}
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label="Fechar"
-          className="absolute right-2 top-2 z-10 inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100"
-        >
-          <X size={18} />
-        </button>
-
-        {/* Barra de pesquisa (Destination / Check‑in / Check‑out / Travelers / Search) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_1fr_1fr_140px]">
-          {/* Destino */}
-          <div className="flex items-center gap-2 px-5 py-4 border-b sm:border-b-0 lg:border-r border-slate-200 bg-white/95">
-            <MapPin size={16} className="text-sky-600" />
-            <div>
-              <div className="text-[12px] font-semibold text-slate-500">Destino</div>
-              <div className="text-[15px] text-slate-900/85">Cidade ou destino</div>
-            </div>
-          </div>
-
-          {/* Check-in */}
-          <div className="flex items-center gap-2 px-5 py-4 border-b sm:border-b-0 lg:border-r border-slate-200 bg-white/95">
-            <CalendarDays size={16} className="text-sky-600" />
-            <div>
-              <div className="text-[12px] font-semibold text-slate-500">Check‑in</div>
-              <div className="text-[15px] text-slate-900/85">Adicionar data</div>
-            </div>
-          </div>
-
-          {/* Check-out */}
-          <div className="flex items-center gap-2 px-5 py-4 border-b sm:border-b-0 lg:border-r border-slate-200 bg-white/95">
-            <CalendarDays size={16} className="text-sky-600" />
-            <div>
-              <div className="text-[12px] font-semibold text-slate-500">Check‑out</div>
-              <div className="text-[15px] text-slate-900/85">Adicionar data</div>
-            </div>
-          </div>
-
-          {/* Viajantes */}
-          <div className="flex items-center gap-2 px-5 py-4 border-b lg:border-b-0 lg:border-r border-slate-200 bg-white/95">
-            <Users size={16} className="text-sky-600" />
-            <div>
-              <div className="text-[12px] font-semibold text-slate-500">Viajantes</div>
-              <div className="text-[15px] text-slate-900/85">Adicionar hóspedes</div>
-            </div>
-          </div>
-
-          {/* Botão Search */}
-          <div className="p-3 lg:p-2 flex bg-white/95">
-            <button
-              type="button"
-              onClick={onClose}
-              className="w-full lg:w-auto lg:min-w-[120px] h-12 ml-auto rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-semibold shadow-[0_10px_20px_rgba(2,132,199,.35)] transition inline-flex items-center justify-center gap-2 px-5"
-            >
-              <SearchIcon size={16} />
-              Search
-            </button>
-          </div>
-        </div>
-
-        {/* Rodapé com dica */}
-        <div className="border-t border-slate-200 px-4 py-2 bg-white/95">
-          <span className="text-xs text-slate-500">Pressione Esc para fechar</span>
+    <div className="min-h-screen w-full bg-slate-100 text-slate-900">
+      <div className="relative mx-3 my-3 md:mx-5 md:my-5 rounded-[18px] md:rounded-[20px] bg-white p-[6px] md:p-2 shadow-md ring-1 ring-slate-200/70">
+        <div className="relative overflow-hidden rounded-[14px] md:rounded-[16px]">
+                    <TreviloHero />
         </div>
       </div>
     </div>
   );
 }
+
+
 
 
 

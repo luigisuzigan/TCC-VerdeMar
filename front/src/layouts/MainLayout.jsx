@@ -1,13 +1,15 @@
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import Header from '../components/Header';
 
 export default function MainLayout() {
-  // O Header é fixo (fixed top-0) e tem 68px de altura + ondinha.
-  // O spacer abaixo garante que o conteúdo não fique escondido sob o header.
+  const location = useLocation();
+  const isHome = location.pathname === '/';
+
   return (
     <>
-      <Header />
-      <div className="h-[84px]" aria-hidden="true" />
+      <Header transparentOnTop={isHome} />
+      {/* Evita empurrar o hero para baixo quando estamos na home com header transparente */}
+      {!isHome && <div className="h-[84px]" aria-hidden="true" />}
       <Outlet />
     </>
   );

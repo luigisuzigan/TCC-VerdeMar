@@ -5,3 +5,12 @@
   --muted: #64748B;
   --radius-xl: 28px;
 }
+
+:root {
+  /* já existentes... (se houver) */
+
+  /* Hero — ajuste aqui e pronto */
+  --hero-width: min(94vw, 1280px); /* troque para 1409px p/ bater com o Figma */
+  --hero-height: 504px;            /* altura do Figma */
+  --hero-radius: 50px;             /* cantos arredondados como no Figma */
+}
