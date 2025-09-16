@@ -1,16 +1,18 @@
 import HeroSection from '../../components/HeroSection';
+import PromoBanners from '../../components/Explorar/PromoBanners';
 import ObjetivoCards from '../../components/ObjetivoCards';
 import EstilosVidaCards from '../../components/EstilosVidaCards';
 import Testimonials from '../../components/Testimonials';
 import BlogSection from '../../components/BlogSection';
-import NearbyProperties from '../../components/section1'; // Section 1 — Imóveis próximos
+// import NearbyProperties from '../../components/section1'; // removido por enquanto
 
 function Home() {
   return (
     <>
-      {/* Header agora vem do MainLayout */}
       <HeroSection />
-      <NearbyProperties />
+      <PromoBanners />
+      {/* Você pode recolocar depois ou mover: */}
+      {/* <NearbyProperties /> */}
       <ObjetivoCards />
       <EstilosVidaCards />
       <Testimonials />

@@ -37,8 +37,7 @@ export default function Header({ transparentOnTop = false }) {
       <div className="mx-auto flex h-[68px] w-[min(96vw,1280px)] items-center justify-between gap-4">
         {/* Logo esquerda */}
         <Link to="/" className="flex items-center gap-2 pl-3" aria-label="Início">
-          <span className="inline-block h-8 w-8 rounded-lg bg-gradient-to-br from-sky-300 to-blue-600 ring-1 ring-black/5" />
-          <span className={["text-[17px] font-bold tracking-wide", isTransparent ? 'text-white' : 'text-slate-900'].join(' ')}>Verde Mar</span>
+          <img src="/Logo.png" alt="Logo Verde Mar" className="h-25 w-25 object-contain" />
         </Link>
 
         {/* Navegação central */}

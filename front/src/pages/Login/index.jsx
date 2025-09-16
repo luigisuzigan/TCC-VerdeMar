@@ -52,13 +52,7 @@ export default function Login() {
       {/* overlay leve */}
       <div className="absolute inset-0 bg-white/30 backdrop-blur-[2px]" />
 
-      {/* Brand simples topo-esquerda */}
-      <div className="relative z-10 p-4">
-        <div className="inline-flex items-center gap-2 text-slate-800 font-semibold">
-          <span className="inline-block h-5 w-5 rounded-md bg-slate-800" aria-hidden="true" />
-          <span>Verde Mar</span>
-        </div>
-      </div>
+
 
       {/* Conteúdo central */}
       <div className="relative z-10 grid min-h-[calc(100dvh-56px)] place-items-center px-4 py-8">
