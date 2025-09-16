@@ -1,5 +1,5 @@
 import HeroSection from '../../components/HeroSection';
-import PromoBanners from '../../components/Explorar/PromoBanners';
+import PromoBanners from '../../components/Home/PromoBanners';
 import ObjetivoCards from '../../components/ObjetivoCards';
 import EstilosVidaCards from '../../components/EstilosVidaCards';
 import Testimonials from '../../components/Testimonials';
