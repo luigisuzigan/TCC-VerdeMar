@@ -1,42 +1,56 @@
-export default function MarketingHeaderBar() {
+import { Link } from 'react-router-dom';
+import { Home, Building2, Waves } from 'lucide-react';
+
+const IMAGE_SRC = '/Teste'; // ajuste para /Teste.jpg/.png se precisar
+
+const STYLES = [
+  { id: 'rusticas', label: 'Rústicas', to: '/explorar?estilo=rustica', Icon: Home },
+  { id: 'moderna', label: 'Modern', to: '/explorar?estilo=moderna', Icon: Building2 },
+  { id: 'piscina', label: 'Casa Com Piscinas', to: '/explorar?feature=piscina', Icon: Waves },
+];
+
+export default function HomeStylesSimple({
+  title = 'HOME STYLES',
+  styles = STYLES,
+  imageSrc = IMAGE_SRC,
+}) {
   return (
-    <div className="relative mx-auto mt-[72px] w-[min(96vw,1280px)] h-[140px] overflow-hidden rounded-3xl ring-1 ring-black/10 shadow-md">
-      <video
-        className="absolute inset-0 h-full w-full object-cover"
-        autoPlay
-        muted
-        loop
-        playsInline
-        poster="/videos/praia-poster.jpg"
-      >
-        <source src="/videos/praia-loop.webm" type="video/webm" />
-        <source src="/videos/praia-loop.mp4" type="video/mp4" />
-      </video>
-      <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/55 to-black/10" />
-      <div className="relative z-10 flex h-full items-center px-8">
-        <div className="flex-1">
-          <h3 className="text-lg md:text-xl font-bold text-white">
-            Encontre seu imóvel dos sonhos no litoral.
-          </h3>
-          <p className="mt-1 text-xs md:text-sm text-white/80">
-            Imóveis verificados • Consultoria especializada • Oferta atualizada
-          </p>
-        </div>
-        <div className="flex gap-3">
-          <a
-            href="/explorar"
-            className="rounded-full bg-emerald-500 px-5 py-2 text-sm font-semibold text-white hover:bg-emerald-400"
-          >
-            Explorar
-          </a>
-          <a
-            href="/contato"
-            className="rounded-full bg-white/15 px-5 py-2 text-sm font-semibold text-white backdrop-blur hover:bg-white/25"
-          >
-            Falar
-          </a>
-        </div>
+    <section className="mx-auto mt-10 w-[min(96vw,1280px)]">
+      <h2 className="mb-6 text-center text-[clamp(1.2rem,2.2vw,1.4rem)] font-bold tracking-wide text-slate-900">
+        {title}
+      </h2>
+
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {styles.map(({ id, label, to, Icon }) => (
+          <div key={id} className="flex flex-col items-center">
+            {/* Card com imagem */}
+            <Link
+              to={to}
+              className={[
+                'block w-full overflow-hidden rounded-xl ring-1 ring-slate-200 bg-slate-100',
+                'shadow-[0_6px_20px_rgba(15,23,42,.10)] transition-transform hover:scale-[1.01]',
+              ].join(' ')}
+            >
+              <div className="relative aspect-[16/9] sm:aspect-[5/3]">
+                <img
+                  src={imageSrc}
+                  alt={label}
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
+              </div>
+            </Link>
+
+            {/* Ícone + rótulo abaixo do card */}
+            <Link
+              to={to}
+              className="mt-3 inline-flex flex-col items-center text-slate-900 hover:text-slate-700"
+            >
+              <Icon className="h-7 w-7" />
+              <span className="mt-2 text-[15px] font-medium">{label}</span>
+            </Link>
+          </div>
+        ))}
       </div>
-    </div>
+    </section>
   );
 }

@@ -100,16 +100,21 @@ export function TreviloHero() {
 
 
 export default function TreviloLanding() {
-  return (
-    <div className="min-h-screen w-full bg-slate-100 text-slate-900">
-      <div className="relative mx-3 my-3 md:mx-5 md:my-5 rounded-[18px] md:rounded-[20px] bg-white p-[6px] md:p-2 shadow-md ring-1 ring-slate-200/70">
-        <div className="relative overflow-hidden rounded-[14px] md:rounded-[16px]">
-                    <TreviloHero />
-        </div>
-      </div>
-    </div>
-  );
+  // Full-bleed hero: no outer margins, padding, or rounded container.
+  return <TreviloHero />;
 }
+
+// export default function TreviloLanding() {
+//   return (
+//     <div className="min-h-screen w-full bg-slate-100 text-slate-900">
+//       <div className="relative mx-3 my-3 md:mx-5 md:my-5 rounded-[18px] md:rounded-[20px] bg-white p-[6px] md:p-2 shadow-md ring-1 ring-slate-200/70">
+//         <div className="relative overflow-hidden rounded-[14px] md:rounded-[16px]">
+//                     <TreviloHero />
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
 
 
 
