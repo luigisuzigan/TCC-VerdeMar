@@ -1,16 +1,15 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
-import { UserRound } from 'lucide-react';
+import UserMenu from './UserMenu';
 
 export default function Header({ transparentOnTop = false }) {
   const [scrolled, setScrolled] = useState(false);
 
-  // Ajuste o quanto precisa rolar para aparecer a sombra
   const THRESHOLD = 8;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > THRESHOLD);
-    onScroll(); // estado correto ao entrar já com scroll
+    onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
@@ -41,10 +40,12 @@ export default function Header({ transparentOnTop = false }) {
         </Link>
 
         {/* Navegação central */}
-        <nav className={[
-          'hidden md:flex items-center justify-center gap-8 text-[0.95rem] font-semibold',
-          isTransparent ? 'text-white' : 'text-slate-900'
-        ].join(' ')}>
+        <nav
+          className={[
+            'hidden md:flex items-center justify-center gap-8 text-[0.95rem] font-semibold',
+            isTransparent ? 'text-white' : 'text-slate-900',
+          ].join(' ')}
+        >
           {nav.map((item) => (
             <NavLink
               key={item.to}
@@ -54,8 +55,12 @@ export default function Header({ transparentOnTop = false }) {
                 [
                   'px-1 py-1 transition relative',
                   isTransparent
-                    ? (isActive ? 'text-white' : 'text-white/80 hover:text-white')
-                    : (isActive ? 'text-slate-900' : 'text-slate-600 hover:text-slate-900'),
+                    ? isActive
+                      ? 'text-white'
+                      : 'text-white/80 hover:text-white'
+                    : isActive
+                      ? 'text-slate-900'
+                      : 'text-slate-600 hover:text-slate-900',
                 ].join(' ')
               }
             >
@@ -64,21 +69,9 @@ export default function Header({ transparentOnTop = false }) {
           ))}
         </nav>
 
-        {/* Ações direita */}
+        {/* Ações direita: User Menu */}
         <div className="flex items-center gap-3 pr-3">
-          <Link
-            to="/login"
-            className={[
-              'inline-flex h-10 w-10 items-center justify-center rounded-full ring-1',
-              isTransparent
-                ? 'bg-white/15 ring-white/40 text-white hover:bg-white/25'
-                : 'bg-sky-50 text-sky-700 ring-sky-200 hover:bg-sky-100'
-            ].join(' ')}
-            aria-label="Ir para login"
-            title="Entrar"
-          >
-            <UserRound size={20} />
-          </Link>
+          <UserMenu inverted={isTransparent} />
         </div>
       </div>
 
