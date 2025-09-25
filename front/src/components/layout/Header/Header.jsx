@@ -9,9 +9,19 @@ import {
 } from 'lucide-react';
 import UserMenu from './UserMenu';
 
+/**
+ * Header “icon-first”:
+ * - Ícones sempre visíveis.
+ * - Labels aparecem para todos os itens quando o mouse está sobre o header (e desaparecem ao sair).
+ * - Labels ficam dentro do header, logo abaixo dos ícones (sem tooltip externo).
+ * - Indicador do ativo: apenas círculo destacado (sem texto).
+ * - Sem a “ondinha” decorativa.
+ */
 export default function Header({ transparentOnTop = false }) {
   const location = useLocation();
   const [scrolled, setScrolled] = useState(false);
+  const [hovered, setHovered] = useState(false);
+
   const THRESHOLD = 8;
 
   useEffect(() => {
@@ -31,18 +41,10 @@ export default function Header({ transparentOnTop = false }) {
 
   const isTransparent = transparentOnTop && !scrolled;
 
-  const newLocal = <Link
-    to="/"
-    className="flex items-center gap-2 pl-2 md:pl-3 font-extrabold text-lg tracking-tight"
-    aria-label="Início"
-  >
-    <img
-      src="/Logo.png"
-      alt="Logo Verde Mar"
-      className="h-12 md:h-14 lg:h-16 w-auto object-contain transition-[filter,transform] duration-300 hover:brightness-110 hover:scale-[1.02]" />
-  </Link>;
   return (
     <header
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       className={[
         'fixed inset-x-0 top-0 z-50 border-b transition-colors duration-200',
         isTransparent
@@ -50,12 +52,29 @@ export default function Header({ transparentOnTop = false }) {
           : 'bg-white/95 backdrop-blur border-slate-200 shadow-[0_6px_18px_rgba(2,48,71,.10)]',
       ].join(' ')}
     >
-      <div className="mx-auto flex h-[68px] w-[min(96vw,1280px)] items-center justify-between gap-6">
-        {newLocal}
+      <div
+        className={[
+          'mx-auto flex w-[min(96vw,1280px)] items-center justify-between gap-6 transition-[height] duration-200',
+          hovered ? 'h-[92px]' : 'h-[68px]',
+        ].join(' ')}
+      >
+        {/* Logo */}
+        <Link
+          to="/"
+          className="flex items-center gap-2 pl-2 md:pl-3"
+          aria-label="Início"
+        >
+          <img
+            src="/Logo.png"
+            alt="Logo Verde Mar"
+            className="h-12 md:h-14 lg:h-16 w-auto object-contain"
+          />
+        </Link>
 
+        {/* Navegação */}
         <nav
           className={[
-            'flex items-center gap-3 md:gap-4 text-sm font-medium',
+            'flex items-end gap-3 md:gap-4 text-sm font-medium',
             isTransparent ? 'text-white' : 'text-slate-800',
           ].join(' ')}
           aria-label="Navegação principal"
@@ -68,95 +87,58 @@ export default function Header({ transparentOnTop = false }) {
               Icon={item.Icon}
               active={location.pathname === item.to}
               inverted={isTransparent}
+              showLabel={hovered}
             />
           ))}
         </nav>
 
+        {/* Lado direito */}
         <div className="flex items-center gap-4 pr-2 md:pr-3">
           <UserMenu inverted={isTransparent} />
         </div>
       </div>
-
-      <div className="pointer-events-none absolute inset-x-0 bottom-[-1px]">
-        <svg viewBox="0 0 1440 40" className="w-full h-6">
-          <defs>
-            <linearGradient id="waveGrad" x1="0" x2="0" y1="0" y2="1">
-              <stop
-                offset="0%"
-                stopColor={isTransparent ? '#FFFFFF' : '#E0F7FA'}
-                stopOpacity={isTransparent ? 0.5 : 0.8}
-              />
-              <stop offset="100%" stopColor="#E0F7FA" stopOpacity="0" />
-            </linearGradient>
-          </defs>
-          <path
-            d="M0,20 C180,40 360,0 540,20 C720,40 900,0 1080,20 C1260,40 1440,0 1440,0 L1440,40 L0,40 Z"
-            fill="url(#waveGrad)"
-          />
-        </svg>
-      </div>
+      {/* ondinha removida */}
     </header>
   );
 }
 
-function IconNavItem({ to, label, Icon, active, inverted }) {
+function IconNavItem({ to, label, Icon, active, inverted, showLabel }) {
   return (
     <NavLink
       to={to}
       end={to === '/'}
-      className="relative group flex items-center"
+      className="relative flex flex-col items-center px-1"
       aria-current={active ? 'page' : undefined}
+      title={label}
     >
+      {/* Ícone com círculo. No ativo, círculo destacado. */}
       <div
         className={[
-          'relative inline-flex items-center justify-center rounded-full transition-colors h-11 w-11',
+          'inline-flex h-11 w-11 items-center justify-center rounded-full transition-colors',
           active
             ? inverted
-              ? 'bg-white/15 text-white'
-              : 'bg-slate-900/5 text-slate-900'
+              ? 'bg-white/18 text-white ring-2 ring-white/65'
+              : 'bg-slate-900/5 text-slate-900 ring-2 ring-emerald-400/80'
             : inverted
-              ? 'text-white/80 hover:text-white hover:bg-white/15'
+              ? 'text-white/80 hover:text-white hover:bg-white/12'
               : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100',
         ].join(' ')}
       >
-        <Icon size={20} />
-        {active && (
-          <span
-            className={[
-              'pointer-events-none absolute -bottom-[6px] left-1/2 h-[3px] w-8 -translate-x-1/2 rounded-full',
-              inverted
-                ? 'bg-white/80 shadow-[0_0_0_1px_rgba(255,255,255,.4)]'
-                : 'bg-emerald-500 shadow-[0_0_0_1px_rgba(16,185,129,.4)]',
-            ].join(' ')}
-          />
-        )}
+        <Icon size={20} strokeWidth={2} />
       </div>
 
-      {active && (
-        <span
-          className={[
-            'ml-2 hidden whitespace-nowrap text-[0.9rem] font-semibold md:inline-block',
-            inverted ? 'text-white' : 'text-slate-900',
-          ].join(' ')}
-        >
-          {label}
-        </span>
-      )}
-
-      {!active && (
-        <span
-          className={[
-            'pointer-events-none absolute left-1/2 top-[110%] z-10 -translate-x-1/2 select-none whitespace-nowrap rounded-full px-3 py-1 text-[11px] font-semibold opacity-0 shadow-lg ring-1 transition-all duration-150 scale-90',
-            inverted
-              ? 'bg-white/90 text-slate-900 ring-white/40 backdrop-blur-sm'
-              : 'bg-slate-900 text-white ring-slate-900/30',
-            'group-hover:opacity-100 group-hover:scale-100 group-focus-within:opacity-100 group-focus-within:scale-100',
-          ].join(' ')}
-          role="tooltip"
-        >
-          {label}
-        </span>
-      )}
+      {/* Label dentro do header, logo abaixo do ícone.
+         - Some quando não está em hover do header
+         - Nunca aparece sozinho no ativo (respeita showLabel) */}
+      <span
+        className={[
+          'mt-1 select-none text-[12px] font-semibold leading-none transition-all duration-150',
+          showLabel ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-1',
+          inverted ? 'text-white/95' : 'text-slate-800',
+        ].join(' ')}
+      >
+        {label}
+      </span>
     </NavLink>
   );
 }

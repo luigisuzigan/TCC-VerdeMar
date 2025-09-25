@@ -1,268 +1,154 @@
-import { useMemo, useState } from 'react';
-import { Bath, BedDouble, MoveLeft, MoveRight, Ruler, Tag } from 'lucide-react';
+import { useState } from 'react';
+import { ChevronLeft, ChevronRight, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-const currency = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+const CARDS_INIT = [
+  {
+    id: 'c1',
+    title: 'YOSEMITE NATIONAL PARK',
+    subtitle: 'Sierra Nevada • United States',
+    img: '/Praia2.jng',
+  },
+  {
+    id: 'c2',
+    title: 'LOS LANCES BEACH',
+    subtitle: 'Tarifa • Spain',
+    img: '/Praia3.jng',
+  },
+  {
+    id: 'c3',
+    title: 'GÖREME VALLEY',
+    subtitle: 'Cappadocia • Turkey',
+    img: '/Praia4.jng',
+  },
+  {
+    id: 'c4',
+    title: 'SAINT ANTÔNIEN',
+    subtitle: 'Switzerland Alps',
+    img: '/Praia5.jng',
+  },
+];
 
-/**
- * props:
- * - items?: Array de imóveis. Se não passar, usa MOCK abaixo.
- * - title?: Título da seção
- */
-export default function NearbyCarousel({
-  items = MOCK_ITEMS,
-  title = 'Imóveis próximos'
-}) {
-  const perPage = 4;
-  const pages = useMemo(() => chunk(items, perPage), [items]);
-  const total = pages.length || 1;
-  const [page, setPage] = useState(0);
+export default function AfterHeroSection() {
+  const [cards, setCards] = useState(CARDS_INIT);
 
-  const prev = () => setPage(p => Math.max(0, p - 1));
-  const next = () => setPage(p => Math.min(total - 1, p + 1));
+  function prev() {
+    setCards((arr) => {
+      const copy = [...arr];
+      const last = copy.pop();
+      copy.unshift(last);
+      return copy;
+    });
+  }
+  function next() {
+    setCards((arr) => {
+      const copy = [...arr];
+      const first = copy.shift();
+      copy.push(first);
+      return copy;
+    });
+  }
 
   return (
-    <section className="mx-auto mt-10 w-[min(96vw,1280px)]">
-      <div className="mb-4 flex items-end justify-between">
-        <div>
-          <h2 className="text-[clamp(1.4rem,2.4vw,1.9rem)] font-extrabold tracking-tight text-slate-900">
-            {title}
-          </h2>
-          <p className="mt-1 text-sm text-slate-500">Perto de você (localização aproximada)</p>
-        </div>
+    <section className="relative w-full">
+      <div className="relative mx-auto h-[560px] w-[min(96vw,1400px)] overflow-hidden rounded-[28px] ring-1 ring-black/10 shadow-[0_25px_60px_rgba(0,0,0,.20)]">
+        {/* Fundo */}
+        <img
+          src="/Praia1.jng"
+          alt="Fundo"
+          className="absolute inset-0 h-full w-full object-cover"
+        />
 
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={prev}
-            disabled={page === 0}
-            className={[
-              'inline-flex h-10 w-10 items-center justify-center rounded-full ring-1 transition',
-              page === 0
-                ? 'bg-slate-100 text-slate-400 ring-slate-200 cursor-not-allowed'
-                : 'bg-white text-slate-700 ring-slate-300 hover:bg-slate-50'
-            ].join(' ')}
-            aria-label="Anterior"
-          >
-            <MoveLeft size={18} />
-          </button>
-          <button
-            type="button"
-            onClick={next}
-            disabled={page >= total - 1}
-            className={[
-              'inline-flex h-10 w-10 items-center justify-center rounded-full ring-1 transition',
-              page >= total - 1
-                ? 'bg-slate-100 text-slate-400 ring-slate-200 cursor-not-allowed'
-                : 'bg-white text-slate-700 ring-slate-300 hover:bg-slate-50'
-            ].join(' ')}
-            aria-label="Próximo"
-          >
-            <MoveRight size={18} />
-          </button>
-        </div>
-      </div>
+        {/* Gradiente para legibilidade */}
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,0.45)_0%,rgba(0,0,0,0.28)_25%,rgba(0,0,0,0.10)_55%,rgba(0,0,0,0.16)_100%)]" />
 
-      {/* Viewport do carrossel */}
-      <div className="relative overflow-hidden rounded-[20px]">
-        <div
-          className="flex transition-transform duration-400 ease-out"
-          style={{
-            width: `${total * 100}%`,
-            transform: `translateX(-${page * (100 / total)}%)`
-          }}
-        >
-          {pages.map((group, idx) => (
-            <div
-              key={idx}
-              className="grid w-full grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4"
-              style={{ width: `${100 / total}%` }}
-            >
-              {group.map((item) => (
-                <PropertyCard key={item.id} item={item} />
-              ))}
+        {/* Conteúdo */}
+        <div className="relative z-10 h-full px-6 sm:px-10 md:px-14">
+          {/* Texto à esquerda */}
+          <div className="absolute left-6 right-[48%] top-[72px] sm:left-10 md:left-14">
+            <div className="mb-3 h-[2px] w-6 rounded bg-white/85" />
+            <p className="text-[13px] font-medium text-white/90">Sahara Desert - Morocco</p>
+
+            <h2 className="mt-2 text-[40px] font-black leading-[0.95] tracking-tight text-white drop-shadow md:text-[52px] lg:text-[58px]">
+              MARRAKECH
+              <br />
+              MERZOUGA
+            </h2>
+
+            <p className="mt-4 max-w-[52ch] text-[13px] text-white/88 md:text-sm">
+              Mauris malesuada nisi sit amet augue accumsan tincidunt. Maecenas tincidunt,
+              velit ac porttitor pulvinar, tortor eros facilisis libero.
+            </p>
+
+            <div className="mt-6 flex items-center gap-3">
+              <span className="grid size-9 place-items-center rounded-full bg-amber-300 text-white shadow ring-1 ring-white/30">
+                <MapPin size={18} />
+              </span>
+              <Link
+                to="/explorar"
+                className="inline-flex items-center rounded-full border border-white/35 bg-white/10 px-5 py-2.5 text-[12px] font-semibold uppercase tracking-wide text-white backdrop-blur-sm transition hover:bg-white/18"
+              >
+                Discover Location
+              </Link>
             </div>
-          ))}
+          </div>
+
+          {/* Cards à direita — menores, como no print */}
+          <div className="pointer-events-none absolute right-6 top-[185px] hidden h-[300px] w-[54%] items-end justify-between gap-4 md:flex">
+            {cards.slice(0, 4).map((c, idx) => (
+              <div
+                key={c.id}
+                className={[
+                  'pointer-events-auto relative w-[170px] overflow-hidden rounded-[18px] shadow-xl ring-1 ring-black/10',
+                  // Centrais um pouco mais altas (290px) e extremos 270px
+                  idx === 1 || idx === 2 ? 'h-[290px]' : 'h-[270px]',
+                ].join(' ')}
+              >
+                <img src={c.img} alt={c.title} className="absolute inset-0 h-full w-full object-cover" />
+                <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/82 via-black/45 to-transparent" />
+                <div className="absolute inset-x-0 bottom-0 p-4">
+                  <div className="text-[10px] font-semibold uppercase tracking-wide text-white/80">
+                    {c.subtitle}
+                  </div>
+                  <div className="mt-1 text-[12px] font-extrabold leading-tight text-white drop-shadow">
+                    {c.title}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Setas centralizadas acima da linha */}
+          <div className="absolute bottom-[78px] left-1/2 z-20 -translate-x-1/2 flex items-center gap-4">
+            <button
+              type="button"
+              onClick={prev}
+              className="grid size-11 place-items-center rounded-full bg-white/18 text-white ring-1 ring-white/45 backdrop-blur-sm transition hover:bg-white/28"
+              aria-label="Anterior"
+            >
+              <ChevronLeft size={18} />
+            </button>
+            <button
+              type="button"
+              onClick={next}
+              className="grid size-11 place-items-center rounded-full bg-white/18 text-white ring-1 ring-white/45 backdrop-blur-sm transition hover:bg-white/28"
+              aria-label="Próximo"
+            >
+              <ChevronRight size={18} />
+            </button>
+          </div>
+
+          {/* Linha de progresso e número */}
+          <div className="absolute bottom-[46px] left-[140px] right-[110px] z-10 hidden items-center gap-3 md:flex">
+            <div className="h-[3px] flex-1 rounded bg-white/28">
+              <div className="h-[3px] w-[26%] rounded bg-amber-300 shadow-[0_0_0_1px_rgba(255,255,255,.35)]" />
+            </div>
+            <div className="ml-auto pr-1 text-[38px] font-extrabold tracking-tight text-white/95">
+              03
+            </div>
+          </div>
         </div>
       </div>
     </section>
   );
 }
-
-function PropertyCard({ item }) {
-  const {
-    id,
-    city,
-    state,
-    image,
-    area,
-    beds,
-    baths,
-    price,
-    badge, // 'DESTAQUE' | 'NOVO' | undefined
-    highlightPrice // boolean (faz pill verde no preço)
-  } = item;
-
-  return (
-    <article className="group relative overflow-hidden rounded-[22px] ring-1 ring-slate-200 bg-slate-100 shadow-[0_6px_20px_rgba(15,23,42,.08)]">
-      {/* Imagem */}
-      <div className="relative aspect-[4/3]">
-        <img
-          src={image}
-          alt={`${city}, ${state}`}
-          className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-[1.04]"
-        />
-        {/* Overlay de cor (degradê para leitura do texto) */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/10 to-black/55" />
-        {/* Badge */}
-        {badge && (
-          <span className="absolute left-3 top-3 rounded-full bg-emerald-500 px-3 py-1 text-[11px] font-extrabold tracking-wide text-white shadow ring-1 ring-white/20">
-            {badge}
-          </span>
-        )}
-        {/* Conteúdo inferior da imagem */}
-        <div className="absolute inset-x-0 bottom-0 p-4 text-white">
-          <h3 className="text-[17px] font-bold drop-shadow">
-            {city}, {state}
-          </h3>
-
-          <div className="mt-2 flex flex-wrap items-center gap-3 text-[13px] text-white/90">
-            <span className="inline-flex items-center gap-1">
-              <Ruler size={15} className="opacity-90" /> {area} m²
-            </span>
-            <span className="inline-flex items-center gap-1">
-              <BedDouble size={15} className="opacity-90" /> {beds}
-            </span>
-            <span className="inline-flex items-center gap-1">
-              <Bath size={15} className="opacity-90" /> {baths}
-            </span>
-
-            {/* CTA flutuante (opcional) */}
-            <Link
-              to={`/property/${id}`}
-              className="ml-auto inline-flex items-center gap-2 rounded-full bg-white/95 px-3.5 py-1.5 text-[12px] font-semibold text-slate-900 shadow hover:bg-white"
-            >
-              Ver detalhes
-            </Link>
-          </div>
-        </div>
-      </div>
-
-      {/* Barra inferior com preço */}
-      <div className="flex items-center justify-between px-4 py-3 bg-white">
-        <div className="inline-flex items-center gap-2 text-[13px] font-bold text-slate-800">
-          <Tag size={15} className="text-emerald-600" />
-          {currency.format(price)}
-        </div>
-
-        {highlightPrice ? (
-          <div className="rounded-full bg-emerald-600 px-3 py-1 text-[12px] font-semibold text-white">
-            {currency.format(price)}
-          </div>
-        ) : null}
-      </div>
-    </article>
-  );
-}
-
-function chunk(arr, size) {
-  const out = [];
-  for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
-  return out;
-}
-
-/* ----------------- MOCK DATA (substitua por dados reais depois) ----------------- */
-const MOCK_ITEMS = [
-  {
-    id: 1,
-    city: 'Porto Seguro',
-    state: 'BA',
-    image:
-      'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1200&auto=format&fit=crop',
-    area: 220,
-    beds: 3,
-    baths: 2,
-    price: 1200000
-  },
-  {
-    id: 2,
-    city: 'Ilhéus',
-    state: 'BA',
-    image:
-      'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?q=80&w=1200&auto=format&fit=crop',
-    area: 500,
-    beds: 4,
-    baths: 3,
-    price: 600000,
-    badge: 'DESTAQUE'
-  },
-  {
-    id: 3,
-    city: 'Paraty',
-    state: 'RJ',
-    image:
-      'https://images.unsplash.com/photo-1523419409543-14f0bf93ba06?q=80&w=1200&auto=format&fit=crop',
-    area: 400,
-    beds: 4,
-    baths: 3,
-    price: 1200000,
-    highlightPrice: true
-  },
-  {
-    id: 4,
-    city: 'Natal',
-    state: 'RN',
-    image:
-      'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?q=80&w=1200&auto=format&fit=crop',
-    area: 180,
-    beds: 2,
-    baths: 2,
-    price: 750000,
-    badge: 'NOVO'
-  },
-  // Mais itens para paginar:
-  {
-    id: 5,
-    city: 'Florianópolis',
-    state: 'SC',
-    image:
-      'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=1200&auto=format&fit=crop',
-    area: 260,
-    beds: 3,
-    baths: 2,
-    price: 980000
-  },
-  {
-    id: 6,
-    city: 'Ubatuba',
-    state: 'SP',
-    image:
-      'https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?q=80&w=1200&auto=format&fit=crop',
-    area: 320,
-    beds: 3,
-    baths: 3,
-    price: 1120000
-  },
-  {
-    id: 7,
-    city: 'Itacaré',
-    state: 'BA',
-    image:
-      'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=1200&auto=format&fit=crop',
-    area: 210,
-    beds: 3,
-    baths: 2,
-    price: 870000
-  },
-  {
-    id: 8,
-    city: 'Búzios',
-    state: 'RJ',
-    image:
-      'https://images.unsplash.com/photo-1507089947368-19c1da9775ae?q=80&w=1200&auto=format&fit=crop',
-    area: 350,
-    beds: 4,
-    baths: 4,
-    price: 1450000
-  }
-];
