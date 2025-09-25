@@ -54,7 +54,7 @@ export default function Header({ transparentOnTop = false }) {
     >
       <div
         className={[
-          'mx-auto flex w-[min(96vw,1280px)] items-center justify-between gap-6 transition-[height] duration-200',
+          'flex px-4 md:px-6 w-full items-center justify-between gap-6 transition-[height] duration-200',
           hovered ? 'h-[92px]' : 'h-[68px]',
         ].join(' ')}
       >
