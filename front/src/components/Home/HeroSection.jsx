@@ -5,7 +5,9 @@ const bgUrl = "https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80
 
 function Pill({ children }) {
   return (
-    <span className="inline-flex items-center rounded-full bg-white/70 px-3 py-1 text-[10px] font-semibold uppercase tracking-[.2em] text-slate-800 shadow-sm ring-1 ring-slate-200/60 backdrop-blur">{children}</span>
+    <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.35em] text-white/85 shadow-[0_8px_24px_rgba(4,18,31,0.4)] ring-1 ring-white/40 backdrop-blur">
+      {children}
+    </span>
   );
 }
 
@@ -31,11 +33,27 @@ export function TreviloHero() {
 
   return (
     <section className="relative grid min-h-[92vh] place-items-center overflow-hidden" style={{ backgroundImage: `url(${bgUrl})`, backgroundSize: "cover", backgroundPosition: "center" }}>
-      <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/20 to-black/60" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(241,250,255,0.35),transparent_55%)]" />
+      <div className="absolute inset-0 bg-gradient-to-b from-[#09131f]/80 via-[#111c2a]/35 to-[#0c181f]/90" />
       <div className="relative z-10 mx-auto flex w-full max-w-5xl flex-col items-center px-6 text-center text-white">
-        <div className="mb-6"><Pill>PONTON TREVILO</Pill></div>
-        <h1 className="text-4xl font-extrabold leading-[1.05] tracking-[-0.02em] sm:text-5xl md:text-6xl lg:text-7xl">Discover The Magic In<br className="hidden sm:block" />Every Destination With Us!</h1>
-        <p className="mt-6 max-w-3xl text-base leading-relaxed text-white/85">Enjoy exclusive offers and best prices for satisfying travel packages.</p>
+        <div className="mb-8 flex flex-wrap items-center justify-center gap-3">
+          <Pill>VerdeMar Collection</Pill>
+          <span className="text-[11px] uppercase tracking-[0.3em] text-white/70">
+            Cabins • Nature • Slow Living
+          </span>
+        </div>
+        <h1 className="max-w-4xl text-4xl font-black leading-[1.03] tracking-[-0.03em] text-white drop-shadow-[0_22px_60px_rgba(3,16,28,0.55)] sm:text-5xl md:text-6xl lg:text-[70px]">
+          <span className="block text-white/90">Encontre o seu refúgio</span>
+          <span className="mt-4 inline-flex flex-wrap items-center justify-center gap-4 text-white">
+            <span className="block">ideal em meio</span>
+            <span className="relative inline-flex items-center rounded-full bg-[#fde49b]/90 px-6 py-2 text-[#1f2b2e] shadow-[0_12px_35px_rgba(15,26,34,0.25)]">
+              <span className="text-inherit">à natureza</span>
+            </span>
+          </span>
+        </h1>
+        <p className="mt-6 max-w-3xl text-[15px] leading-relaxed text-white/85">
+          Explore estadias cuidadosamente selecionadas com conforto, tecnologias sustentáveis e vistas que fazem você desacelerar.
+        </p>
 
         <div className="relative mt-8 w-full max-w-4xl">
           <LayoutGroup>
