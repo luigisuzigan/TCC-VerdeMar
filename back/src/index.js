@@ -10,7 +10,16 @@ import { ensureAdmin } from './repos/userRepo.js';
 
 const app = express();
 
-app.use(cors({ origin: process.env.ALLOWED_ORIGIN || 'http://localhost:5173' }));
+// CORS: permitir origens do Vite (5173/5174) e, em dev, qualquer localhost
+app.use(cors({
+	origin: (origin, callback) => {
+		const allowed = process.env.ALLOWED_ORIGIN;
+		if (!origin) return callback(null, true);
+		if (allowed && origin === allowed) return callback(null, true);
+		if (/^http:\/\/localhost:\d+$/.test(origin)) return callback(null, true);
+		return callback(null, true); // relaxado em dev
+	},
+}));
 app.use(express.json({ limit: '1mb' }));
 app.use(morgan('dev'));
 

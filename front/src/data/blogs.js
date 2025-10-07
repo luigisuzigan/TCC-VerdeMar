@@ -1,0 +1,88 @@
+// Mock data for blog posts. Images expected in /public as /praia1.jpg ... /praia8.jpg
+// You can replace titles/excerpts freely; keep slugs unique.
+
+export const BLOGS = [
+  {
+    id: 1,
+  slug: 'paraisos-praianos-no-brasil',
+    title: 'Paraísos Praianos no Brasil',
+    excerpt: 'Descubra praias escondidas, águas cristalinas e trilhas costeiras que poucos conhecem.',
+    image: '/praia1.jpg',
+    date: '2025-07-02',
+    readingTime: 6,
+    category: 'Inspiração',
+  },
+  {
+    id: 2,
+  slug: 'roteiro-de-7-dias-em-florianopolis',
+    title: 'Roteiro de 7 dias em Florianópolis',
+    excerpt: 'Do leste ao sul da ilha: onde comer, dormir e os melhores picos para curtir o pôr do sol.',
+    image: '/praia2.jpg',
+    date: '2025-06-21',
+    readingTime: 8,
+    category: 'Roteiros',
+  },
+  {
+    id: 3,
+  slug: 'como-planejar-uma-viagem-de-verao',
+    title: 'Como planejar uma viagem de verão',
+    excerpt: 'Checklist de planejamento, orçamento e reservas para aproveitar a alta temporada sem perrengue.',
+    image: '/praia3.jpg',
+    date: '2025-06-05',
+    readingTime: 7,
+    category: 'Dicas',
+  },
+  {
+    id: 4,
+  slug: 'praias-para-familias-no-nordeste',
+    title: 'Praias para famílias no Nordeste',
+    excerpt: 'Mar calmo, estrutura e passeios para todas as idades nos principais destinos do Nordeste.',
+    image: '/praia4.jpg',
+    date: '2025-05-28',
+    readingTime: 5,
+    category: 'Família',
+  },
+  {
+    id: 5,
+  slug: 'ilhas-imperdiveis-para-mergulho',
+    title: 'Ilhas imperdíveis para mergulho',
+    excerpt: 'Um guia com condições ideais, melhor época e escolas para iniciantes em águas azuis.',
+    image: '/praia5.jpg',
+    date: '2025-05-11',
+    readingTime: 9,
+    category: 'Aventura',
+  },
+  {
+    id: 6,
+  slug: 'o-que-levar-na-mala-de-praia',
+    title: 'O que levar na mala de praia',
+    excerpt: 'Lista essencial de itens e apps que salvam sua viagem (e pesam pouco).',
+    image: '/praia6.jpg',
+    date: '2025-04-29',
+    readingTime: 4,
+    category: 'Checklist',
+  },
+  {
+    id: 7,
+  slug: 'economize-na-hospedagem-de-verao',
+    title: 'Economize na hospedagem de verão',
+    excerpt: 'Estratégias simples para conseguir tarifas melhores e ainda ficar bem localizado.',
+    image: '/praia7.jpg',
+    date: '2025-04-10',
+    readingTime: 6,
+    category: 'Economia',
+  },
+  {
+    id: 8,
+  slug: 'as-10-melhores-praias-para-surf',
+    title: 'As 10 melhores praias para surf',
+    excerpt: 'Da pororoca às direitas longas: onde pegar ondas inesquecíveis no Brasil.',
+    image: '/praia8.jpg',
+    date: '2025-03-19',
+    readingTime: 10,
+    category: 'Surf',
+  },
+];
+
+// Dica: adicione arquivos praia1.jpg...praia8.jpg em front/public/.
+// Enquanto não tiver as imagens, você pode usar links externos no campo `image` temporariamente.

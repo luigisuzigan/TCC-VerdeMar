@@ -1,6 +1,6 @@
 import { prisma } from '../prisma.js';
 
-export const Roles = { ADMIN: 'ADMIN', USER: 'USER' };
+export const Roles = { ADMIN: 'ADMIN', USER: 'USER', SELLER: 'SELLER' };
 
 export function findUserByEmail(email) {
   return prisma.user.findUnique({ where: { email } });

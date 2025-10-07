@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.jsx';
 
 export default function Login() {
@@ -7,7 +8,6 @@ export default function Login() {
   const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [remember, setRemember] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -18,7 +18,7 @@ export default function Login() {
     await new Promise((r) => setTimeout(r, 300)); // pequena simulação de atraso
 
     try {
-      await login({ email, password, remember });
+      await login({ email, password, remember: true });
       navigate('/');
     } catch (err) {
       setError(err?.response?.data?.error || err?.message || 'Falha no login');
@@ -28,80 +28,86 @@ export default function Login() {
   }
 
   return (
-    <main
-      className="relative min-h-dvh bg-cover bg-center"
-      style={{
-        backgroundImage:
-          "url('https://images.unsplash.com/photo-1521207418485-99c705420785?q=80&w=1600&auto=format&fit=crop')",
-      }}
-    >
-      <div className="absolute inset-0 bg-white/30 backdrop-blur-[2px]" />
+    <main className="relative min-h-dvh bg-gradient-to-br from-emerald-50 to-sky-50">
+      {/* Voltar para Home */}
+      <Link
+        to="/"
+        className="fixed left-4 top-4 z-50 inline-flex items-center gap-2 rounded-full bg-white/90 px-3 py-2 text-sm font-medium text-slate-700 ring-1 ring-slate-200 shadow hover:bg-white"
+      >
+        <ArrowLeft size={16} /> Voltar para Home
+      </Link>
 
-      <div className="relative z-10 grid min-h-[calc(100dvh-56px)] place-items-center px-4 py-8">
-        <div className="w-full max-w-[460px] rounded-2xl border border-gray-200 bg-white/95 p-8 shadow-sm">
-          <h1 className="text-center text-2xl font-semibold text-gray-900">Entrar</h1>
+      <div className="mx-auto max-w-[1400px] min-h-dvh p-3 md:p-6">
+        {/* Container combinando as duas colunas e ocupando quase a tela inteira */}
+        <div className="grid min-h-[calc(100dvh-1.5rem)] overflow-hidden rounded-[36px] ring-1 ring-slate-200 md:grid-cols-2">
+          {/* Coluna esquerda: formulário */}
+          <div className="flex items-center bg-white/98 p-8 md:p-12">
+            <div className="w-full max-w-md">
+              <div className="mb-8">
+                <div className="text-emerald-800 text-lg font-semibold">verdemar</div>
+                <h1 className="mt-4 text-4xl font-extrabold leading-tight text-slate-900">
+                  Entre na sua conta
+                </h1>
+              </div>
 
-          {error && (
-            <div className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-              {error}
+              {error && (
+                <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                  {error}
+                </div>
+              )}
+
+              <form className="space-y-4" onSubmit={handleSubmit}>
+                <div>
+                  <input
+                    id="email"
+                    type="email"
+                    placeholder="Email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    autoComplete="email"
+                    required
+                    className="w-full rounded-full border border-slate-300 bg-slate-100 px-4 py-3 text-slate-900 outline-none focus:border-emerald-500 focus:bg-white"
+                  />
+                </div>
+
+                <div>
+                  <input
+                    id="password"
+                    type="password"
+                    placeholder="Senha"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    autoComplete="current-password"
+                    required
+                    className="w-full rounded-full border border-slate-300 bg-slate-100 px-4 py-3 text-slate-900 outline-none focus:border-emerald-500 focus:bg-white"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="mt-2 w-full rounded-full bg-emerald-800 py-3 text-white font-semibold hover:brightness-110 transition disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                  {loading ? 'Entrando…' : 'Entrar'}
+                </button>
+
+                <p className="pt-2 text-center text-sm text-slate-600">
+                  Não tem conta?{' '}
+                  <Link to="/register" className="font-semibold text-emerald-800 hover:underline">Criar conta</Link>
+                </p>
+              </form>
             </div>
-          )}
+          </div>
 
-          <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
-            <div className="space-y-1">
-              <label htmlFor="email" className="text-sm text-gray-700">Email address</label>
-              <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                autoComplete="email"
-                required
-                className="w-full rounded-md border border-gray-300 bg-gray-100 px-3 py-2 text-gray-900 outline-none focus:border-blue-500 focus:bg-white"
-              />
-            </div>
-
-            <div className="space-y-1">
-              <label htmlFor="password" className="text-sm text-gray-700">Password</label>
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                autoComplete="current-password"
-                required
-                className="w-full rounded-md border border-gray-300 bg-gray-100 px-3 py-2 text-gray-900 outline-none focus:border-blue-500 focus:bg-white"
-              />
-            </div>
-
-            <div className="flex items-center justify-between text-sm">
-              <label className="inline-flex items-center gap-2 text-gray-700">
-                <input
-                  type="checkbox"
-                  checked={remember}
-                  onChange={(e) => setRemember(e.target.checked)}
-                  className="size-4 rounded border-gray-300 text-blue-600 focus:ring-blue-600"
-                />
-                Keep me signed in
-              </label>
-              <a href="#" className="text-blue-600 hover:underline">Forgot password?</a>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full rounded-md bg-blue-600 py-2.5 text-white font-medium hover:bg-blue-700 transition disabled:opacity-70 disabled:cursor-not-allowed"
-            >
-              {loading ? 'Signing in...' : 'Continue with email'}
-            </button>
-
-            {/* Opções sociais removidas */}
-          </form>
-
-          <p className="mt-6 text-center text-sm text-gray-600">
-            Não tem uma conta?{' '}
-            <Link to="/register" className="font-medium text-blue-600 hover:underline">Registrar</Link>
-          </p>
+          {/* Coluna direita: imagem ocupa toda a altura */}
+          <div className="relative hidden md:block">
+            <img
+              src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?q=80&w=1600&auto=format&fit=crop"
+              alt="Paisagem"
+              className="absolute inset-0 h-full w-full object-cover"
+              loading="lazy"
+            />
+          </div>
         </div>
       </div>
     </main>

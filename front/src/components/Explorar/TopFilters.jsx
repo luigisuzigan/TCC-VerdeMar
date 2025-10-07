@@ -1,100 +1,113 @@
-import { useState } from 'react';
-import { MapPin, Calendar, Users, Search } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { Search, SlidersHorizontal } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
 
-export default function ExploreFiltersBar({ onSearch }) {
-  const [filters, setFilters] = useState({
-    location: '',
-    dateIn: '',
-    dateOut: '',
-    guests: 1
-  });
+export default function FiltersBar() {
+  const [params, setParams] = useSearchParams();
 
-  function handleChange(e) {
-    const { name, value } = e.target;
-    setFilters(f => ({ ...f, [name]: value }));
-  }
+  const initial = useMemo(() => ({
+    search: params.get('search') || '',
+    type: params.get('type') || '',
+    minPrice: params.get('minPrice') || '',
+    maxPrice: params.get('maxPrice') || '',
+    country: params.get('country') || '',
+  }), [params]);
 
-  function submit(e) {
-    e.preventDefault();
-    onSearch?.(filters);
+  const [form, setForm] = useState(initial);
+
+  useEffect(() => {
+    setForm(initial);
+  }, [initial]);
+
+  function apply() {
+    const next = new URLSearchParams();
+    if (form.search) next.set('search', form.search);
+    if (form.type) next.set('type', form.type);
+    if (form.minPrice) next.set('minPrice', form.minPrice);
+    if (form.maxPrice) next.set('maxPrice', form.maxPrice);
+    if (form.country) next.set('country', form.country);
+    setParams(next, { replace: true });
   }
 
   return (
-    <form
-      onSubmit={submit}
-      className="flex w-full flex-col gap-3 rounded-2xl bg-white/90 p-3 shadow-lg ring-1 ring-slate-200 backdrop-blur md:flex-row md:items-center md:gap-0"
-    >
-      <Field icon={<MapPin size={16} />} label="Location">
-        <input
-          name="location"
-          value={filters.location}
-          onChange={handleChange}
-          placeholder="Ex: Florianópolis"
-          className="w-full bg-transparent text-sm outline-none placeholder:text-slate-400"
-        />
-      </Field>
+    <div className="rounded-2xl border border-slate-200 bg-white p-3 sm:p-4 shadow-sm">
+      <div className="grid gap-3 md:grid-cols-5">
+        {/* Search */}
+        <div className="md:col-span-2">
+          <label className="mb-1 block text-[12px] font-semibold text-slate-600">Find Property</label>
+          <div className="flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-3 py-2">
+            <Search size={16} className="text-slate-500" />
+            <input
+              value={form.search}
+              onChange={(e) => setForm((s) => ({ ...s, search: e.target.value }))}
+              onKeyDown={(e) => e.key === 'Enter' && apply()}
+              placeholder="Ex.: pé na areia"
+              className="w-full outline-none text-sm"
+            />
+          </div>
+        </div>
 
-      <Divider />
+        {/* Type */}
+        <div>
+          <label className="mb-1 block text-[12px] font-semibold text-slate-600">Type</label>
+          <select
+            value={form.type}
+            onChange={(e) => setForm((s) => ({ ...s, type: e.target.value }))}
+            className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm"
+          >
+            <option value="">Todos</option>
+            <option value="condominio">Condomínio</option>
+            <option value="casa">Casa</option>
+            <option value="apartamento">Apartamento</option>
+          </select>
+        </div>
 
-      <Field icon={<Calendar size={16} />} label="Check-in">
-        <input
-          type="date"
-          name="dateIn"
-          value={filters.dateIn}
-          onChange={handleChange}
-          className="w-full bg-transparent text-sm outline-none"
-        />
-      </Field>
+        {/* Price */}
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <label className="mb-1 block text-[12px] font-semibold text-slate-600">Min Price</label>
+            <input
+              inputMode="numeric"
+              value={form.minPrice}
+              onChange={(e) => setForm((s) => ({ ...s, minPrice: e.target.value }))}
+              className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm"
+              placeholder="0"
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-[12px] font-semibold text-slate-600">Max Price</label>
+            <input
+              inputMode="numeric"
+              value={form.maxPrice}
+              onChange={(e) => setForm((s) => ({ ...s, maxPrice: e.target.value }))}
+              className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm"
+              placeholder="1000000"
+            />
+          </div>
+        </div>
 
-      <Divider />
+        {/* Country */}
+        <div>
+          <label className="mb-1 block text-[12px] font-semibold text-slate-600">Country</label>
+          <input
+            value={form.country}
+            onChange={(e) => setForm((s) => ({ ...s, country: e.target.value }))}
+            className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm"
+            placeholder="Brasil"
+          />
+        </div>
+      </div>
 
-      <Field icon={<Calendar size={16} />} label="Check-out">
-        <input
-          type="date"
-          name="dateOut"
-          value={filters.dateOut}
-          onChange={handleChange}
-          className="w-full bg-transparent text-sm outline-none"
-        />
-      </Field>
-
-      <Divider />
-
-      <Field icon={<Users size={16} />} label="Hóspedes">
-        <input
-          type="number"
-          name="guests"
-          min={1}
-          value={filters.guests}
-          onChange={handleChange}
-          className="w-16 bg-transparent text-sm outline-none"
-        />
-      </Field>
-
-      <div className="md:ml-auto md:pl-3">
+      <div className="mt-3 flex justify-end">
         <button
-          type="submit"
-          className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-6 py-3 text-sm font-semibold text-white shadow hover:bg-emerald-500 md:w-auto"
+          type="button"
+          onClick={apply}
+          className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow hover:brightness-110"
         >
-          <Search size={16} />
-          Search
+          <SlidersHorizontal size={16} />
+          Filtrar
         </button>
       </div>
-    </form>
+    </div>
   );
-}
-
-function Field({ icon, label, children }) {
-  return (
-    <label className="flex flex-col gap-1 px-2 py-1 md:min-w-[150px]">
-      <span className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
-        {icon} {label}
-      </span>
-      {children}
-    </label>
-  );
-}
-
-function Divider() {
-  return <span className="hidden h-10 w-px bg-slate-200 md:block" />;
 }

@@ -8,6 +8,7 @@ import {
   Info,
 } from 'lucide-react';
 import UserMenu from './UserMenu';
+import { useAuth } from '../../../context/AuthContext.jsx';
 
 /**
  * Header “icon-first”:
@@ -19,6 +20,7 @@ import UserMenu from './UserMenu';
  */
 export default function Header({ transparentOnTop = false }) {
   const location = useLocation();
+  const { user } = useAuth();
   const [scrolled, setScrolled] = useState(false);
   const [hovered, setHovered] = useState(false);
 
@@ -93,8 +95,19 @@ export default function Header({ transparentOnTop = false }) {
         </nav>
 
         {/* Lado direito */}
-        <div className="flex items-center gap-4 pr-2 md:pr-3">
-          <UserMenu inverted={isTransparent} />
+        <div className="flex items-center gap-3 pr-2 md:pr-3">
+          {!user && (
+            <Link
+              to="/login"
+              className={[
+                'hidden sm:inline-flex rounded-full px-4 py-2 text-sm font-semibold',
+                isTransparent ? 'bg-white/20 text-white ring-1 ring-white/40 hover:bg-white/30' : 'bg-emerald-600 text-white hover:bg-emerald-700'
+              ].join(' ')}
+            >
+              Entrar
+            </Link>
+          )}
+          <UserMenu inverted={isTransparent} requireAuth />
         </div>
       </div>
       {/* ondinha removida */}

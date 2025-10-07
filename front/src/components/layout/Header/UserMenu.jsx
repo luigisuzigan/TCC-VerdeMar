@@ -37,14 +37,14 @@ function initials(name) {
   return (a + b).toUpperCase();
 }
 
-export default function UserMenu({ inverted = false }) {
+export default function UserMenu({ inverted = false, requireAuth = false }) {
   const navigate = useNavigate();
-  const { user: authedUser, logout: ctxLogout, isAdmin } = useAuth();
+  const { user: authedUser, logout: ctxLogout, isAdmin, isSeller } = useAuth();
   const [open, setOpen] = useState(false);
   const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light');
 
-  const user = authedUser || getStoredUser();
   const isAuthed = Boolean(authedUser);
+  const user = isAuthed ? authedUser : null;
 
   const name = user?.name || 'Usuário';
   const email = user?.email || 'user@example.com';
@@ -112,13 +112,17 @@ export default function UserMenu({ inverted = false }) {
       <button
         ref={btnRef}
         type="button"
-        onClick={() => setOpen((s) => !s)}
+        onClick={() => {
+          if (requireAuth && !isAuthed) return; // bloqueia abrir sem login
+          setOpen((s) => !s);
+        }}
         className={triggerClasses}
         aria-haspopup="menu"
         aria-expanded={open}
+        aria-disabled={requireAuth && !isAuthed}
       >
         <div className="relative grid size-8 place-items-center overflow-hidden rounded-full bg-gradient-to-br from-emerald-400 to-sky-500 text-white text-xs font-bold">
-          {avatarUrl ? (
+          {avatarUrl && isAuthed ? (
             <img src={avatarUrl} alt="" className="h-full w-full object-cover" />
           ) : (
             <span>{initials(name)}</span>
@@ -130,7 +134,7 @@ export default function UserMenu({ inverted = false }) {
       </button>
 
       {/* Dropdown */}
-      {open && (
+  {open && isAuthed && (
         <div
           ref={panelRef}
           className="absolute right-0 z-50 mt-3 w-80 origin-top-right rounded-2xl bg-white p-3 shadow-xl ring-1 ring-slate-200"
@@ -154,34 +158,23 @@ export default function UserMenu({ inverted = false }) {
             </span>
           </div>
 
-          {/* Ações principais */}
+          {/* Ações principais: apenas Painel, Configurações, Notificações e Log out */}
           <div className="mt-3 space-y-1">
-            <MenuItem to="/account" icon={<User2 size={16} />} label="Account" onChoose={() => setOpen(false)} />
-            {isAdmin && (
-              <MenuItem to="/admin/properties" icon={<Settings size={16} />} label="Admin" onChoose={() => setOpen(false)} />
+            {/* Painel */}
+            {isAdmin ? (
+              <MenuItem to="/admin/properties" icon={<Settings size={16} />} label="Painel" onChoose={() => setOpen(false)} />
+            ) : isSeller ? (
+              <MenuItem to="/seller" icon={<Settings size={16} />} label="Painel" onChoose={() => setOpen(false)} />
+            ) : (
+              <MenuItem to="/account" icon={<User2 size={16} />} label="Painel" onChoose={() => setOpen(false)} />
             )}
-            <MenuItem to="/favorites" icon={<Heart size={16} className="text-rose-500" />} label="Favoritos" badge={favCount} onChoose={() => setOpen(false)} />
+
+            {/* Configurações */}
             <MenuItem to="/settings" icon={<Settings size={16} />} label="Configurações" onChoose={() => setOpen(false)} />
+
+            {/* Notificações */}
             <MenuItem to="/notifications" icon={<Bell size={16} className="text-amber-500" />} label="Notificações" badge={notifCount} onChoose={() => setOpen(false)} />
           </div>
-
-          <Divider />
-
-          {/* Aparência e ajuda */}
-          <button
-            type="button"
-            onClick={toggleTheme}
-            className="group flex w-full items-center justify-between rounded-xl px-2 py-2 text-left text-sm hover:bg-slate-50"
-          >
-            <span className="inline-flex items-center gap-2 text-slate-800">
-              {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
-              Aparência: {theme === 'dark' ? 'Dark' : 'Light'}
-            </span>
-            <ChevronRight size={16} className="text-slate-400 group-hover:text-slate-500" />
-          </button>
-
-          <MenuItem to="/whats-new" icon={<Sparkles size={16} className="text-emerald-600" />} label="Novidades" onChoose={() => setOpen(false)} />
-          <MenuItem to="/help" icon={<HelpCircle size={16} />} label="Ajuda" onChoose={() => setOpen(false)} />
 
           <Divider />
 
@@ -197,24 +190,7 @@ export default function UserMenu({ inverted = false }) {
                 Log out
               </span>
             </button>
-          ) : (
-            <div className="grid grid-cols-2 gap-2">
-              <Link
-                to="/login"
-                onClick={() => setOpen(false)}
-                className="rounded-xl bg-slate-100 px-3 py-2 text-center text-sm font-semibold text-slate-800 hover:bg-slate-200"
-              >
-                Entrar
-              </Link>
-              <Link
-                to="/register"
-                onClick={() => setOpen(false)}
-                className="rounded-xl bg-emerald-600 px-3 py-2 text-center text-sm font-semibold text-white hover:bg-emerald-500"
-              >
-                Criar conta
-              </Link>
-            </div>
-          )}
+          ) : null}
         </div>
       )}
     </div>

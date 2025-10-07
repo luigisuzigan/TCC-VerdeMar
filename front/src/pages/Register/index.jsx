@@ -9,6 +9,7 @@ export default function Register() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
+  const [role, setRole] = useState('USER');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -21,9 +22,9 @@ export default function Register() {
     try {
       if (!name.trim()) throw new Error('Informe seu nome.');
       if (!email) throw new Error('Informe um email válido.');
-      if (password.length < 6) throw new Error('A senha deve ter pelo menos 6 caracteres.');
-      if (password !== confirm) throw new Error('As senhas não conferem.');
-      await register({ name: name.trim(), email, password });
+  if (password.length < 6) throw new Error('A senha deve ter pelo menos 6 caracteres.');
+  if (password !== confirm) throw new Error('As senhas não conferem.');
+  await register({ name: name.trim(), email, password, role });
       navigate('/');
     } catch (err) {
       const msg = err?.response?.data?.error || err?.response?.data?.errors?.[0]?.msg || err?.message;
@@ -43,7 +44,7 @@ export default function Register() {
     >
       <div className="absolute inset-0 bg-white/30 backdrop-blur-[2px]" />
 
-      <div className="relative z-10 grid min-h-[calc(100dvh-56px)] place-items-center px-4 py-8">
+  <div className="relative z-10 grid min-h-dvh place-items-center px-4 py-8">
         <div className="w-full max-w-[520px] rounded-2xl border border-gray-200 bg-white/95 p-8 shadow-sm">
           <h1 className="text-center text-2xl font-semibold text-gray-900">Criar conta</h1>
 
@@ -77,6 +78,19 @@ export default function Register() {
                 required
                 className="w-full rounded-md border border-gray-300 bg-gray-100 px-3 py-2 text-gray-900 outline-none focus:border-blue-500 focus:bg-white"
               />
+            </div>
+
+            <div className="space-y-1">
+              <label htmlFor="role" className="text-sm text-gray-700">Tipo de conta</label>
+              <select
+                id="role"
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+                className="w-full rounded-md border border-gray-300 bg-gray-100 px-3 py-2 text-gray-900 outline-none focus:border-blue-500 focus:bg-white"
+              >
+                <option value="USER">Usuário</option>
+                <option value="SELLER">Vendedor</option>
+              </select>
             </div>
 
             <div className="space-y-1">

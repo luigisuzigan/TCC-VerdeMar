@@ -13,18 +13,18 @@ const listValidators = [
   query('published').optional().isBoolean().toBoolean(),
 ];
 
-router.get('/', listValidators, (req, res) => {
+router.get('/', listValidators, async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
   const { search, city, country, minPrice, maxPrice, limit = 20, offset = 0, published = true } = req.query;
-  const result = listProperties({ search, city, country, minPrice, maxPrice, limit, offset, published });
+  const result = await listProperties({ search, city, country, minPrice, maxPrice, limit, offset, published });
   res.json(result);
 });
 
-router.get('/:id', [param('id').isString()], (req, res) => {
+router.get('/:id', [param('id').isString()], async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
-  const item = getProperty(req.params.id);
+  const item = await getProperty(req.params.id);
   if (!item) return res.status(404).json({ error: 'Not found' });
   res.json(item);
 });
@@ -47,33 +47,33 @@ const propertyValidators = [
   body('published').optional().isBoolean().toBoolean(),
 ];
 
-router.post('/', authMiddleware, requireAdmin, propertyValidators, (req, res) => {
+router.post('/', authMiddleware, requireAdmin, propertyValidators, async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
-  const item = createProperty(req.body);
+  const item = await createProperty(req.body);
   res.status(201).json(item);
 });
 
-router.put('/:id', authMiddleware, requireAdmin, [param('id').isString(), ...propertyValidators], (req, res) => {
+router.put('/:id', authMiddleware, requireAdmin, [param('id').isString(), ...propertyValidators], async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
-  const updated = updateProperty(req.params.id, req.body);
+  const updated = await updateProperty(req.params.id, req.body);
   if (!updated) return res.status(404).json({ error: 'Not found' });
   res.json(updated);
 });
 
-router.patch('/:id/publish', authMiddleware, requireAdmin, [param('id').isString(), body('published').isBoolean()], (req, res) => {
+router.patch('/:id/publish', authMiddleware, requireAdmin, [param('id').isString(), body('published').isBoolean()], async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
-  const updated = updateProperty(req.params.id, { published: req.body.published });
+  const updated = await updateProperty(req.params.id, { published: req.body.published });
   if (!updated) return res.status(404).json({ error: 'Not found' });
   res.json(updated);
 });
 
-router.delete('/:id', authMiddleware, requireAdmin, [param('id').isString()], (req, res) => {
+router.delete('/:id', authMiddleware, requireAdmin, [param('id').isString()], async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
-  const ok = deleteProperty(req.params.id);
+  const ok = await deleteProperty(req.params.id);
   if (!ok) return res.status(404).json({ error: 'Not found' });
   res.status(204).send();
 });

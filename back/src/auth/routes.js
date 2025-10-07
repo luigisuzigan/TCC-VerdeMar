@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { body, validationResult } from 'express-validator';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { createUser, findUserByEmail } from '../repos/userRepo.js';
+import { createUser, findUserByEmail, Roles } from '../repos/userRepo.js';
 import { authMiddleware } from './middleware.js';
 
 const router = Router();
@@ -16,11 +16,12 @@ const validators = [
 router.post('/register', validators, async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
-  const { name, email, password } = req.body;
-  const existing = findUserByEmail(email);
+  const { name, email, password, role } = req.body;
+  const existing = await findUserByEmail(email);
   if (existing) return res.status(400).json({ error: 'Email já cadastrado' });
   const passwordHash = await bcrypt.hash(password, 10);
-  const user = createUser({ name: name || email.split('@')[0], email, passwordHash });
+  const safeRole = [Roles.USER, Roles.SELLER, Roles.ADMIN].includes(role) ? role : Roles.USER;
+  const user = await createUser({ name: name || email.split('@')[0], email, passwordHash, role: safeRole });
   const token = jwt.sign({ sub: user.id, role: user.role }, process.env.JWT_SECRET || 'dev', { expiresIn: '7d' });
   return res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role } });
 });
@@ -29,7 +30,7 @@ router.post('/login', [body('email').isEmail(), body('password').isString()], as
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
   const { email, password } = req.body;
-  const user = findUserByEmail(email);
+  const user = await findUserByEmail(email);
   if (!user) return res.status(401).json({ error: 'Credenciais inválidas' });
   const ok = await bcrypt.compare(password, user.passwordHash);
   if (!ok) return res.status(401).json({ error: 'Credenciais inválidas' });

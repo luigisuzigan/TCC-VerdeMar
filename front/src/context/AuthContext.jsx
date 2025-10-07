@@ -17,6 +17,7 @@ export function AuthProvider({ children }) {
   }, [token]);
 
   const isAdmin = user?.role === 'ADMIN';
+  const isSeller = user?.role === 'SELLER';
 
   async function login({ email, password, remember = true }) {
     const { data } = await api.post('/auth/login', { email, password });
@@ -48,7 +49,7 @@ export function AuthProvider({ children }) {
     sessionStorage.removeItem(USER_KEY);
   }
 
-  const value = useMemo(() => ({ user, token, isAdmin, login, register, logout }), [user, token, isAdmin]);
+  const value = useMemo(() => ({ user, token, isAdmin, isSeller, login, register, logout }), [user, token, isAdmin, isSeller]);
   return <AuthCtx.Provider value={value}>{children}</AuthCtx.Provider>;
 }
 
