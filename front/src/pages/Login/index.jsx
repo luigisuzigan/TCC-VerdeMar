@@ -1,23 +1,10 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-
-const USERS_KEY = 'vm_users';
-const TOKEN_KEY = 'token';
-const USER_KEY = 'user';
-
-function getUsers() {
-  try {
-    return JSON.parse(localStorage.getItem(USERS_KEY) || '[]');
-  } catch {
-    return [];
-  }
-}
-function findUser(email) {
-  return getUsers().find((u) => u.email.toLowerCase() === email.toLowerCase());
-}
+import { useAuth } from '../../context/AuthContext.jsx';
 
 export default function Login() {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [remember, setRemember] = useState(true);
@@ -31,15 +18,10 @@ export default function Login() {
     await new Promise((r) => setTimeout(r, 300)); // pequena simulação de atraso
 
     try {
-      const user = findUser(email);
-      if (!user) throw new Error('Usuário não encontrado. Crie sua conta.');
-      if (user.password !== password) throw new Error('Senha inválida.');
-
-      (remember ? localStorage : sessionStorage).setItem(TOKEN_KEY, 'mock-token');
-      localStorage.setItem(USER_KEY, JSON.stringify({ name: user.name, email: user.email }));
+      await login({ email, password, remember });
       navigate('/');
     } catch (err) {
-      setError(err?.message || 'Falha no login');
+      setError(err?.response?.data?.error || err?.message || 'Falha no login');
     } finally {
       setLoading(false);
     }
@@ -57,7 +39,7 @@ export default function Login() {
 
       <div className="relative z-10 grid min-h-[calc(100dvh-56px)] place-items-center px-4 py-8">
         <div className="w-full max-w-[460px] rounded-2xl border border-gray-200 bg-white/95 p-8 shadow-sm">
-          <h1 className="text-center text-2xl font-semibold text-gray-900">Sign in</h1>
+          <h1 className="text-center text-2xl font-semibold text-gray-900">Entrar</h1>
 
           {error && (
             <div className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -113,27 +95,12 @@ export default function Login() {
               {loading ? 'Signing in...' : 'Continue with email'}
             </button>
 
-            <div className="flex items-center gap-3 py-1 text-xs text-gray-500">
-              <span className="h-px flex-1 bg-gray-200" />
-              <span>or use one of these options</span>
-              <span className="h-px flex-1 bg-gray-200" />
-            </div>
-
-            <div className="grid grid-cols-1 gap-3">
-              <button type="button" className="inline-flex items-center justify-center gap-2 rounded-md border border-gray-300 bg-white py-2.5 text-sm font-medium text-gray-800 hover:bg-gray-50">
-                <span className="inline-block size-4 rounded-sm bg-gradient-to-br from-yellow-400 via-red-500 to-blue-600" aria-hidden="true" />
-                Continue with Google
-              </button>
-              <button type="button" className="inline-flex items-center justify-center gap-2 rounded-md bg-[#1877F2] py-2.5 text-sm font-medium text-white hover:brightness-105">
-                <span className="inline-block size-4 rounded-sm bg-white" aria-hidden="true" />
-                Continue with Facebook
-              </button>
-            </div>
+            {/* Opções sociais removidas */}
           </form>
 
           <p className="mt-6 text-center text-sm text-gray-600">
-            Don't have an account?{' '}
-            <Link to="/register" className="font-medium text-blue-600 hover:underline">Register</Link>
+            Não tem uma conta?{' '}
+            <Link to="/register" className="font-medium text-blue-600 hover:underline">Registrar</Link>
           </p>
         </div>
       </div>

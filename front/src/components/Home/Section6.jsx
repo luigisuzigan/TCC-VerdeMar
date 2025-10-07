@@ -1,125 +1,132 @@
+import { useEffect, useRef, useState } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { Umbrella, Waves, ShieldCheck, Ship, ChevronRight } from 'lucide-react';
 
-const BEACH_IMG =
-  'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?q=80&w=1600&auto=format&fit=crop';
-
-const MINI = [
-  {
-    id: 'm1',
-    title: 'Península de Maraú',
-    img: 'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?q=80&w=600&auto=format&fit=crop',
-  },
-  {
-    id: 'm2',
-    title: 'Fernando de Noronha',
-    img: 'https://images.unsplash.com/photo-1526485797145-8b2f7cf7b2b1?q=80&w=600&auto=format&fit=crop',
-  },
-  {
-    id: 'm3',
-    title: 'Ilhabela',
-    img: 'https://images.unsplash.com/photo-1502082553048-f009c37129b9?q=80&w=600&auto=format&fit=crop',
-  },
+// Coloque estas imagens em /public:
+// - /Praia1.png  (surf - primeiro slide)
+// - /Praia2.png
+// - /Praia3.png
+// - /Praia4.png
+const SLIDES = [
+  { id: 1, img: '/Praia1.png', title: 'XXXXXXXXX', text: 'XXXXXXXXX', cta: 'XXXXXXXXX', to: '/explorar' },
+  { id: 2, img: '/Praia2.png', title: 'XXXXXXXXX', text: 'XXXXXXXXX', cta: 'XXXXXXXXX', to: '/explorar' },
+  { id: 3, img: '/Praia3.png', title: 'XXXXXXXXX', text: 'XXXXXXXXX', cta: 'XXXXXXXXX', to: '/explorar' },
+  { id: 4, img: '/Praia4.png', title: 'XXXXXXXXX', text: 'XXXXXXXXX', cta: 'XXXXXXXXX', to: '/explorar' },
 ];
 
-export default function BeachInfo() {
+export default function Section1() {
+  const [index, setIndex] = useState(0);
+  const timerRef = useRef(null);
+  const DURATION = 15000; // 15s
+
+  useEffect(() => {
+    start();
+    return stop;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [index]);
+
+  function start() {
+    stop();
+    timerRef.current = setTimeout(() => {
+      setIndex((i) => (i + 1) % SLIDES.length);
+    }, DURATION);
+  }
+  function stop() {
+    if (timerRef.current) clearTimeout(timerRef.current);
+  }
+  function goPrev() {
+    stop();
+    setIndex((i) => (i - 1 + SLIDES.length) % SLIDES.length);
+  }
+  function goNext() {
+    stop();
+    setIndex((i) => (i + 1) % SLIDES.length);
+  }
+
   return (
-    <section className="relative mx-auto w-[min(96vw,1400px)] py-10 sm:py-12">
-      <div className="grid items-center gap-8 lg:grid-cols-2">
-        {/* Bloco da imagem com artes/overlays */}
-        <div className="relative">
-          {/* blobs decorativos */}
-          <div className="pointer-events-none absolute -left-10 top-10 h-40 w-40 rounded-full bg-sky-300/40 blur-3xl" />
-          <div className="pointer-events-none absolute -right-6 bottom-10 h-36 w-36 rounded-full bg-emerald-300/40 blur-3xl" />
-
-          <div className="relative overflow-hidden rounded-[28px] ring-1 ring-white/20 shadow-xl">
-            <div className="relative aspect-[16/11] w-full bg-slate-200 md:aspect-[4/3]">
+    <section className="relative w-full py-8">
+      <div
+        className="relative mx-auto h-[520px] w-[min(96vw,1400px)] overflow-hidden rounded-[28px] ring-1 ring-black/10 shadow-[0_25px_60px_rgba(0,0,0,.18)] md:h-[560px] lg:h-[600px]"
+        onMouseEnter={stop}
+        onMouseLeave={start}
+      >
+        {SLIDES.map((s, i) => {
+          const active = i === index;
+          return (
+            <div
+              key={s.id}
+              className={[
+                'absolute inset-0 transition-all duration-700',
+                active ? 'opacity-100 scale-100' : 'opacity-0 scale-[1.02]',
+              ].join(' ')}
+              aria-hidden={!active}
+            >
+              {/* Imagem de fundo ocupando a seção */}
               <img
-                src={BEACH_IMG}
-                alt="Praia paradisíaca"
+                src={s.img}
+                alt=""
                 className="absolute inset-0 h-full w-full object-cover"
-                loading="lazy"
+                loading={i === 0 ? 'eager' : 'lazy'}
               />
-              {/* Glass overlay sutil para legibilidade */}
-              <div className="absolute inset-0 bg-gradient-to-tr from-black/30 via-black/0 to-black/10" />
-            </div>
+              {/* Degradê azul/verde (vibe Section6) */}
+              <div className="absolute inset-0 bg-gradient-to-tr from-emerald-500/30 via-sky-500/22 to-transparent" />
+              {/* Overlay escuro para legibilidade */}
+              <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-transparent" />
 
-            {/* Cards mini sobrepostos (estilo vitrine) */}
-            <div className="absolute -bottom-5 left-5 right-5 flex gap-3">
-              {MINI.map((m) => (
-                <div
-                  key={m.id}
-                  className="hidden min-w-0 flex-1 overflow-hidden rounded-2xl bg-white/85 backdrop-blur ring-1 ring-slate-200 shadow md:block"
-                >
-                  <div className="relative aspect-[7/5]">
-                    <img src={m.img} alt={m.title} className="absolute inset-0 h-full w-full object-cover" />
-                  </div>
-                  <div className="px-3 py-2">
-                    <div className="truncate text-[12px] font-semibold text-slate-800">{m.title}</div>
-                    <div className="mt-0.5 text-[10px] font-medium text-slate-500">Descubra agora</div>
+              {/* Conteúdo de texto (placeholder) */}
+              <div className="relative z-10 flex h-full items-center">
+                <div className="px-6 sm:px-10 md:px-14 lg:px-16">
+                  <h2 className="max-w-[22ch] text-3xl font-extrabold leading-tight text-white drop-shadow md:text-5xl">
+                    {s.title}
+                  </h2>
+                  <p className="mt-3 max-w-[60ch] text-sm text-white/90 md:text-base">
+                    {s.text}
+                  </p>
+                  <div className="mt-6">
+                    <Link
+                      to={s.to}
+                      className="inline-flex items-center rounded-xl bg-emerald-600 px-6 py-3 text-sm font-semibold text-white shadow hover:bg-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/60"
+                    >
+                      {s.cta}
+                    </Link>
                   </div>
                 </div>
-              ))}
+              </div>
             </div>
-          </div>
+          );
+        })}
+
+        {/* Setas para navegar */}
+        <div className="absolute bottom-6 left-1/2 z-20 -translate-x-1/2 flex items-center gap-4">
+          <button
+            type="button"
+            onClick={goPrev}
+            className="grid size-11 place-items-center rounded-full bg-white/18 text-white ring-1 ring-white/45 backdrop-blur-sm transition hover:bg-white/28"
+            aria-label="Slide anterior"
+          >
+            <ChevronLeft size={18} />
+          </button>
+          <button
+            type="button"
+            onClick={goNext}
+            className="grid size-11 place-items-center rounded-full bg-white/18 text-white ring-1 ring-white/45 backdrop-blur-sm transition hover:bg-white/28"
+            aria-label="Próximo slide"
+          >
+            <ChevronRight size={18} />
+          </button>
         </div>
 
-        {/* Bloco de conteúdo */}
-        <div className="pt-6 lg:pt-0">
-          <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700">Litoral brasileiro</p>
-
-          <h2 className="mt-2 text-balance text-3xl font-extrabold leading-tight text-slate-900 sm:text-4xl">
-            Imóveis
-            <span className="bg-gradient-to-r from-emerald-600 via-sky-600 to-emerald-600 bg-clip-text px-2 text-transparent">
-              é nossa praia
-            </span>
-          </h2>
-
-          <p className="mt-3 max-w-[56ch] text-sm text-slate-600">
-            Curadoria de casas e experiências à beira‑mar. Anúncios verificados, atendimento humano e as melhores
-            recomendações para aproveitar cada onda, cada pôr do sol e cada cantinho do litoral.
-          </p>
-
-          {/* Chips informativos */}
-          <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <InfoChip icon={<Waves size={16} />} title="Mais de 120 praias" desc="Do Norte ao Sul" />
-            <InfoChip icon={<Umbrella size={16} />} title="Stay & relax" desc="Hospedagens selecionadas" />
-            <InfoChip icon={<Ship size={16} />} title="Passeios e tours" desc="Barcos e trilhas" />
-            <InfoChip icon={<ShieldCheck size={16} />} title="Verificado" desc="Segurança e suporte" />
-          </div>
-
-          {/* CTAs */}
-          <div className="mt-6 flex flex-wrap items-center gap-3">
-            <Link
-              to="/explorar"
-              className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow hover:bg-emerald-500"
-            >
-              Explorar imóveis
-              <ChevronRight size={16} />
-            </Link>
-            <Link
-              to="/sobre"
-              className="inline-flex items-center gap-2 rounded-xl bg-slate-900/5 px-5 py-3 text-sm font-semibold text-slate-800 ring-1 ring-slate-200 hover:bg-slate-900/10"
-            >
-              Saiba mais
-            </Link>
+        {/* Indicador de progresso simples */}
+        <div className="absolute bottom-6 left-6 right-6 z-10 hidden items-center gap-3 md:flex">
+          <div className="h-[3px] flex-1 rounded bg-white/25">
+            <div
+              className="h-[3px] rounded bg-emerald-300 shadow-[0_0_0_1px_rgba(255,255,255,.35)] transition-[width]"
+              style={{ width: `${((index + 1) / SLIDES.length) * 100}%` }}
+              aria-hidden="true"
+            />
           </div>
         </div>
       </div>
     </section>
-  );
-}
-
-function InfoChip({ icon, title, desc }) {
-  return (
-    <div className="flex items-start gap-3 rounded-2xl bg-white px-4 py-3 ring-1 ring-slate-200 shadow-sm">
-      <span className="mt-0.5 grid size-7 place-items-center rounded-full bg-sky-50 text-sky-700 ring-1 ring-sky-200">
-        {icon}
-      </span>
-      <div>
-        <div className="text-[13px] font-semibold text-slate-900">{title}</div>
-        <div className="text-[11px] font-medium text-slate-500">{desc}</div>
-      </div>
-    </div>
   );
 }

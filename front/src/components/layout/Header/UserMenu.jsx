@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../../context/AuthContext.jsx';
 import {
   ChevronRight,
   User2,
@@ -38,11 +39,12 @@ function initials(name) {
 
 export default function UserMenu({ inverted = false }) {
   const navigate = useNavigate();
+  const { user: authedUser, logout: ctxLogout, isAdmin } = useAuth();
   const [open, setOpen] = useState(false);
   const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light');
 
-  const user = useMemo(() => getStoredUser(), []);
-  const isAuthed = Boolean(getToken());
+  const user = authedUser || getStoredUser();
+  const isAuthed = Boolean(authedUser);
 
   const name = user?.name || 'Usuário';
   const email = user?.email || 'user@example.com';
@@ -95,13 +97,7 @@ export default function UserMenu({ inverted = false }) {
     else root.classList.remove('dark');
   }
 
-  function logout() {
-    localStorage.removeItem(TOKEN_KEY);
-    sessionStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(USER_KEY);
-    setOpen(false);
-    navigate('/login');
-  }
+  function logout() { ctxLogout(); setOpen(false); navigate('/login'); }
 
   const triggerClasses = [
     'inline-flex items-center gap-2 rounded-full p-1 pr-2 ring-1 transition',
@@ -161,6 +157,9 @@ export default function UserMenu({ inverted = false }) {
           {/* Ações principais */}
           <div className="mt-3 space-y-1">
             <MenuItem to="/account" icon={<User2 size={16} />} label="Account" onChoose={() => setOpen(false)} />
+            {isAdmin && (
+              <MenuItem to="/admin/properties" icon={<Settings size={16} />} label="Admin" onChoose={() => setOpen(false)} />
+            )}
             <MenuItem to="/favorites" icon={<Heart size={16} className="text-rose-500" />} label="Favoritos" badge={favCount} onChoose={() => setOpen(false)} />
             <MenuItem to="/settings" icon={<Settings size={16} />} label="Configurações" onChoose={() => setOpen(false)} />
             <MenuItem to="/notifications" icon={<Bell size={16} className="text-amber-500" />} label="Notificações" badge={notifCount} onChoose={() => setOpen(false)} />

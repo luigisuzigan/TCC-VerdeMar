@@ -1,3 +1,12 @@
+# Frontend notes
+
+To point the app to a custom API URL, create a `.env` file in `front/` with:
+
+```
+VITE_API_BASE=http://localhost:4000
+```
+
+By default it uses `http://localhost:4000`.
 # React + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
