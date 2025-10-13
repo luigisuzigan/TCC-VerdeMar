@@ -1,4 +1,6 @@
+# ========================================
 # Logs
+# ========================================
 logs
 *.log
 npm-debug.log*
@@ -7,14 +9,84 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# ========================================
+# Dependencies
+# ========================================
 node_modules
+.pnp
+.pnp.js
+
+# Backend dependencies
+back/node_modules
+
+# Frontend dependencies
+front/node_modules
+
+# ========================================
+# Build Output
+# ========================================
 dist
 dist-ssr
+build
 *.local
 
+# Frontend build
+front/dist
+front/dist-ssr
+front/build
+front/.vite
+
+# Backend build (se houver)
+back/dist
+back/build
+
+# ========================================
+# Environment Variables
+# ========================================
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env*.local
+
+# Backend
+back/.env
+back/.env.local
+back/.env.production
+
+# Frontend
+front/.env
+front/.env.local
+front/.env.production
+
+# ========================================
+# Database
+# ========================================
+# SQLite
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+dev.db
+prisma/*.db
+
+# MySQL
+*.sql
+
+# Prisma
+prisma/dev.db
+prisma/migrations/**/*.sql
+back/prisma/*.db
+back/prisma/*.db-journal
+back/prisma/dev.db
+
+# ========================================
 # Editor directories and files
+# ========================================
 .vscode/*
 !.vscode/extensions.json
+!.vscode/settings.json
 .idea
 .DS_Store
 *.suo
@@ -22,3 +94,124 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+*.swp
+*.swo
+*~
+
+# ========================================
+# OS Files
+# ========================================
+Thumbs.db
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# ========================================
+# Testing
+# ========================================
+coverage
+*.coverage
+.nyc_output
+.jest
+
+# ========================================
+# Temporary files
+# ========================================
+tmp
+temp
+*.tmp
+*.temp
+*.cache
+.cache
+
+# ========================================
+# Package Manager
+# ========================================
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Backend lock files
+back/package-lock.json
+back/yarn.lock
+back/pnpm-lock.yaml
+
+# Frontend lock files
+front/package-lock.json
+front/yarn.lock
+front/pnpm-lock.yaml
+
+# ========================================
+# Next.js (se usar no futuro)
+# ========================================
+.next/
+out/
+
+# ========================================
+# Vercel
+# ========================================
+.vercel
+
+# ========================================
+# Uploads/User Content
+# ========================================
+uploads/
+public/uploads/
+storage/
+
+# Backend uploads
+back/uploads/
+back/storage/
+back/public/uploads/
+
+# Frontend uploads (se houver)
+front/public/uploads/
+
+# ========================================
+# Backup files
+# ========================================
+*.bak
+*.backup
+*.old
+
+# ========================================
+# Project Specific - Backend
+# ========================================
+# Logs
+back/logs/
+back/*.log
+
+# Scripts temporários
+back/src/scripts/temp/
+
+# Testes
+back/coverage/
+back/.nyc_output/
+
+# ========================================
+# Project Specific - Frontend
+# ========================================
+# Vite cache
+front/.vite/
+front/vite.config.*.timestamp-*
+
+# ESLint cache
+front/.eslintcache
+
+# Storybook (se adicionar)
+front/storybook-static/
+
+# Testes
+front/coverage/
+front/.nyc_output/
+
+# ========================================
+# Monorepo específico
+# ========================================
+# Lerna
+lerna-debug.log*
+.lerna/
+
+# Turbo
+.turbo/
