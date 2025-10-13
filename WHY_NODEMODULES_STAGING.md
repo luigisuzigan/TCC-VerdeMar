@@ -2,7 +2,7 @@
 
 ## ✅ **RESPOSTA RÁPIDA**
 
-Boa notícia: **`node_modules` NÃO está em staging** no seu repositório! 
+Boa notícia: **`node_modules` NÃO está em staging** no seu repositório!
 
 Quando você perguntou, verifiquei e encontrei apenas estes arquivos:
 
@@ -139,6 +139,7 @@ git status
 Para evitar esse problema no futuro:
 
 ### **1. Crie .gitignore ANTES de commitar qualquer coisa**
+
 ```bash
 # Sempre faça isso primeiro:
 echo "node_modules/" > .gitignore
@@ -148,11 +149,13 @@ git commit -m "chore: adiciona .gitignore"
 ```
 
 ### **2. Use templates de .gitignore**
+
 - [gitignore.io](https://www.toptal.com/developers/gitignore)
 - Templates do GitHub para Node.js
 - Use o que criamos agora! 😉
 
 ### **3. Configure Git Hooks**
+
 ```bash
 # Instalar pre-commit hook que bloqueia commits de .env
 npm install --save-dev husky
@@ -179,12 +182,12 @@ npx husky init
 
 ## ✅ **RESUMO FINAL**
 
-| Item | Status | Ação |
-|------|--------|------|
-| node_modules | ✅ Nunca rastreado | Nenhuma |
-| .env | ✅ Removido do Git | Commitado |
-| dev.db | ✅ Removido do Git | Commitado |
-| .gitignore | ✅ Atualizado | Commitar |
-| Código novo | ✅ Pronto | Commitar |
+| Item         | Status             | Ação      |
+| ------------ | ------------------ | --------- |
+| node_modules | ✅ Nunca rastreado | Nenhuma   |
+| .env         | ✅ Removido do Git | Commitado |
+| dev.db       | ✅ Removido do Git | Commitado |
+| .gitignore   | ✅ Atualizado      | Commitar  |
+| Código novo  | ✅ Pronto          | Commitar  |
 
 **Seu repositório está limpo e seguro! 🎉**
