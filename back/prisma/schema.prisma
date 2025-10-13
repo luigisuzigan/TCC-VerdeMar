@@ -3,36 +3,133 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
+// ========================================
+// 👤 USER - Usuários do sistema
+// ========================================
 model User {
   id           String   @id @default(uuid())
   name         String
   email        String   @unique
   passwordHash String
-  role         String   @default("USER")
+  phone        String?
+  avatar       String?
+  bio          String?
+  role         String   @default("USER") // USER, SELLER, ADMIN
+  isActive     Boolean  @default(true)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+  
+  // Relacionamentos
+  properties   Property[]
+  favorites    Favorite[]
+  reviews      Review[]
 }
 
+// ========================================
+// 🏠 PROPERTY - Propriedades/Imóveis
+// ========================================
 model Property {
-  id          String   @id @default(uuid())
-  title       String
-  description String?
-  price       Float
-  currency    String   @default("BRL")
-  city        String
-  country     String
-  area        Int
-  beds        Int
-  baths       Int
-  guests      Int
-  rating      Float?   @default(0)
-  reviews     Int?     @default(0)
-  images      String
-  published   Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id           String   @id @default(uuid())
+  userId       String   // FK: Dono da propriedade
+  title        String
+  description  String?
+  type         String   @default("Apartamento") // Casa, Apartamento, Chalé, Cobertura, Terreno
+  price        Float
+  currency     String   @default("BRL")
+  
+  // Localização
+  address      String   @default("")
+  city         String
+  state        String   @default("")
+  country      String
+  zipCode      String?
+  latitude     Float?
+  longitude    Float?
+  
+  // Características
+  area         Int      // m²
+  beds         Int
+  baths        Int
+  guests       Int
+  amenities    String   @default("[]") // JSON: ["Piscina", "WiFi", "Ar-condicionado"]
+  
+  // Mídia
+  images       String   // JSON: ["url1", "url2", "url3"]
+  mainImage    String?
+  
+  // Métricas (calculadas)
+  rating       Float?   @default(0)
+  reviewCount  Int      @default(0)
+  viewCount    Int      @default(0)
+  
+  // Status
+  published    Boolean  @default(false)
+  featured     Boolean  @default(false) // Destaque na home
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  // Relacionamentos
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  favorites    Favorite[]
+  reviews      Review[]
+  
+  // Índices para performance
+  @@index([userId])
+  @@index([city])
+  @@index([published])
+  @@index([featured])
+}
+
+// ========================================
+// ⭐ FAVORITE - Favoritos (Tabela Pivot M:N)
+// ========================================
+model Favorite {
+  id         String   @id @default(uuid())
+  userId     String   // FK: Usuário que favoritou
+  propertyId String   // FK: Propriedade favoritada
+  createdAt  DateTime @default(now())
+  
+  // Relacionamentos
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  
+  // Constraints
+  @@unique([userId, propertyId]) // Não permitir favoritar 2x a mesma propriedade
+  @@index([userId])
+  @@index([propertyId])
+}
+
+// ========================================
+// 💬 REVIEW - Avaliações de propriedades
+// ========================================
+model Review {
+  id             String   @id @default(uuid())
+  userId         String   // FK: Quem avaliou
+  propertyId     String   // FK: Propriedade avaliada
+  
+  // Avaliações (1-5 estrelas)
+  rating         Float    // Nota geral
+  cleanRating    Float?   // Limpeza
+  valueRating    Float?   // Custo-benefício
+  locationRating Float?   // Localização
+  
+  comment        String?  // Comentário opcional
+  isPublished    Boolean  @default(true)
+  
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  
+  // Relacionamentos
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  property       Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  
+  // Constraints
+  @@unique([userId, propertyId]) // Um usuário só pode avaliar cada propriedade 1x
+  @@index([propertyId])
+  @@index([rating])
 }

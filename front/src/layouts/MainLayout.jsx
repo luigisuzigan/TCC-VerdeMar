@@ -1,10 +1,11 @@
-import { Outlet, useLocation } from 'react-router-dom';
-import Header from '../components/slayout/Header/Header';
+import { Outlet, useLocation } from "react-router-dom";
+import Header from "../components/layout/Header/Header";
 
 export default function MainLayout() {
   const location = useLocation();
-  const isHome = location.pathname === '/';
-  const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
+  const isHome = location.pathname === "/";
+  const isAuthPage =
+    location.pathname === "/login" || location.pathname === "/register";
 
   return (
     <>
@@ -19,7 +20,6 @@ export default function MainLayout() {
     </>
   );
 }
-
 
 // import { Outlet, useLocation } from 'react-router-dom';
 // import Header from '../components/layout/Header';
