@@ -10,14 +10,59 @@ const listValidators = [
   query('offset').optional().isInt({ min: 0 }),
   query('minPrice').optional().isFloat({ min: 0 }),
   query('maxPrice').optional().isFloat({ min: 0 }),
+  query('minArea').optional().isInt({ min: 0 }),
+  query('maxArea').optional().isInt({ min: 0 }),
+  query('types').optional().isString(),
+  query('minBedrooms').optional().isInt({ min: 0 }),
+  query('minBathrooms').optional().isInt({ min: 0 }),
+  query('minParkingSpaces').optional().isInt({ min: 0 }),
+  query('minSuites').optional().isInt({ min: 0 }),
+  query('sortBy').optional().isString(),
   query('published').optional().isBoolean().toBoolean(),
 ];
 
 router.get('/', listValidators, async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
-  const { search, city, country, minPrice, maxPrice, limit = 20, offset = 0, published = true } = req.query;
-  const result = await listProperties({ search, city, country, minPrice, maxPrice, limit, offset, published });
+  
+  const { 
+    search, 
+    city, 
+    country, 
+    minPrice, 
+    maxPrice,
+    minArea,
+    maxArea,
+    types,
+    minBedrooms,
+    minBathrooms,
+    minParkingSpaces,
+    minSuites,
+    sortBy,
+    limit = 20, 
+    offset = 0, 
+    published = true 
+  } = req.query;
+  
+  const result = await listProperties({ 
+    search, 
+    city, 
+    country, 
+    minPrice, 
+    maxPrice,
+    minArea,
+    maxArea,
+    types,
+    minBedrooms,
+    minBathrooms,
+    minParkingSpaces,
+    minSuites,
+    sortBy,
+    limit, 
+    offset, 
+    published 
+  });
+  
   res.json(result);
 });
 

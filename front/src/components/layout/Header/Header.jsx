@@ -57,7 +57,7 @@ export default function Header({ transparentOnTop = false }) {
       <div
         className={[
           'flex px-4 md:px-6 w-full items-center transition-[height] duration-200',
-          hovered ? 'h-[92px]' : 'h-[68px]',
+          'h-[68px]',
         ].join(' ')}
       >
         {/* Logo - largura fixa para manter centralização */}
@@ -82,11 +82,10 @@ export default function Header({ transparentOnTop = false }) {
         >
           <div
             className={[
-              'flex items-end gap-2 md:gap-3 px-4 md:px-6 py-2 rounded-full transition-all duration-200',
+              'flex items-center gap-1 md:gap-2 px-3 md:px-4 py-2.5 rounded-full transition-all duration-200',
               isTransparent
                 ? 'bg-white/95 backdrop-blur shadow-lg'
-                : 'bg-white shadow-md ring-1 ring-slate-200',
-              hovered ? 'pb-1' : 'pb-2'
+                : 'bg-transparent',
             ].join(' ')}
           >
             {nav.map((item) => (
@@ -147,32 +146,35 @@ function IconNavItem({ to, label, Icon, active, inverted, showLabel }) {
     <NavLink
       to={to}
       end={to === '/'}
-      className="relative flex flex-col items-center px-2 md:px-3"
+      className="relative flex flex-col items-center justify-center px-2 md:px-3 h-10"
       aria-current={active ? 'page' : undefined}
       title={label}
     >
-      {/* Ícone sem círculo individual */}
-      <div
-        className={[
-          'inline-flex h-9 w-9 items-center justify-center rounded-full transition-colors',
-          active
-            ? 'text-emerald-600 bg-emerald-50'
-            : 'text-slate-600 hover:text-emerald-600 hover:bg-slate-50',
-        ].join(' ')}
-      >
-        <Icon size={20} strokeWidth={2} />
-      </div>
+      {/* Container para manter o ícone fixo no centro */}
+      <div className="flex flex-col items-center justify-center">
+        {/* Ícone centralizado */}
+        <div
+          className={[
+            'inline-flex h-11 w-11 items-center justify-center rounded-full transition-colors',
+            active
+              ? 'text-emerald-600'
+              : 'text-slate-600 hover:text-emerald-600',
+          ].join(' ')}
+        >
+          <Icon size={20} strokeWidth={2} />
+        </div>
 
-      {/* Label dentro do header, logo abaixo do ícone */}
-      <span
-        className={[
-          'mt-1 select-none text-[11px] font-semibold leading-none transition-all duration-150',
-          showLabel ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-1',
-          active ? 'text-emerald-600' : 'text-slate-700',
-        ].join(' ')}
-      >
-        {label}
-      </span>
+        {/* Label aparece bem próximo no hover */}
+        <span
+          className={[
+            'absolute top-[35px] select-none text-[10px] font-medium leading-none transition-all duration-150 whitespace-nowrap',
+            showLabel ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-1 pointer-events-none',
+            active ? 'text-emerald-600' : 'text-slate-700',
+          ].join(' ')}
+        >
+          {label}
+        </span>
+      </div>
     </NavLink>
   );
 }

@@ -11,7 +11,27 @@ function fromRow(row) {
   return { ...row, images };
 }
 
-export async function listProperties({ search, city, country, minPrice, maxPrice, limit = 20, offset = 0, published = true }) {
+export async function listProperties({ 
+  search, 
+  city, 
+  country, 
+  minPrice, 
+  maxPrice, 
+  minArea,
+  maxArea,
+  types,
+  minBedrooms,
+  minBathrooms,
+  minParkingSpaces,
+  minSuites,
+  amenities,
+  condoAmenities,
+  condition,
+  sortBy = 'default',
+  limit = 20, 
+  offset = 0, 
+  published = true 
+}) {
   const where = {
     AND: [
       published !== undefined && published !== null ? { published: published === true || published === 'true' } : {},
@@ -23,15 +43,41 @@ export async function listProperties({ search, city, country, minPrice, maxPrice
             { country: { contains: String(search), mode: 'insensitive' } },
           ] }
         : {},
-      city ? { city: { equals: String(city), mode: 'insensitive' } } : {},
-      country ? { country: { equals: String(country), mode: 'insensitive' } } : {},
+      city ? { city: { contains: String(city), mode: 'insensitive' } } : {},
+      country ? { country: { contains: String(country), mode: 'insensitive' } } : {},
       minPrice != null ? { price: { gte: Number(minPrice) } } : {},
       maxPrice != null ? { price: { lte: Number(maxPrice) } } : {},
-    ],
+      minArea != null ? { area: { gte: Number(minArea) } } : {},
+      maxArea != null ? { area: { lte: Number(maxArea) } } : {},
+      types ? { type: { in: String(types).split(',').map(t => t.trim()) } } : {},
+      minBedrooms != null ? { beds: { gte: Number(minBedrooms) } } : {},
+      minBathrooms != null ? { baths: { gte: Number(minBathrooms) } } : {},
+    ].filter(Boolean),
   };
+
+  // Ordenação
+  let orderBy = { createdAt: 'desc' };
+  switch (sortBy) {
+    case 'price-asc':
+      orderBy = { price: 'asc' };
+      break;
+    case 'price-desc':
+      orderBy = { price: 'desc' };
+      break;
+    case 'area-asc':
+      orderBy = { area: 'asc' };
+      break;
+    case 'area-desc':
+      orderBy = { area: 'desc' };
+      break;
+    case 'newest':
+      orderBy = { createdAt: 'desc' };
+      break;
+  }
+
   const [total, rows] = await Promise.all([
     prisma.property.count({ where }),
-    prisma.property.findMany({ where, skip: Number(offset), take: Number(limit), orderBy: { createdAt: 'desc' } }),
+    prisma.property.findMany({ where, skip: Number(offset), take: Number(limit), orderBy }),
   ]);
   const items = rows.map(fromRow);
   return { total, items };
