@@ -237,3 +237,6 @@ git push --force
 - ✅ `node_modules` nunca será commitado
 
 **Seu repositório está seguro agora!** 🔒
+
+
+

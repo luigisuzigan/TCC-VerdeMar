@@ -56,58 +56,85 @@ export default function Header({ transparentOnTop = false }) {
     >
       <div
         className={[
-          'flex px-4 md:px-6 w-full items-center justify-between gap-6 transition-[height] duration-200',
+          'flex px-4 md:px-6 w-full items-center transition-[height] duration-200',
           hovered ? 'h-[92px]' : 'h-[68px]',
         ].join(' ')}
       >
-        {/* Logo */}
-        <Link
-          to="/"
-          className="flex items-center gap-2 pl-2 md:pl-3"
-          aria-label="Início"
-        >
-          <img
-            src="/Logo.png"
-            alt="Logo Verde Mar"
-            className="h-12 md:h-14 lg:h-16 w-auto object-contain"
-          />
-        </Link>
+        {/* Logo - largura fixa para manter centralização */}
+        <div className="flex items-center w-[200px] md:w-[240px]">
+          <Link
+            to="/"
+            className="flex items-center gap-2"
+            aria-label="Início"
+          >
+            <img
+              src="/Logo.png"
+              alt="Logo Verde Mar"
+              className="h-12 md:h-14 lg:h-16 w-auto object-contain"
+            />
+          </Link>
+        </div>
 
-        {/* Navegação */}
+        {/* Navegação - Centralizada */}
         <nav
-          className={[
-            'flex items-end gap-3 md:gap-4 text-sm font-medium',
-            isTransparent ? 'text-white' : 'text-slate-800',
-          ].join(' ')}
+          className="flex-1 flex justify-center"
           aria-label="Navegação principal"
         >
-          {nav.map((item) => (
-            <IconNavItem
-              key={item.to}
-              to={item.to}
-              label={item.label}
-              Icon={item.Icon}
-              active={location.pathname === item.to}
-              inverted={isTransparent}
-              showLabel={hovered}
-            />
-          ))}
+          <div
+            className={[
+              'flex items-end gap-2 md:gap-3 px-4 md:px-6 py-2 rounded-full transition-all duration-200',
+              isTransparent
+                ? 'bg-white/95 backdrop-blur shadow-lg'
+                : 'bg-white shadow-md ring-1 ring-slate-200',
+              hovered ? 'pb-1' : 'pb-2'
+            ].join(' ')}
+          >
+            {nav.map((item) => (
+              <IconNavItem
+                key={item.to}
+                to={item.to}
+                label={item.label}
+                Icon={item.Icon}
+                active={location.pathname === item.to}
+                inverted={false}
+                showLabel={hovered}
+              />
+            ))}
+          </div>
         </nav>
 
-        {/* Lado direito */}
-        <div className="flex items-center gap-3 pr-2 md:pr-3">
-          {!user && (
-            <Link
-              to="/login"
-              className={[
-                'hidden sm:inline-flex rounded-full px-4 py-2 text-sm font-semibold',
-                isTransparent ? 'bg-white/20 text-white ring-1 ring-white/40 hover:bg-white/30' : 'bg-emerald-600 text-white hover:bg-emerald-700'
-              ].join(' ')}
-            >
-              Entrar
-            </Link>
+        {/* Lado direito - largura fixa igual ao da logo para manter navegação centralizada */}
+        <div className="flex items-center justify-end w-[200px] md:w-[240px]">
+          {!user ? (
+            <div className="flex items-center gap-3">
+              {/* Botões quando NÃO está logado */}
+              <Link
+                to="/register"
+                className={[
+                  'rounded-full px-4 py-2 text-sm font-semibold transition-colors',
+                  isTransparent 
+                    ? 'bg-transparent text-white ring-1 ring-white/60 hover:bg-white/10' 
+                    : 'bg-transparent text-slate-700 ring-1 ring-slate-300 hover:bg-slate-50'
+                ].join(' ')}
+              >
+                Sign Up
+              </Link>
+              <Link
+                to="/login"
+                className={[
+                  'rounded-full px-4 py-2 text-sm font-semibold transition-colors',
+                  isTransparent 
+                    ? 'bg-white/20 text-white ring-1 ring-white/40 hover:bg-white/30' 
+                    : 'bg-emerald-600 text-white hover:bg-emerald-700'
+                ].join(' ')}
+              >
+                Login
+              </Link>
+            </div>
+          ) : (
+            /* Menu do usuário quando ESTÁ logado */
+            <UserMenu inverted={isTransparent} />
           )}
-          <UserMenu inverted={isTransparent} requireAuth />
         </div>
       </div>
       {/* ondinha removida */}
@@ -120,34 +147,28 @@ function IconNavItem({ to, label, Icon, active, inverted, showLabel }) {
     <NavLink
       to={to}
       end={to === '/'}
-      className="relative flex flex-col items-center px-1"
+      className="relative flex flex-col items-center px-2 md:px-3"
       aria-current={active ? 'page' : undefined}
       title={label}
     >
-      {/* Ícone com círculo. No ativo, círculo destacado. */}
+      {/* Ícone sem círculo individual */}
       <div
         className={[
-          'inline-flex h-11 w-11 items-center justify-center rounded-full transition-colors',
+          'inline-flex h-9 w-9 items-center justify-center rounded-full transition-colors',
           active
-            ? inverted
-              ? 'bg-white/18 text-white ring-2 ring-white/65'
-              : 'bg-slate-900/5 text-slate-900 ring-2 ring-emerald-400/80'
-            : inverted
-              ? 'text-white/80 hover:text-white hover:bg-white/12'
-              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100',
+            ? 'text-emerald-600 bg-emerald-50'
+            : 'text-slate-600 hover:text-emerald-600 hover:bg-slate-50',
         ].join(' ')}
       >
         <Icon size={20} strokeWidth={2} />
       </div>
 
-      {/* Label dentro do header, logo abaixo do ícone.
-         - Some quando não está em hover do header
-         - Nunca aparece sozinho no ativo (respeita showLabel) */}
+      {/* Label dentro do header, logo abaixo do ícone */}
       <span
         className={[
-          'mt-1 select-none text-[12px] font-semibold leading-none transition-all duration-150',
+          'mt-1 select-none text-[11px] font-semibold leading-none transition-all duration-150',
           showLabel ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-1',
-          inverted ? 'text-white/95' : 'text-slate-800',
+          active ? 'text-emerald-600' : 'text-slate-700',
         ].join(' ')}
       >
         {label}
