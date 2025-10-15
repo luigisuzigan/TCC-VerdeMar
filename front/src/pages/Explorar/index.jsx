@@ -1,11 +1,17 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { MapPin, DollarSign, Home, Maximize2, X, Star } from 'lucide-react';
 import { api } from '../../api/client.js';
 import { parseFiltersFromUrl, getFilterDescriptions, countActiveFilters, filtersToUrlParams } from '../../utils/filterHelpers.js';
-import MobileFilters from '../../components/Explorar/MobileFilters.jsx';
 import ActiveFilters from '../../components/Explorar/ActiveFilters.jsx';
 import Pagination from '../../components/Explorar/Pagination.jsx';
+import TopFiltersBar from '../../components/Explorar/TopFiltersBar.jsx';
+import StickyFilterButton from '../../components/Explorar/StickyFilterButton.jsx';
+import FiltersModal from '../../components/Explorar/FiltersModal.jsx';
+import LocationModal from '../../components/Search/Modals/LocationModal.jsx';
+import PriceModal from '../../components/Explorar/Modals/PriceModal.jsx';
+import PropertyTypeModal from '../../components/Explorar/Modals/PropertyTypeModal.jsx';
+import RoomsModal from '../../components/Explorar/Modals/RoomsModal.jsx';
 
 export default function Explorar() {
   const [searchParams] = useSearchParams();
@@ -16,13 +22,33 @@ export default function Explorar() {
   const [sortBy, setSortBy] = useState('default');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
+  const [showStickyButton, setShowStickyButton] = useState(false);
+  const [showFiltersModal, setShowFiltersModal] = useState(false);
+  const [showLocationModal, setShowLocationModal] = useState(false);
+  const [showPriceModal, setShowPriceModal] = useState(false);
+  const [showPropertyTypeModal, setShowPropertyTypeModal] = useState(false);
+  const [showRoomsModal, setShowRoomsModal] = useState(false);
   const itemsPerPage = 24;
+  const topFiltersRef = useRef(null);
 
   // Parse filters from URL on mount
   useEffect(() => {
     const parsed = parseFiltersFromUrl(searchParams);
     setFilters(parsed);
   }, [searchParams]);
+
+  // Detect scroll to show/hide sticky button
+  useEffect(() => {
+    const handleScroll = () => {
+      if (topFiltersRef.current) {
+        const rect = topFiltersRef.current.getBoundingClientRect();
+        setShowStickyButton(rect.bottom < 0);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Fetch properties when filters change
   useEffect(() => {
@@ -154,6 +180,63 @@ export default function Explorar() {
     navigate(`/explorar?${params.toString()}`, { replace: true });
   };
 
+  const applyFilters = (newFilters) => {
+    setFilters(newFilters);
+    setCurrentPage(1);
+    
+    const params = filtersToUrlParams(newFilters);
+    navigate(`/explorar?${params.toString()}`, { replace: true });
+  };
+
+  const handleFilterClick = (filterType) => {
+    // Open specific modal based on filter type
+    switch (filterType) {
+      case 'location':
+        setShowLocationModal(true);
+        break;
+      case 'price':
+        setShowPriceModal(true);
+        break;
+      case 'propertyType':
+        setShowPropertyTypeModal(true);
+        break;
+      case 'rooms':
+        setShowRoomsModal(true);
+        break;
+      case 'more':
+        setShowFiltersModal(true);
+        break;
+      default:
+        setShowFiltersModal(true);
+    }
+  };
+
+  const handleLocationApply = (locationText, properties) => {
+    updateFilter('location', locationText);
+    // TODO: If properties were filtered by map boundary, update filters accordingly
+  };
+
+  const handlePriceApply = (priceFilters) => {
+    const newFilters = { ...filters, ...priceFilters };
+    applyFilters(newFilters);
+  };
+
+  const handlePropertyTypeApply = (typeFilters) => {
+    const newFilters = { ...filters, ...typeFilters };
+    applyFilters(newFilters);
+  };
+
+  const handleRoomsApply = (roomFilters) => {
+    const newFilters = { ...filters, ...roomFilters };
+    applyFilters(newFilters);
+  };
+
+  const handleSearch = (searchText) => {
+    if (searchText) {
+      updateFilter('search', searchText);
+    }
+  };
+
   const removeFilter = (key, value) => {
     updateFilter(key, value);
   };
@@ -183,343 +266,143 @@ export default function Explorar() {
 
   return (
     <main className="mx-auto max-w-[1600px] px-4 py-8">
-      {/* Mobile Filters Button */}
-      <MobileFilters
+      {/* Sticky Filter Button - Shows when scrolled */}
+      {showStickyButton && (
+        <StickyFilterButton
+          onClick={() => setShowFiltersModal(true)}
+          filterCount={activeFiltersCount}
+        />
+      )}
+
+      {/* Top Filters Bar */}
+      <div ref={topFiltersRef} className="mb-6">
+        <TopFiltersBar
+          filters={filters}
+          onFilterClick={handleFilterClick}
+          onSearch={handleSearch}
+        />
+      </div>
+
+      {/* Active Filters Pills */}
+      <ActiveFilters
         filters={filters}
-        updateFilter={updateFilter}
-        clearFilter={clearFilter}
-        clearAllFilters={clearAllFilters}
-        activeFiltersCount={activeFiltersCount}
+        onRemove={removeFilter}
+        onClearAll={clearAllFilters}
       />
 
-      <div className="flex gap-8">
-        {/* Sidebar de Filtros */}
-        <aside className="hidden lg:block w-[280px] flex-shrink-0">
-          <div className="sticky top-24">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-bold text-slate-900">Custom Filter</h2>
-              {activeFiltersCount > 0 && (
-                <button
-                  onClick={clearAllFilters}
-                  className="text-sm text-blue-600 hover:text-blue-700 font-medium"
-                >
-                  Clear all
-                </button>
-              )}
-            </div>
-
-            {/* Filtros ativos */}
-            {filterDescriptions.length > 0 && (
-              <div className="mb-4 flex flex-wrap gap-2">
-                {filterDescriptions.map((desc, i) => (
-                  <span
-                    key={i}
-                    className="inline-flex items-center gap-1 px-3 py-1 bg-blue-50 text-blue-700 text-sm rounded-full"
-                  >
-                    {desc}
-                  </span>
-                ))}
-              </div>
-            )}
-
-            <div className="space-y-6">
-              {/* Location Filter */}
-              <FilterSection
-                title="Location"
-                icon={<MapPin className="w-4 h-4" />}
-                onClear={() => clearFilter('location')}
-                hasValue={!!filters.location}
-              >
-                <input
-                  type="text"
-                  placeholder="Buscar localização..."
-                  value={filters.location || ''}
-                  onChange={(e) => updateFilter('location', e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                />
-                <div className="mt-2 space-y-1">
-                  {['Jakarta, Indonesia', 'Semarang, Indonesia'].map((loc) => (
-                    <label key={loc} className="flex items-center gap-2 text-sm text-slate-700 cursor-pointer hover:bg-slate-50 p-2 rounded">
-                      <input
-                        type="checkbox"
-                        checked={filters.location === loc}
-                        onChange={(e) => updateFilter('location', e.target.checked ? loc : '')}
-                        className="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
-                      />
-                      {loc}
-                    </label>
-                  ))}
-                </div>
-              </FilterSection>
-
-              {/* Price Range Filter */}
-              <FilterSection
-                title="Price Range"
-                icon={<DollarSign className="w-4 h-4" />}
-                onClear={() => {
-                  clearFilter('priceMin');
-                  clearFilter('priceMax');
-                }}
-                hasValue={!!(filters.priceMin || filters.priceMax)}
-              >
-                <div className="space-y-2">
-                  <label className="flex items-center gap-2 text-sm cursor-pointer hover:bg-slate-50 p-2 rounded">
-                    <input
-                      type="radio"
-                      name="priceRange"
-                      checked={!filters.priceMin && filters.priceMax === 1000}
-                      onChange={() => {
-                        updateFilter('priceMin', '');
-                        updateFilter('priceMax', 1000);
-                      }}
-                      className="text-emerald-600 focus:ring-emerald-500"
-                    />
-                    Under $1.000
-                  </label>
-                  <label className="flex items-center gap-2 text-sm cursor-pointer hover:bg-slate-50 p-2 rounded">
-                    <input
-                      type="radio"
-                      name="priceRange"
-                      checked={filters.priceMin === 1000 && filters.priceMax === 15000}
-                      onChange={() => {
-                        updateFilter('priceMin', 1000);
-                        updateFilter('priceMax', 15000);
-                      }}
-                      className="text-emerald-600 focus:ring-emerald-500"
-                    />
-                    $1.000 - $15.000
-                  </label>
-                  <label className="flex items-center gap-2 text-sm cursor-pointer hover:bg-slate-50 p-2 rounded">
-                    <input
-                      type="radio"
-                      name="priceRange"
-                      checked={filters.priceMin === 15000 && !filters.priceMax}
-                      onChange={() => {
-                        updateFilter('priceMin', 15000);
-                        updateFilter('priceMax', '');
-                      }}
-                      className="text-emerald-600 focus:ring-emerald-500"
-                    />
-                    More Than $15.000
-                  </label>
-                  <label className="flex items-center gap-2 text-sm cursor-pointer hover:bg-slate-50 p-2 rounded">
-                    <input
-                      type="radio"
-                      name="priceRange"
-                      checked={!filters.priceMin && !filters.priceMax}
-                      onChange={() => {
-                        updateFilter('priceMin', '');
-                        updateFilter('priceMax', '');
-                      }}
-                      className="text-emerald-600 focus:ring-emerald-500"
-                    />
-                    Custom
-                  </label>
-                </div>
-                <div className="mt-3 flex items-center gap-2">
-                  <input
-                    type="number"
-                    placeholder="$10K"
-                    value={filters.priceMin || ''}
-                    onChange={(e) => updateFilter('priceMin', e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm"
-                  />
-                  <input
-                    type="number"
-                    placeholder="$50K"
-                    value={filters.priceMax || ''}
-                    onChange={(e) => updateFilter('priceMax', e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm"
-                  />
-                </div>
-              </FilterSection>
-
-              {/* Land Area Filter */}
-              <FilterSection
-                title="Land Area"
-                icon={<Maximize2 className="w-4 h-4" />}
-                onClear={() => {
-                  clearFilter('areaMin');
-                  clearFilter('areaMax');
-                }}
-                hasValue={!!(filters.areaMin || filters.areaMax)}
-              >
-                <div className="flex items-center gap-2">
-                  <input
-                    type="number"
-                    placeholder="Min"
-                    value={filters.areaMin || ''}
-                    onChange={(e) => updateFilter('areaMin', e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm"
-                  />
-                  <span className="text-slate-500 text-sm">sq ft</span>
-                  <input
-                    type="number"
-                    placeholder="Max"
-                    value={filters.areaMax || ''}
-                    onChange={(e) => updateFilter('areaMax', e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm"
-                  />
-                  <span className="text-slate-500 text-sm">sq ft</span>
-                </div>
-              </FilterSection>
-
-              {/* Type of Place Filter */}
-              <FilterSection
-                title="Type Of Place"
-                icon={<Home className="w-4 h-4" />}
-                onClear={() => clearFilter('propertyTypes')}
-                hasValue={!!(filters.propertyTypes?.length > 0)}
-              >
-                <div className="space-y-2">
-                  {[
-                    { id: 'casa', label: 'Single Family Home' },
-                    { id: 'apartamento', label: 'Condo/Townhouse' },
-                    { id: 'comercial', label: 'Apartment' },
-                    { id: 'terreno', label: 'Bungalow' },
-                  ].map((type) => (
-                    <label key={type.id} className="flex items-center gap-2 text-sm cursor-pointer hover:bg-slate-50 p-2 rounded">
-                      <input
-                        type="checkbox"
-                        checked={filters.propertyTypes?.includes(type.id) || false}
-                        onChange={(e) => {
-                          const current = filters.propertyTypes || [];
-                          const updated = e.target.checked
-                            ? [...current, type.id]
-                            : current.filter(t => t !== type.id);
-                          updateFilter('propertyTypes', updated);
-                        }}
-                        className="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
-                      />
-                      {type.label}
-                    </label>
-                  ))}
-                </div>
-              </FilterSection>
-
-              {/* Amenities Filter */}
-              <FilterSection
-                title="Amenities"
-                onClear={() => clearFilter('amenities')}
-                hasValue={!!(filters.amenities?.length > 0)}
-              >
-                <div className="space-y-2">
-                  {[
-                    'Parking',
-                    'Pet Allowed',
-                    'Garden',
-                    'Gym & Fitness',
-                    'Swimming Pool',
-                    'Home Theater',
-                  ].map((amenity) => (
-                    <label key={amenity} className="flex items-center gap-2 text-sm cursor-pointer hover:bg-slate-50 p-2 rounded">
-                      <input
-                        type="checkbox"
-                        checked={filters.amenities?.includes(amenity) || false}
-                        onChange={(e) => {
-                          const current = filters.amenities || [];
-                          const updated = e.target.checked
-                            ? [...current, amenity]
-                            : current.filter(a => a !== amenity);
-                          updateFilter('amenities', updated);
-                        }}
-                        className="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
-                      />
-                      {amenity}
-                    </label>
-                  ))}
-                </div>
-              </FilterSection>
-            </div>
-          </div>
-        </aside>
-
-        {/* Main Content */}
-        <div className="flex-1 min-w-0">
-          {/* Header */}
-          <div className="mb-6 flex items-end justify-between gap-4">
-            <div>
-              <h1 className="text-2xl font-bold text-slate-900 mb-2">
-                Explorar Imóveis
-              </h1>
-              <p className="text-slate-600">
-                {loading ? 'Carregando...' : `${items?.length || 0} imóveis encontrados`}
-              </p>
-            </div>
-
-            {/* Sort Dropdown */}
-            <div className="hidden md:flex items-center gap-2">
-              <label className="text-sm font-medium text-slate-600">
-                Ordenar por:
-              </label>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="px-4 py-2 border border-slate-300 rounded-lg text-sm font-medium text-slate-700 bg-white hover:border-slate-400 focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-colors"
-              >
-                <option value="default">Padrão</option>
-                <option value="price-asc">Menor preço</option>
-                <option value="price-desc">Maior preço</option>
-                <option value="area-desc">Maior área</option>
-                <option value="area-asc">Menor área</option>
-                <option value="newest">Mais recentes</option>
-              </select>
-            </div>
+      {/* Main Content */}
+      <div className="mt-6">
+        {/* Header */}
+        <div className="mb-6 flex items-end justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900 mb-2">
+              Explorar Imóveis
+            </h1>
+            <p className="text-slate-600">
+              {loading ? 'Carregando...' : `${items?.length || 0} imóveis encontrados`}
+            </p>
           </div>
 
-          {/* Active Filters Pills */}
-          <ActiveFilters
-            filters={filters}
-            onRemove={removeFilter}
-            onClearAll={clearAllFilters}
-          />
-
-          {/* Property Grid - 3 por linha */}
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mt-6">
-            {loading
-              ? Array.from({ length: 6 }).map((_, i) => <PropertyCardSkeleton key={i} />)
-              : sortedItems.map((property) => <PropertyCard key={property.id} property={property} />)}
+          {/* Sort Dropdown */}
+          <div className="flex items-center gap-2">
+            <label className="text-sm font-medium text-slate-600">
+              Ordenar por:
+            </label>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="px-4 py-2 border border-slate-300 rounded-lg text-sm font-medium text-slate-700 bg-white hover:border-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+            >
+              <option value="default">Padrão</option>
+              <option value="price-asc">Menor preço</option>
+              <option value="price-desc">Maior preço</option>
+              <option value="area-desc">Maior área</option>
+              <option value="area-asc">Menor área</option>
+              <option value="newest">Mais recentes</option>
+            </select>
           </div>
-
-          {/* Pagination */}
-          {!loading && totalItems > 0 && (
-            <div className="mt-8">
-              <Pagination
-                currentPage={currentPage}
-                totalPages={Math.ceil(totalItems / itemsPerPage)}
-                onPageChange={handlePageChange}
-                totalItems={totalItems}
-                itemsPerPage={itemsPerPage}
-              />
-            </div>
-          )}
-
-          {/* Empty State */}
-          {!loading && items.length === 0 && (
-            <div className="text-center py-12">
-              <Home className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-slate-900 mb-2">
-                Nenhum imóvel encontrado
-              </h3>
-              <p className="text-slate-600 mb-4">
-                Tente ajustar seus filtros para ver mais resultados
-              </p>
-              <button
-                onClick={clearAllFilters}
-                className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700"
-              >
-                Limpar filtros
-              </button>
-            </div>
-          )}
         </div>
+
+        {/* Property Grid - 3 por linha */}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mt-6">
+          {loading
+            ? Array.from({ length: 6 }).map((_, i) => <PropertyCardSkeleton key={i} />)
+            : sortedItems.map((property) => <PropertyCard key={property.id} property={property} />)}
+        </div>
+
+        {/* Pagination */}
+        {!loading && totalItems > 0 && (
+          <div className="mt-8">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={Math.ceil(totalItems / itemsPerPage)}
+              onPageChange={handlePageChange}
+              totalItems={totalItems}
+              itemsPerPage={itemsPerPage}
+            />
+          </div>
+        )}
+
+        {/* Empty State */}
+        {!loading && items.length === 0 && (
+          <div className="text-center py-12">
+            <Home className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-slate-900 mb-2">
+              Nenhum imóvel encontrado
+            </h3>
+            <p className="text-slate-600 mb-4">
+              Tente ajustar seus filtros para ver mais resultados
+            </p>
+            <button
+              onClick={clearAllFilters}
+              className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700"
+            >
+              Limpar filtros
+            </button>
+          </div>
+        )}
       </div>
+
+      {/* Modals */}
+      <LocationModal
+        isOpen={showLocationModal}
+        onClose={() => setShowLocationModal(false)}
+        onApply={handleLocationApply}
+      />
+
+      <PriceModal
+        isOpen={showPriceModal}
+        onClose={() => setShowPriceModal(false)}
+        filters={filters}
+        onApply={handlePriceApply}
+      />
+
+      <PropertyTypeModal
+        isOpen={showPropertyTypeModal}
+        onClose={() => setShowPropertyTypeModal(false)}
+        filters={filters}
+        onApply={handlePropertyTypeApply}
+      />
+
+      <RoomsModal
+        isOpen={showRoomsModal}
+        onClose={() => setShowRoomsModal(false)}
+        filters={filters}
+        onApply={handleRoomsApply}
+      />
+
+      {/* Filters Modal */}
+      <FiltersModal
+        isOpen={showFiltersModal}
+        onClose={() => setShowFiltersModal(false)}
+        filters={filters}
+        onApplyFilters={applyFilters}
+      />
     </main>
   );
 }
 
-// Filter Section Component
+// Filter Section Component (não mais usado mas mantido para compatibilidade)
 function FilterSection({ title, icon, children, onClear, hasValue }) {
   return (
     <div className="border-b border-slate-200 pb-6">

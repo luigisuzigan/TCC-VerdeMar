@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import MainLayout from '../layouts/MainLayout';
+import AdminLayout from '../layouts/AdminLayout';
 import Home from '../pages/Home';
 import Explorar from '../pages/Explorar';
 import Blog from '../pages/Blog';
@@ -14,6 +15,7 @@ import PropertyDetails from '../pages/PropertyDetails';
 import SellerDashboard from '../pages/Seller/Dashboard.jsx';
 import SellerPropertiesList from '../pages/Seller/Properties/List.jsx';
 import SellerPropertyForm from '../pages/Seller/Properties/Form.jsx';
+import AdminDashboard from '../pages/Admin/Dashboard.jsx';
 
 // Guards
 function RequireAuth({ children }) {
@@ -58,12 +60,14 @@ export default function AppRoutes() {
           <Route path="/seller/properties" element={<RequireSeller><SellerPropertiesList /></RequireSeller>} />
           <Route path="/seller/properties/new" element={<RequireSeller><SellerPropertyForm /></RequireSeller>} />
           <Route path="/seller/properties/:id" element={<RequireSeller><SellerPropertyForm /></RequireSeller>} />
+        </Route>
 
-          {/* Admin */}
-          <Route path="/admin" element={<RequireAdmin><div className="p-6">Selecione uma seção do Admin.</div></RequireAdmin>} />
-          <Route path="/admin/properties" element={<RequireAdmin><AdminPropertiesList /></RequireAdmin>} />
-          <Route path="/admin/properties/new" element={<RequireAdmin><AdminPropertyForm /></RequireAdmin>} />
-          <Route path="/admin/properties/:id" element={<RequireAdmin><AdminPropertyForm /></RequireAdmin>} />
+        {/* Admin Routes - Separate Layout */}
+        <Route element={<RequireAdmin><AdminLayout /></RequireAdmin>}>
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/properties" element={<AdminPropertiesList />} />
+          <Route path="/admin/properties/new" element={<AdminPropertyForm />} />
+          <Route path="/admin/properties/:id" element={<AdminPropertyForm />} />
         </Route>
       </Routes>
     </Router>

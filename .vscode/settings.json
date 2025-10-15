@@ -1,0 +1,8 @@
+{
+  // Terminal padrão: Command Prompt (cmd.exe)
+  "terminal.integrated.defaultProfile.windows": "Command Prompt",
+  
+  // Configurações adicionais do terminal
+  "terminal.integrated.fontSize": 14,
+  "terminal.integrated.fontFamily": "Consolas, 'Courier New', monospace"
+}

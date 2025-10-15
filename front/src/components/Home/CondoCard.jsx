@@ -1,7 +1,9 @@
 import { MapPin, Star } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export default function CondoCard({ condo }) {
   const {
+    id, // ID do imóvel para o link
     name,
     city,
     state,
@@ -16,7 +18,10 @@ export default function CondoCard({ condo }) {
   const priceFmt = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(priceMin);
 
   return (
-    <article className="group relative h-[280px] w-[240px] overflow-hidden rounded-2xl ring-1 ring-slate-200 bg-white shadow-sm">
+    <Link 
+      to={`/property/${id}`}
+      className="group relative h-[280px] w-[240px] overflow-hidden rounded-2xl ring-1 ring-slate-200 bg-white shadow-sm block cursor-pointer"
+    >
       {/* imagem */}
       <div className="absolute inset-0">
         <img
@@ -54,6 +59,6 @@ export default function CondoCard({ condo }) {
           <span>{city}{state ? `, ${state}` : ''}{region ? ` • ${region}` : ''}</span>
         </div>
       </div>
-    </article>
+    </Link>
   );
 }

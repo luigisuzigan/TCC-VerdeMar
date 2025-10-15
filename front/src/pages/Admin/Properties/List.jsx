@@ -1,123 +1,389 @@
-import { useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { api } from '../../../api/client.js';
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { 
+  Plus, 
+  Search, 
+  Edit2, 
+  Trash2, 
+  Eye, 
+  EyeOff,
+  MapPin,
+  Home,
+  Filter,
+  CheckSquare,
+  Square,
+  X
+} from 'lucide-react';
+import { api } from '../../../api/client';
 
 export default function AdminPropertiesList() {
-  const [items, setItems] = useState([]);
-  const [total, setTotal] = useState(0);
-  const [q, setQ] = useState('');
+  const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [limit, setLimit] = useState(10);
-  const [offset, setOffset] = useState(0);
-  const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filter, setFilter] = useState('all'); // all, published, unpublished
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const limit = 1000; // Mostrar todos
+  const [selectedIds, setSelectedIds] = useState(new Set());
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  const page = useMemo(() => Math.floor(offset / limit) + 1, [offset, limit]);
-  const pages = useMemo(() => Math.max(1, Math.ceil(total / limit)), [total, limit]);
+  useEffect(() => {
+    fetchProperties();
+  }, [searchTerm, filter, page]);
 
-  async function load() {
-    setLoading(true); setError('');
+  const fetchProperties = async () => {
+    setLoading(true);
     try {
-      const { data } = await api.get('/properties', { params: { search: q, limit, offset, published: undefined } });
-      setItems(data.items || []);
+      const params = {
+        search: searchTerm || undefined,
+        published: filter === 'published' ? true : filter === 'unpublished' ? false : undefined,
+        limit,
+        offset: (page - 1) * limit
+      };
+      
+      const { data } = await api.get('/properties', { params });
+      setProperties(data.properties || []);
       setTotal(data.total || 0);
-    } catch (e) {
-      setError(e?.response?.data?.error || 'Falha ao carregar imóveis');
-    } finally { setLoading(false); }
-  }
+    } catch (error) {
+      console.error('Erro ao buscar propriedades:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  useEffect(() => { load(); /* eslint-disable-next-line */ }, [limit, offset]);
-
-  function search(e) { e.preventDefault(); setOffset(0); load(); }
-
-  async function togglePublish(id, published) {
+  const handleTogglePublish = async (id, currentStatus) => {
     try {
-      await api.patch(`/properties/${id}/publish`, { published: !published });
-      load();
-    } catch (e) { alert('Falha ao publicar/despublicar'); }
-  }
+      await api.patch(`/properties/${id}`, { published: !currentStatus });
+      fetchProperties();
+    } catch (error) {
+      console.error('Erro ao atualizar status:', error);
+      alert('Erro ao atualizar status da propriedade');
+    }
+  };
 
-  async function remove(id) {
-    if (!confirm('Deseja excluir este imóvel?')) return;
-    try { await api.delete(`/properties/${id}`); load(); } catch { alert('Falha ao excluir'); }
-  }
+  const handleDelete = async (id) => {
+    if (!window.confirm('Tem certeza que deseja excluir esta propriedade?')) return;
+    
+    try {
+      await api.delete(`/properties/${id}`);
+      setSelectedIds(new Set()); // Limpar seleção
+      fetchProperties();
+    } catch (error) {
+      console.error('Erro ao deletar propriedade:', error);
+      alert('Erro ao deletar propriedade');
+    }
+  };
+
+  const handleDeleteSelected = async () => {
+    if (selectedIds.size === 0) return;
+    
+    setShowDeleteConfirm(false);
+    
+    try {
+      // Deletar todos os selecionados
+      await Promise.all(
+        Array.from(selectedIds).map(id => api.delete(`/properties/${id}`))
+      );
+      setSelectedIds(new Set());
+      fetchProperties();
+    } catch (error) {
+      console.error('Erro ao deletar propriedades:', error);
+      alert('Erro ao deletar algumas propriedades');
+    }
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === properties.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(properties.map(p => p.id)));
+    }
+  };
+
+  const toggleSelect = (id) => {
+    const newSelected = new Set(selectedIds);
+    if (newSelected.has(id)) {
+      newSelected.delete(id);
+    } else {
+      newSelected.add(id);
+    }
+    setSelectedIds(newSelected);
+  };
+
+  const isAllSelected = properties.length > 0 && selectedIds.size === properties.length;
+
+  const formatCurrency = (value) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+      minimumFractionDigits: 0
+    }).format(value);
+  };
+
+  const totalPages = Math.ceil(total / limit);
 
   return (
-    <main className="mx-auto w-[min(96vw,1100px)] py-8">
-      <div className="mb-4 flex items-center justify-between gap-3">
-        <h1 className="text-2xl font-bold">Imóveis</h1>
-        <Link to="/admin/properties/new" className="rounded-md bg-emerald-600 px-4 py-2 text-white">Novo</Link>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-slate-900">Imóveis</h1>
+          <p className="text-slate-600 mt-1">{total} propriedades cadastradas</p>
+        </div>
+        <Link
+          to="/admin/properties/new"
+          className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-emerald-600 text-white rounded-xl font-medium hover:bg-emerald-700 transition-colors"
+        >
+          <Plus size={20} />
+          Novo Imóvel
+        </Link>
       </div>
 
-      <form onSubmit={search} className="mb-4 flex items-center gap-2">
-        <input value={q} onChange={(e)=>setQ(e.target.value)} placeholder="Buscar por título, cidade, país"
-               className="w-full rounded-md border px-3 py-2" />
-        <button className="rounded-md border px-4 py-2">Buscar</button>
-      </form>
+      {/* Selection Bar */}
+      {selectedIds.size > 0 && (
+        <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <CheckSquare className="text-emerald-600" size={20} />
+            <span className="font-medium text-slate-900">
+              {selectedIds.size} {selectedIds.size === 1 ? 'imóvel selecionado' : 'imóveis selecionados'}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowDeleteConfirm(true)}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors"
+            >
+              <Trash2 size={18} />
+              Excluir Selecionados
+            </button>
+            <button
+              onClick={() => setSelectedIds(new Set())}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-slate-200 text-slate-700 rounded-lg font-medium hover:bg-slate-300 transition-colors"
+            >
+              <X size={18} />
+              Limpar
+            </button>
+          </div>
+        </div>
+      )}
 
-      {error && <div className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</div>}
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white rounded-2xl p-6 max-w-md w-full mx-4">
+            <h3 className="text-xl font-bold text-slate-900 mb-2">Confirmar Exclusão</h3>
+            <p className="text-slate-600 mb-6">
+              Tem certeza que deseja excluir {selectedIds.size} {selectedIds.size === 1 ? 'imóvel' : 'imóveis'}? 
+              Esta ação não pode ser desfeita.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={handleDeleteSelected}
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors"
+              >
+                Sim, Excluir
+              </button>
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="flex-1 px-4 py-2 bg-slate-200 text-slate-700 rounded-lg font-medium hover:bg-slate-300 transition-colors"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
-      <div className="overflow-auto rounded-lg ring-1 ring-slate-200">
-        <table className="min-w-full text-sm">
-          <thead className="bg-slate-50">
-            <tr>
-              <Th>Título</Th>
-              <Th>Cidade</Th>
-              <Th className="text-right">Preço</Th>
-              <Th className="text-center">Publicado</Th>
-              <Th>Ações</Th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr><Td colSpan={5}>Carregando...</Td></tr>
-            ) : items.length === 0 ? (
-              <tr><Td colSpan={5}>Nenhum imóvel encontrado</Td></tr>
-            ) : (
-              items.map((it) => (
-                <tr key={it.id} className="border-t">
-                  <Td className="font-medium">{it.title}</Td>
-                  <Td>{it.city}</Td>
-                  <Td className="text-right">R$ {Number(it.price).toLocaleString('pt-BR')}</Td>
-                  <Td className="text-center">
-                    <span className={["inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold ring-1",
-                      it.published ? 'bg-emerald-50 text-emerald-700 ring-emerald-200' : 'bg-slate-100 text-slate-700 ring-slate-200'].join(' ')}>
-                      {it.published ? 'Publicado' : 'Rascunho'}
-                    </span>
-                  </Td>
-                  <Td>
-                    <div className="flex items-center gap-2">
-                      <button onClick={() => togglePublish(it.id, it.published)} className="rounded-md border px-3 py-1">
-                        {it.published ? 'Despublicar' : 'Publicar'}
-                      </button>
-                      <Link to={`/admin/properties/${it.id}`} className="rounded-md border px-3 py-1">Editar</Link>
-                      <button onClick={() => remove(it.id)} className="rounded-md border px-3 py-1 text-rose-700">Excluir</button>
-                    </div>
-                  </Td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+      {/* Filters */}
+      <div className="bg-white rounded-2xl p-6 border border-slate-200">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Select All Checkbox */}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={toggleSelectAll}
+              className="flex items-center gap-2 px-4 py-3 border border-slate-300 rounded-xl hover:bg-slate-50 transition-colors"
+            >
+              {isAllSelected ? (
+                <CheckSquare className="text-emerald-600" size={20} />
+              ) : (
+                <Square className="text-slate-400" size={20} />
+              )}
+              <span className="font-medium text-slate-700">
+                {isAllSelected ? 'Desmarcar Todos' : 'Selecionar Todos'}
+              </span>
+            </button>
+          </div>
 
-      <div className="mt-4 flex items-center justify-between">
-        <div className="text-sm text-slate-600">{total} resultados</div>
-        <div className="flex items-center gap-2">
-          <button disabled={page<=1} onClick={()=>setOffset(Math.max(0, offset - limit))} className="rounded-md border px-3 py-1 disabled:opacity-50">Anterior</button>
-          <span className="text-sm">Página {page} de {pages}</span>
-          <button disabled={page>=pages} onClick={()=>setOffset(offset + limit)} className="rounded-md border px-3 py-1 disabled:opacity-50">Próxima</button>
-          <select value={limit} onChange={(e)=>{setOffset(0); setLimit(Number(e.target.value));}} className="rounded-md border px-2 py-1 text-sm">
-            <option value={10}>10</option>
-            <option value={20}>20</option>
-            <option value={50}>50</option>
-          </select>
+          {/* Search */}
+          <div className="relative">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+            <input
+              type="text"
+              placeholder="Buscar por título ou cidade..."
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setPage(1);
+              }}
+              className="w-full pl-12 pr-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+            />
+          </div>
+
+          {/* Filter by Status */}
+          <div className="relative">
+            <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+            <select
+              value={filter}
+              onChange={(e) => {
+                setFilter(e.target.value);
+                setPage(1);
+              }}
+              className="w-full pl-12 pr-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent appearance-none bg-white"
+            >
+              <option value="all">Todos os imóveis</option>
+              <option value="published">Publicados</option>
+              <option value="unpublished">Não publicados</option>
+            </select>
+          </div>
         </div>
       </div>
-    </main>
+
+      {/* Properties Grid */}
+      {loading ? (
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+        </div>
+      ) : properties.length === 0 ? (
+        <div className="bg-white rounded-2xl p-12 border border-slate-200 text-center">
+          <Home className="mx-auto text-slate-300 mb-4" size={48} />
+          <h3 className="text-lg font-medium text-slate-900 mb-2">Nenhum imóvel encontrado</h3>
+          <p className="text-slate-600 mb-6">Comece adicionando seu primeiro imóvel</p>
+          <Link
+            to="/admin/properties/new"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-emerald-600 text-white rounded-xl font-medium hover:bg-emerald-700 transition-colors"
+          >
+            <Plus size={20} />
+            Adicionar Imóvel
+          </Link>
+        </div>
+      ) : (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {properties.map((property) => {
+              const isSelected = selectedIds.has(property.id);
+              
+              return (
+                <div
+                  key={property.id}
+                  className={`bg-white rounded-2xl overflow-hidden border-2 transition-all ${
+                    isSelected 
+                      ? 'border-emerald-500 shadow-lg' 
+                      : 'border-slate-200 hover:shadow-lg'
+                  }`}
+                >
+                  {/* Image with Checkbox Overlay */}
+                  <div className="relative h-48 bg-slate-200">
+                    {property.images && property.images.length > 0 ? (
+                      <img
+                        src={property.images[0]}
+                        alt={property.title}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Home className="text-slate-400" size={48} />
+                      </div>
+                    )}
+                    
+                    {/* Checkbox */}
+                    <div className="absolute top-3 left-3">
+                      <button
+                        onClick={() => toggleSelect(property.id)}
+                        className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${
+                          isSelected
+                            ? 'bg-emerald-600 text-white'
+                            : 'bg-white/90 text-slate-600 hover:bg-white'
+                        }`}
+                      >
+                        {isSelected ? (
+                          <CheckSquare size={20} />
+                        ) : (
+                          <Square size={20} />
+                        )}
+                      </button>
+                    </div>
+
+                    {/* Status Badge */}
+                    <div className="absolute top-3 right-3">
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-medium ${
+                          property.published
+                            ? 'bg-emerald-100 text-emerald-700'
+                            : 'bg-slate-100 text-slate-700'
+                        }`}
+                      >
+                        {property.published ? 'Publicado' : 'Não publicado'}
+                      </span>
+                    </div>
+                  </div>
+
+                {/* Content */}
+                <div className="p-5">
+                  <h3 className="text-lg font-bold text-slate-900 mb-2 line-clamp-1">
+                    {property.title}
+                  </h3>
+                  
+                  <div className="flex items-center gap-2 text-slate-600 text-sm mb-3">
+                    <MapPin size={16} />
+                    <span className="line-clamp-1">{property.city}, {property.state}</span>
+                  </div>
+                  
+                  <p className="text-2xl font-bold text-emerald-600 mb-4">
+                    {formatCurrency(property.price)}
+                  </p>
+
+                  {/* Actions */}
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handleTogglePublish(property.id, property.published)}
+                      className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
+                        property.published
+                          ? 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                          : 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
+                      }`}
+                      title={property.published ? 'Despublicar' : 'Publicar'}
+                    >
+                      {property.published ? <EyeOff size={16} /> : <Eye size={16} />}
+                      <span className="hidden sm:inline">
+                        {property.published ? 'Ocultar' : 'Publicar'}
+                      </span>
+                    </button>
+                    
+                    <Link
+                      to={`/admin/properties/${property.id}`}
+                      className="flex items-center justify-center px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
+                      title="Editar"
+                    >
+                      <Edit2 size={16} />
+                    </Link>
+                    
+                    <button
+                      onClick={() => handleDelete(property.id)}
+                      className="flex items-center justify-center px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors"
+                      title="Excluir"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+            })}
+          </div>
+
+          {/* Pagination - Removida pois mostramos todos */}
+        </>
+      )}
+    </div>
   );
 }
-
-function Th({ children, className = '' }) { return <th className={["px-3 py-2 text-left font-semibold", className].join(' ')}>{children}</th>; }
-function Td({ children, className = '', colSpan }) { return <td className={["px-3 py-2", className].join(' ')} colSpan={colSpan}>{children}</td>; }
-// End of file

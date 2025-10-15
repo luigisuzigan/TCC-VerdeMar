@@ -107,7 +107,10 @@ export default function TravelChoice() {
 
 function TravelCard({ item }) {
   return (
-    <article className="group relative overflow-hidden rounded-[18px] bg-white shadow-sm ring-1 ring-slate-200">
+    <Link 
+      to={`/property/${item.id}`}
+      className="group relative overflow-hidden rounded-[18px] bg-white shadow-sm ring-1 ring-slate-200 block cursor-pointer"
+    >
       <div className="relative aspect-[3/4] w-full">
         <img
           src={item.img}
@@ -131,6 +134,6 @@ function TravelCard({ item }) {
           </h3>
         </div>
       </div>
-    </article>
+    </Link>
   );
 }
