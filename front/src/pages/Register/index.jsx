@@ -80,18 +80,6 @@ export default function Register() {
               />
             </div>
 
-            <div className="space-y-1">
-              <label htmlFor="role" className="text-sm text-gray-700">Tipo de conta</label>
-              <select
-                id="role"
-                value={role}
-                onChange={(e) => setRole(e.target.value)}
-                className="w-full rounded-md border border-gray-300 bg-gray-100 px-3 py-2 text-gray-900 outline-none focus:border-blue-500 focus:bg-white"
-              >
-                <option value="USER">Usuário</option>
-                <option value="SELLER">Vendedor</option>
-              </select>
-            </div>
 
             <div className="space-y-1">
               <label htmlFor="password" className="text-sm text-gray-700">Senha</label>
