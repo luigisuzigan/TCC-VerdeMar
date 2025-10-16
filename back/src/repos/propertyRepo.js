@@ -37,14 +37,14 @@ export async function listProperties({
       published !== undefined && published !== null ? { published: published === true || published === 'true' } : {},
       search
         ? { OR: [
-            { title: { contains: String(search), mode: 'insensitive' } },
-            { description: { contains: String(search), mode: 'insensitive' } },
-            { city: { contains: String(search), mode: 'insensitive' } },
-            { country: { contains: String(search), mode: 'insensitive' } },
+            { title: { contains: String(search) } },
+            { description: { contains: String(search) } },
+            { city: { contains: String(search) } },
+            { country: { contains: String(search) } },
           ] }
         : {},
-      city ? { city: { contains: String(city), mode: 'insensitive' } } : {},
-      country ? { country: { contains: String(country), mode: 'insensitive' } } : {},
+      city ? { city: { contains: String(city) } } : {},
+      country ? { country: { contains: String(country) } } : {},
       minPrice != null ? { price: { gte: Number(minPrice) } } : {},
       maxPrice != null ? { price: { lte: Number(maxPrice) } } : {},
       minArea != null ? { area: { gte: Number(minArea) } } : {},

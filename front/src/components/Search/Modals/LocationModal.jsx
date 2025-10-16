@@ -5,17 +5,7 @@ import { Autocomplete, useLoadScript } from '@react-google-maps/api';
 import InteractiveMap from '../../Explorar/InteractiveMap';
 import { api } from '../../../api/client';
 
-// Localizações populares de exemplo
-const POPULAR_LOCATIONS = [
-  { name: 'Florianópolis, SC', lat: -27.5954, lng: -48.5480 },
-  { name: 'Balneário Camboriú, SC', lat: -26.9979, lng: -48.6357 },
-  { name: 'Itapema, SC', lat: -27.0905, lng: -48.6114 },
-  { name: 'Bombinhas, SC', lat: -27.1396, lng: -48.5123 },
-  { name: 'Porto Belo, SC', lat: -27.1583, lng: -48.5553 },
-  { name: 'Praia Central - Florianópolis', lat: -27.5969, lng: -48.5495 },
-];
-
-const DEFAULT_CENTER = { lat: -27.5954, lng: -48.5480 }; // Florianópolis
+const DEFAULT_CENTER = { lat: -27.5954, lng: -48.5480 }; // Centro padrão
 
 const libraries = ['places', 'drawing', 'geometry'];
 
@@ -47,11 +37,24 @@ export default function LocationModal({ isOpen, onClose, location, onApply }) {
           params: {
             published: true,
             limit: 100,
-            // Você pode adicionar filtros de lat/lng aqui
           }
         });
         
-        const properties = data.properties || data.items || [];
+        // Tentar diferentes estruturas de resposta
+        let properties = [];
+        if (Array.isArray(data)) {
+          properties = data;
+        } else if (data.items && Array.isArray(data.items)) {
+          properties = data.items;
+        } else if (data.properties && Array.isArray(data.properties)) {
+          properties = data.properties;
+        } else if (data.data && Array.isArray(data.data)) {
+          properties = data.data;
+        }
+        
+        console.log('Propriedades carregadas no mapa:', properties.length);
+        console.log('Primeira propriedade:', properties[0]);
+        console.log('Propriedades com lat/lng:', properties.filter(p => p.latitude && p.longitude).length);
         setNearbyProperties(properties);
         setFilteredProperties(properties);
       } catch (error) {
@@ -168,10 +171,9 @@ export default function LocationModal({ isOpen, onClose, location, onApply }) {
 
   const handleClear = () => {
     setSearchText('');
-  };
-
-  const selectPopular = (loc) => {
-    handleLocationSelect(loc.name, loc.lat, loc.lng);
+    setDrawnBoundary(null);
+    setFilteredProperties(nearbyProperties);
+    setMapCenter(DEFAULT_CENTER);
   };
   
   // Se não tiver API Key
@@ -214,21 +216,6 @@ export default function LocationModal({ isOpen, onClose, location, onApply }) {
                     <p className="font-medium">Configure a API Key do Google Maps</p>
                     <p className="text-sm">Adicione VITE_GOOGLE_MAPS_API_KEY no arquivo .env</p>
                   </div>
-                </div>
-              </div>
-
-              <div className="mb-6">
-                <h3 className="text-sm font-semibold text-slate-700 mb-3">Localizações Populares</h3>
-                <div className="grid grid-cols-2 gap-2">
-                  {POPULAR_LOCATIONS.map((loc) => (
-                    <button
-                      key={loc.name}
-                      onClick={() => selectPopular(loc)}
-                      className="px-3 py-2 text-sm text-slate-700 bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 rounded-lg transition-colors text-left"
-                    >
-                      {loc.name}
-                    </button>
-                  ))}
                 </div>
               </div>
             </div>
@@ -293,8 +280,8 @@ export default function LocationModal({ isOpen, onClose, location, onApply }) {
 
       {/* Container centralizado */}
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <Dialog.Panel className={`mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden transition-all duration-300 ${
-          isFullscreen ? 'w-full h-full max-w-none' : 'max-w-4xl w-full'
+        <Dialog.Panel className={`mx-auto bg-white rounded-2xl shadow-2xl overflow-y-auto transition-all duration-300 flex flex-col ${
+          isFullscreen ? 'w-full h-full max-w-none' : 'max-w-4xl w-full max-h-[90vh]'
         }`}>
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b border-slate-200">
@@ -319,22 +306,19 @@ export default function LocationModal({ isOpen, onClose, location, onApply }) {
             </div>
           </div>
 
-          {/* Content - Grid com 2 colunas ou fullscreen */}
-          <div className={`grid ${isFullscreen ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2'} ${
-            isFullscreen ? 'h-[calc(100vh-180px)]' : 'max-h-[420px]'
-          }`}>
-            {/* Coluna Esquerda - Pesquisa e Localizações */}
-            {!isFullscreen && (
-              <div className="p-6 overflow-y-auto border-r border-slate-200">
-                {/* Barra de busca com Autocomplete */}
-                <div className="relative mb-6">
-                  <MapPin
-                    size={20}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 z-10"
-                  />
-                  <Autocomplete
-                    onLoad={onAutocompleteLoad}
-                    onPlaceChanged={onPlaceChanged}
+          {/* Content - Layout VERTICAL: busca em cima, mapa embaixo */}
+          <div className="flex flex-col flex-1 min-h-0">
+            {/* Seção de Busca */}
+            <div className="p-6 border-b border-slate-200 flex-shrink-0">
+              {/* Barra de busca com Autocomplete */}
+              <div className="relative">
+                <MapPin
+                  size={20}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 z-10"
+                />
+                <Autocomplete
+                  onLoad={onAutocompleteLoad}
+                  onPlaceChanged={onPlaceChanged}
                     options={{
                       componentRestrictions: { country: 'br' },
                       types: ['(cities)']
@@ -357,108 +341,37 @@ export default function LocationModal({ isOpen, onClose, location, onApply }) {
                     </button>
                   )}
                 </div>
-
-                {/* Estatísticas de Filtro */}
-                {drawnBoundary && (
-                  <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
-                    <p className="text-sm font-medium text-emerald-900 mb-1">
-                      Área Desenhada
-                    </p>
-                    <p className="text-emerald-700 font-semibold text-lg">
-                      {filteredProperties.length} {filteredProperties.length === 1 ? 'imóvel encontrado' : 'imóveis encontrados'}
-                    </p>
-                    <p className="text-emerald-600 text-xs mt-1">
-                      Use Draw no mapa para refinar a busca
-                    </p>
-                  </div>
-                )}
-
-                {/* Localizações populares */}
-                <div>
-                  <h3 className="text-sm font-semibold text-slate-700 mb-3">
-                    Localizações Populares em Santa Catarina
-                  </h3>
-                  <div className="space-y-2">
-                    {POPULAR_LOCATIONS.map((loc) => (
-                      <button
-                        key={loc.name}
-                        onClick={() => selectPopular(loc)}
-                        className="w-full flex items-center gap-3 px-4 py-3 text-left text-slate-700 bg-slate-50 hover:bg-emerald-50 hover:text-emerald-700 rounded-lg transition-colors group"
-                      >
-                        <MapPin size={18} className="text-slate-400 group-hover:text-emerald-600" />
-                        <span className="font-medium">{loc.name}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Localização Selecionada */}
-                {searchText && !drawnBoundary && (
-                  <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                    <p className="text-sm font-medium text-blue-900 mb-1">
-                      Localização Selecionada:
-                    </p>
-                    <p className="text-blue-700 font-semibold">
-                      {searchText}
-                    </p>
-                    <p className="text-blue-600 text-xs mt-1">
-                      {nearbyProperties.length} imóveis nesta região
-                    </p>
-                  </div>
-                )}
               </div>
-            )}
 
-            {/* Coluna Direita - Mapa */}
-            <div className={`relative bg-slate-100 ${isFullscreen ? 'col-span-1' : ''}`}>
-              <InteractiveMap
-                properties={filteredProperties}
-                initialCenter={mapCenter}
-                height={isFullscreen ? 'calc(100vh - 180px)' : '420px'}
-                showDrawTools={true}
-                showLayers={true}
-                onPropertyClick={(property) => {
-                  console.log('Property clicked:', property);
-                  // Você pode navegar para detalhes ou abrir preview
-                }}
-                onBoundaryChange={handleBoundaryChange}
-              />
-              
-              {/* Info Badge no Fullscreen */}
-              {isFullscreen && (
-                <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-white/95 backdrop-blur px-6 py-3 rounded-xl shadow-lg border border-slate-200">
-                  <p className="text-sm text-slate-600">
-                    <span className="font-semibold text-emerald-600">{filteredProperties.length}</span> imóveis •
-                    {drawnBoundary ? (
-                      <span className="text-emerald-700"> Área desenhada ativa</span>
-                    ) : (
-                      <span> Use Draw para filtrar por área</span>
-                    )}
+              {/* Estatísticas em linha quando tem filtro */}
+              {drawnBoundary && (
+                <div className="px-6 py-3 bg-emerald-50 border-y border-emerald-200 flex-shrink-0">
+                  <p className="text-sm text-emerald-900">
+                    <span className="font-semibold">{filteredProperties.length}</span> {filteredProperties.length === 1 ? 'imóvel encontrado' : 'imóveis encontrados'} na área desenhada
                   </p>
                 </div>
               )}
 
-              {/* Estatísticas quando tem filtro de área */}
-              {!isFullscreen && drawnBoundary && (
-                <div className="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur px-4 py-3 rounded-xl shadow-lg border border-emerald-200">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs text-slate-600 mb-1">Imóveis na área selecionada:</p>
-                      <p className="text-2xl font-bold text-emerald-600">{filteredProperties.length}</p>
-                    </div>
-                    <div className="text-emerald-600">
-                      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-              )}
+            {/* Seção do Mapa - ABAIXO da busca */}
+            <div className={`relative bg-slate-100 ${
+              isFullscreen ? 'flex-1 min-h-[400px]' : 'h-[320px]'
+            }`}>
+              <InteractiveMap
+                properties={nearbyProperties}
+                initialCenter={mapCenter}
+                height={isFullscreen ? '100%' : '320px'}
+                showDrawTools={true}
+                showLayers={true}
+                onPropertyClick={(property) => {
+                  console.log('Property clicked:', property);
+                }}
+                onBoundaryChange={handleBoundaryChange}
+              />
             </div>
           </div>
 
-          {/* Footer */}
-          <div className="flex justify-between gap-3 p-6 border-t border-slate-200 bg-slate-50">
+          {/* Footer - sempre visível */}
+          <div className="flex justify-between gap-3 p-6 border-t border-slate-200 bg-slate-50 flex-shrink-0">
             <button
               onClick={handleClear}
               className="px-6 py-2 text-slate-600 hover:bg-slate-200 rounded-lg transition-colors font-medium"

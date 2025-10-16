@@ -114,6 +114,7 @@ export default function MapView({ properties = [], onPropertyClick }) {
           mapTypeControl: false,
           streetViewControl: false,
           fullscreenControl: true,
+          gestureHandling: 'greedy', // Permite zoom com scroll sem Ctrl
         }}
       >
         {/* Property Markers */}
@@ -434,22 +435,6 @@ export default function MapView({ properties = [], onPropertyClick }) {
           </div>
         </div>
       )}
-
-      {/* Zoom Controls */}
-      <div className="absolute bottom-6 right-4 bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
-        <button
-          onClick={() => mapRef.current?.setZoom((mapRef.current?.getZoom() || 12) + 1)}
-          className="block px-4 py-3 hover:bg-slate-50 transition-colors text-slate-700 font-bold text-lg border-b border-slate-200"
-        >
-          +
-        </button>
-        <button
-          onClick={() => mapRef.current?.setZoom((mapRef.current?.getZoom() || 12) - 1)}
-          className="block px-4 py-3 hover:bg-slate-50 transition-colors text-slate-700 font-bold text-lg"
-        >
-          −
-        </button>
-      </div>
 
       {/* Tooltip */}
       {drawingMode && (

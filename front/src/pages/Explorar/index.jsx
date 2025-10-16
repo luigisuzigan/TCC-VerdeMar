@@ -28,6 +28,7 @@ export default function Explorar() {
   const [showPriceModal, setShowPriceModal] = useState(false);
   const [showPropertyTypeModal, setShowPropertyTypeModal] = useState(false);
   const [showRoomsModal, setShowRoomsModal] = useState(false);
+  const [filteredPropertyIds, setFilteredPropertyIds] = useState(null); // IDs das propriedades filtradas por área
   const itemsPerPage = 24;
   const topFiltersRef = useRef(null);
 
@@ -57,16 +58,39 @@ export default function Explorar() {
     
     (async () => {
       try {
+        // Se tem filtro de área desenhada, buscar TODOS os imóveis para filtrar localmente
         const query = buildApiQuery(filters);
-        const offset = (currentPage - 1) * itemsPerPage;
-        const { data } = await api.get(`/properties?${query}&offset=${offset}`);
+        const offset = filteredPropertyIds ? 0 : (currentPage - 1) * itemsPerPage;
+        const limit = filteredPropertyIds ? 1000 : itemsPerPage; // Buscar mais se tem filtro de área
+        
+        console.log('Fazendo fetch com query:', query);
+        console.log('Filtros ativos:', filters);
+        console.log('IDs filtrados:', filteredPropertyIds);
+        
+        const { data } = await api.get(`/properties?${query}&offset=${offset}&limit=${limit}`);
         if (!active) return;
         
-        const arr = Array.isArray(data?.items) ? data.items : Array.isArray(data) ? data : [];
+        let arr = Array.isArray(data?.items) ? data.items : Array.isArray(data) ? data : [];
+        console.log('Propriedades recebidas da API:', arr.length);
+        
+        // Se tem filtro de área desenhada, filtrar apenas os IDs selecionados
+        if (filteredPropertyIds && filteredPropertyIds.length > 0) {
+          console.log('Filtrando por IDs:', filteredPropertyIds);
+          arr = arr.filter(item => filteredPropertyIds.includes(item.id));
+          console.log('Propriedades após filtro de IDs:', arr.length);
+          
+          // Aplicar paginação local
+          const startIndex = (currentPage - 1) * itemsPerPage;
+          const endIndex = startIndex + itemsPerPage;
+          arr = arr.slice(startIndex, endIndex);
+          console.log(`Página ${currentPage}: mostrando ${arr.length} imóveis (${startIndex} a ${endIndex})`);
+        }
+        
         setItems(arr);
-        setTotalItems(data?.total || arr.length);
+        setTotalItems(filteredPropertyIds ? filteredPropertyIds.length : (data?.total || arr.length));
       } catch (e) {
         if (!active) return;
+        console.error('Erro no fetch de propriedades:', e);
         setItems([]);
         setTotalItems(0);
       } finally {
@@ -75,7 +99,7 @@ export default function Explorar() {
     })();
     
     return () => { active = false; };
-  }, [filters, currentPage]);
+  }, [filters, currentPage, filteredPropertyIds]);
 
   // Build API query from filters
   const buildApiQuery = (filters) => {
@@ -211,9 +235,41 @@ export default function Explorar() {
     }
   };
 
-  const handleLocationApply = (locationText, properties) => {
-    updateFilter('location', locationText);
-    // TODO: If properties were filtered by map boundary, update filters accordingly
+  const handleLocationApply = (locationText, properties, boundaryData) => {
+    try {
+      console.log('Aplicando filtro de localização:', {
+        locationText,
+        propertiesCount: properties?.length,
+        boundaryData: boundaryData ? 'presente' : 'ausente'
+      });
+      
+      // Se tem área desenhada com propriedades filtradas, salvar os IDs
+      if (boundaryData && properties && properties.length > 0) {
+        const propertyIds = properties.map(p => p.id);
+        console.log('IDs das propriedades filtradas:', propertyIds);
+        setFilteredPropertyIds(propertyIds);
+        console.log(`Filtro de área aplicado: ${propertyIds.length} imóveis`);
+        
+        // NÃO aplicar filtro de texto, apenas IDs
+        // Limpar o filtro de localização de texto se existir
+        const newFilters = { ...filters };
+        delete newFilters.location;
+        setFilters(newFilters);
+        setCurrentPage(1);
+        
+        const params = filtersToUrlParams(newFilters);
+        navigate(`/explorar?${params.toString()}`, { replace: true });
+      } else {
+        // Sem área desenhada, usar busca por texto
+        updateFilter('location', locationText);
+        setFilteredPropertyIds(null);
+        console.log('Sem filtro de área, usando localização de texto:', locationText);
+      }
+      
+      setShowLocationModal(false);
+    } catch (error) {
+      console.error('Erro ao aplicar filtro de localização:', error);
+    }
   };
 
   const handlePriceApply = (priceFilters) => {
@@ -245,6 +301,12 @@ export default function Explorar() {
     const newFilters = { ...filters };
     delete newFilters[key];
     setFilters(newFilters);
+    
+    // Se limpar filtro de localização, limpar também os IDs filtrados
+    if (key === 'location') {
+      setFilteredPropertyIds(null);
+      setCurrentPage(1); // Reset página para forçar novo fetch
+    }
     
     const params = filtersToUrlParams(newFilters);
     navigate(`/explorar?${params.toString()}`, { replace: true });

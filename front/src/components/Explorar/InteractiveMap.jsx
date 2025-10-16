@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { GoogleMap, useLoadScript, DrawingManager, OverlayView } from '@react-google-maps/api';
-import { Layers, Pencil, X, Square, Circle as CircleIcon, Trash2 } from 'lucide-react';
+import { Layers, Pencil, X, Square, Circle as CircleIcon, Trash2, MapPin } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const libraries = ['drawing', 'places', 'geometry'];
@@ -37,6 +37,13 @@ export default function InteractiveMap({
   onBoundaryChange,
 }) {
   const navigate = useNavigate();
+  
+  // Debug: ver quantas propriedades estão sendo passadas
+  useEffect(() => {
+    console.log('InteractiveMap recebeu', properties.length, 'propriedades');
+    console.log('Propriedades:', properties);
+  }, [properties]);
+  
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '',
     libraries,
@@ -194,11 +201,14 @@ export default function InteractiveMap({
           mapTypeControl: false,
           streetViewControl: false,
           fullscreenControl: true,
+          gestureHandling: 'greedy', // Permite zoom com scroll sem Ctrl
         }}
       >
         {/* Property Markers - Losango Azul Responsivo */}
-        {properties.map((property) => (
-          property.latitude && property.longitude ? (
+        {(() => {
+          const validProperties = properties.filter(p => p.latitude && p.longitude);
+          console.log('Renderizando marcadores:', validProperties.length, 'de', properties.length);
+          return validProperties.map((property) => (
             <OverlayView
               key={property.id}
               position={{
@@ -232,63 +242,85 @@ export default function InteractiveMap({
                   }}
                 />
 
-                {/* Tooltip ao passar o mouse */}
+                {/* Tooltip ao passar o mouse - Card Horizontal estilo homes.com */}
                 {hoveredProperty === property.id && (
                   <div
-                    className="absolute left-1/2 -translate-x-1/2 pointer-events-none"
+                    className="absolute left-1/2 -translate-x-1/2"
                     style={{ 
                       bottom: `${getMarkerSize(currentZoom) + 12}px`,
-                      zIndex: 2000
+                      zIndex: 2000,
+                      padding: '20px',
+                      marginLeft: '-20px',
+                      marginRight: '-20px',
                     }}
+                    onMouseEnter={() => setHoveredProperty(property.id)}
+                    onMouseLeave={() => setHoveredProperty(null)}
                   >
-                    <div className="bg-white rounded-lg shadow-2xl overflow-hidden border border-slate-200 w-64 pointer-events-auto">
-                      {/* Imagem */}
-                      {(() => {
-                        try {
-                          const images = property.images ? JSON.parse(property.images) : [];
-                          const firstImage = Array.isArray(images) ? images[0] : null;
-                          return firstImage ? (
-                            <div className="h-32 overflow-hidden bg-slate-100">
-                              <img
-                                src={firstImage}
-                                alt={property.title || 'Imóvel'}
-                                className="w-full h-full object-cover"
-                                onError={(e) => {
-                                  e.target.style.display = 'none';
-                                }}
-                              />
+                    <div className="bg-white rounded-xl shadow-2xl overflow-hidden border border-slate-200 w-80"
+                      style={{ pointerEvents: 'auto' }}
+                    >
+                      {/* Layout Horizontal: Imagem | Conteúdo */}
+                      <div className="flex">
+                        {/* Imagem à esquerda */}
+                        {(() => {
+                          try {
+                            const images = property.images ? JSON.parse(property.images) : [];
+                            const firstImage = Array.isArray(images) ? images[0] : null;
+                            return firstImage ? (
+                              <div className="w-32 h-32 flex-shrink-0 overflow-hidden bg-slate-100">
+                                <img
+                                  src={firstImage}
+                                  alt={property.title || 'Imóvel'}
+                                  className="w-full h-full object-cover"
+                                  onError={(e) => {
+                                    e.target.style.display = 'none';
+                                  }}
+                                />
+                              </div>
+                            ) : (
+                              <div className="w-32 h-32 flex-shrink-0 bg-slate-100 flex items-center justify-center">
+                                <MapPin size={32} className="text-slate-400" />
+                              </div>
+                            );
+                          } catch (e) {
+                            return (
+                              <div className="w-32 h-32 flex-shrink-0 bg-slate-100 flex items-center justify-center">
+                                <MapPin size={32} className="text-slate-400" />
+                              </div>
+                            );
+                          }
+                        })()}
+                        
+                        {/* Conteúdo à direita */}
+                        <div className="flex-1 p-3 flex flex-col justify-between">
+                          {/* Informações */}
+                          <div>
+                            <h4 className="font-bold text-sm text-slate-900 mb-1 line-clamp-1">
+                              {property.title || 'Imóvel'}
+                            </h4>
+                            
+                            <p className="text-lg font-bold text-emerald-600 mb-2">
+                              {formatPrice(property.price)}
+                            </p>
+                            
+                            <div className="flex items-center gap-2 text-xs text-slate-600 mb-2">
+                              {property.beds && <span className="flex items-center gap-1">🛏️ {property.beds}</span>}
+                              {property.baths && <span className="flex items-center gap-1">🚿 {property.baths}</span>}
+                              {property.area && <span className="flex items-center gap-1">📏 {property.area}m²</span>}
                             </div>
-                          ) : null;
-                        } catch (e) {
-                          return null;
-                        }
-                      })()}
-                      
-                      {/* Conteúdo */}
-                      <div className="p-3">
-                        <h4 className="font-bold text-sm text-slate-900 mb-2 line-clamp-1">
-                          {property.title || 'Imóvel'}
-                        </h4>
-                        
-                        <div className="flex items-center gap-2 mb-2 text-xs text-slate-600">
-                          {property.beds && <span>🛏️ {property.beds}</span>}
-                          {property.baths && <span>🚿 {property.baths}</span>}
-                          {property.area && <span>📏 {property.area}m²</span>}
+                          </div>
+                          
+                          {/* Botão Ver Detalhes */}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/property/${property.id}`);
+                            }}
+                            className="w-full px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-medium hover:bg-emerald-700 transition-colors"
+                          >
+                            Ver Detalhes
+                          </button>
                         </div>
-                        
-                        <p className="text-lg font-bold text-emerald-600 mb-3">
-                          {formatPrice(property.price)}
-                        </p>
-                        
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(`/property/${property.id}`);
-                          }}
-                          className="w-full px-3 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors"
-                        >
-                          Ver Detalhes
-                        </button>
                       </div>
                     </div>
                     
@@ -301,8 +333,8 @@ export default function InteractiveMap({
                 )}
               </div>
             </OverlayView>
-          ) : null
-        ))}
+          ));
+        })()}
 
         {/* Drawing Manager */}
         {drawingMode && (
@@ -596,32 +628,6 @@ export default function InteractiveMap({
           </div>
         </div>
       )}
-
-      {/* Custom Zoom Controls */}
-      <div className="absolute bottom-6 right-4 bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
-        <button
-          onClick={() => {
-            if (mapRef.current) {
-              const currentZoom = mapRef.current.getZoom() || 12;
-              mapRef.current.setZoom(currentZoom + 1);
-            }
-          }}
-          className="block px-4 py-3 hover:bg-slate-50 transition-colors text-slate-700 font-bold text-lg border-b border-slate-200"
-        >
-          +
-        </button>
-        <button
-          onClick={() => {
-            if (mapRef.current) {
-              const currentZoom = mapRef.current.getZoom() || 12;
-              mapRef.current.setZoom(currentZoom - 1);
-            }
-          }}
-          className="block px-4 py-3 hover:bg-slate-50 transition-colors text-slate-700 font-bold text-lg"
-        >
-          −
-        </button>
-      </div>
 
       {/* Drawing Hint */}
       {drawingMode && (
