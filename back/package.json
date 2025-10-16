@@ -6,9 +6,14 @@
   "scripts": {
     "dev": "node src/index.js",
     "start": "node src/index.js",
+    "seed": "node quick-seed.js",
+    "seed:full": "node src/scripts/seedProperties.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev --name init",
     "prisma:studio": "prisma studio"
+  },
+  "prisma": {
+    "seed": "node quick-seed.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

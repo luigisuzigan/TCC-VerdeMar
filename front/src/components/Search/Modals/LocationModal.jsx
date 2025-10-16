@@ -66,7 +66,7 @@ export default function LocationModal({ isOpen, onClose, location, onApply }) {
 
   // Filtrar propriedades pela área desenhada
   const filterPropertiesByBoundary = (boundary) => {
-    if (!boundary) {
+    if (!boundary || !window.google?.maps?.geometry) {
       setFilteredProperties(nearbyProperties);
       return;
     }
@@ -77,30 +77,37 @@ export default function LocationModal({ isOpen, onClose, location, onApply }) {
       const lat = parseFloat(property.latitude);
       const lng = parseFloat(property.longitude);
       
+      if (isNaN(lat) || isNaN(lng)) return false;
+      
       return isPointInBoundary(lat, lng, boundary);
     });
     
+    console.log(`Filtrados ${filtered.length} de ${nearbyProperties.length} imóveis`);
     setFilteredProperties(filtered);
   };
 
   // Verificar se ponto está dentro do boundary
   const isPointInBoundary = (lat, lng, boundary) => {
+    if (!window.google?.maps?.geometry) return false;
+    
     const point = new window.google.maps.LatLng(lat, lng);
     
-    if (boundary.type === window.google?.maps?.drawing?.OverlayType?.CIRCLE) {
+    // Circle
+    if (boundary.getCenter && boundary.getRadius) {
       const center = boundary.getCenter();
       const radius = boundary.getRadius();
       const distance = window.google.maps.geometry.spherical.computeDistanceBetween(point, center);
       return distance <= radius;
     }
     
-    if (boundary.type === window.google?.maps?.drawing?.OverlayType?.RECTANGLE) {
+    // Rectangle
+    if (boundary.getBounds && !boundary.getPath) {
       const bounds = boundary.getBounds();
       return bounds.contains(point);
     }
     
-    if (boundary.type === window.google?.maps?.drawing?.OverlayType?.POLYGON) {
-      const path = boundary.getPath();
+    // Polygon
+    if (boundary.getPath) {
       return window.google.maps.geometry.poly.containsLocation(point, boundary);
     }
     
@@ -287,7 +294,7 @@ export default function LocationModal({ isOpen, onClose, location, onApply }) {
       {/* Container centralizado */}
       <div className="fixed inset-0 flex items-center justify-center p-4">
         <Dialog.Panel className={`mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden transition-all duration-300 ${
-          isFullscreen ? 'w-full h-full max-w-none' : 'max-w-6xl w-full'
+          isFullscreen ? 'w-full h-full max-w-none' : 'max-w-4xl w-full'
         }`}>
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b border-slate-200">
@@ -314,7 +321,7 @@ export default function LocationModal({ isOpen, onClose, location, onApply }) {
 
           {/* Content - Grid com 2 colunas ou fullscreen */}
           <div className={`grid ${isFullscreen ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2'} ${
-            isFullscreen ? 'h-[calc(100vh-180px)]' : 'h-[600px]'
+            isFullscreen ? 'h-[calc(100vh-180px)]' : 'max-h-[420px]'
           }`}>
             {/* Coluna Esquerda - Pesquisa e Localizações */}
             {!isFullscreen && (
@@ -407,7 +414,7 @@ export default function LocationModal({ isOpen, onClose, location, onApply }) {
               <InteractiveMap
                 properties={filteredProperties}
                 initialCenter={mapCenter}
-                height={isFullscreen ? 'calc(100vh - 180px)' : '600px'}
+                height={isFullscreen ? 'calc(100vh - 180px)' : '420px'}
                 showDrawTools={true}
                 showLayers={true}
                 onPropertyClick={(property) => {

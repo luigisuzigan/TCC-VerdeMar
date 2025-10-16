@@ -1,6 +1,7 @@
-import { useState, useCallback, useRef } from 'react';
-import { GoogleMap, useLoadScript, Marker, DrawingManager, OverlayView } from '@react-google-maps/api';
+import { useState, useCallback, useRef, useEffect } from 'react';
+import { GoogleMap, useLoadScript, DrawingManager, OverlayView } from '@react-google-maps/api';
 import { Layers, Pencil, X, Square, Circle as CircleIcon, Trash2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const libraries = ['drawing', 'places', 'geometry'];
 
@@ -35,6 +36,7 @@ export default function InteractiveMap({
   showLayers = true,
   onBoundaryChange,
 }) {
+  const navigate = useNavigate();
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '',
     libraries,
@@ -47,6 +49,7 @@ export default function InteractiveMap({
   const [showNeighborhoods, setShowNeighborhoods] = useState(false);
   const [showSchools, setShowSchools] = useState(false);
   const [hoveredProperty, setHoveredProperty] = useState(null);
+  const [currentZoom, setCurrentZoom] = useState(12);
   const [schoolFilters, setSchoolFilters] = useState({
     elementary: false,
     middle: false,
@@ -60,6 +63,25 @@ export default function InteractiveMap({
 
   const onMapLoad = useCallback((map) => {
     mapRef.current = map;
+    // Setar zoom inicial
+    setCurrentZoom(map.getZoom() || 12);
+  }, []);
+
+  // Atualizar zoom quando o mapa mover
+  useEffect(() => {
+    if (!mapRef.current) return;
+    
+    const listener = mapRef.current.addListener('zoom_changed', () => {
+      if (mapRef.current) {
+        setCurrentZoom(mapRef.current.getZoom());
+      }
+    });
+    
+    return () => {
+      if (listener && window.google?.maps?.event) {
+        window.google.maps.event.removeListener(listener);
+      }
+    };
   }, []);
 
   const handleOverlayComplete = useCallback((overlay) => {
@@ -108,6 +130,36 @@ export default function InteractiveMap({
     }).format(price);
   };
 
+  // Calcular tamanho do marcador baseado no zoom (como homes.com)
+  const getMarkerSize = (zoom) => {
+    // Garantir que zoom é um número válido
+    const zoomLevel = typeof zoom === 'number' ? zoom : 12;
+    
+    // Escala progressiva mais suave (como homes.com)
+    // Zoom baixo (10-11): muito pequeno
+    // Zoom médio (12-14): pequeno a médio
+    // Zoom alto (15-17): médio a grande
+    // Zoom muito alto (18+): grande
+    if (zoomLevel <= 10) return 6;
+    if (zoomLevel <= 11) return 8;
+    if (zoomLevel <= 12) return 10;
+    if (zoomLevel <= 13) return 12;
+    if (zoomLevel <= 14) return 14;
+    if (zoomLevel <= 15) return 16;
+    if (zoomLevel <= 16) return 18;
+    if (zoomLevel <= 17) return 20;
+    return 22;
+  };
+
+  const handlePropertyClick = (property) => {
+    if (onPropertyClick) {
+      onPropertyClick(property);
+    } else {
+      // Navegar para página de detalhes
+      navigate(`/property/${property.id}`);
+    }
+  };
+
   if (loadError) {
     return (
       <div className="h-full flex items-center justify-center bg-slate-100">
@@ -144,7 +196,7 @@ export default function InteractiveMap({
           fullscreenControl: true,
         }}
       >
-        {/* Property Markers with Price Labels */}
+        {/* Property Markers - Losango Azul Responsivo */}
         {properties.map((property) => (
           property.latitude && property.longitude ? (
             <OverlayView
@@ -154,33 +206,98 @@ export default function InteractiveMap({
                 lng: parseFloat(property.longitude),
               }}
               mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
+              getPixelPositionOffset={(width, height) => ({
+                x: -(width / 2),
+                y: -(height / 2),
+              })}
             >
               <div
-                className="relative cursor-pointer"
-                onClick={() => onPropertyClick && onPropertyClick(property)}
+                className="relative cursor-pointer group"
+                onClick={() => handlePropertyClick(property)}
                 onMouseEnter={() => setHoveredProperty(property.id)}
                 onMouseLeave={() => setHoveredProperty(null)}
+                style={{ zIndex: hoveredProperty === property.id ? 1000 : 1 }}
               >
-                {/* Price Tag */}
+                {/* Losango Azul - tamanho varia com zoom */}
                 <div
-                  className={`px-2.5 py-1 rounded-md font-bold whitespace-nowrap shadow-md transition-all transform ${
+                  className={`transform rotate-45 transition-all duration-200 ${
                     hoveredProperty === property.id
-                      ? 'bg-emerald-700 text-white scale-125 -translate-y-1 shadow-xl z-50'
-                      : 'bg-white text-emerald-700 border-2 border-emerald-600'
+                      ? 'bg-blue-700 scale-150 shadow-lg'
+                      : 'bg-blue-600 shadow-md'
                   }`}
                   style={{
-                    fontSize: hoveredProperty === property.id ? '14px' : '13px',
-                    fontWeight: '700',
+                    width: `${getMarkerSize(currentZoom)}px`,
+                    height: `${getMarkerSize(currentZoom)}px`,
+                    border: hoveredProperty === property.id ? '2px solid white' : '1.5px solid white',
                   }}
-                >
-                  {formatPrice(property.price)}
-                </div>
-                {/* Arrow pointing down */}
+                />
+
+                {/* Tooltip ao passar o mouse */}
                 {hoveredProperty === property.id && (
                   <div
-                    className="absolute left-1/2 -translate-x-1/2 w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-t-[5px] border-t-emerald-700"
-                    style={{ top: '100%' }}
-                  />
+                    className="absolute left-1/2 -translate-x-1/2 pointer-events-none"
+                    style={{ 
+                      bottom: `${getMarkerSize(currentZoom) + 12}px`,
+                      zIndex: 2000
+                    }}
+                  >
+                    <div className="bg-white rounded-lg shadow-2xl overflow-hidden border border-slate-200 w-64 pointer-events-auto">
+                      {/* Imagem */}
+                      {(() => {
+                        try {
+                          const images = property.images ? JSON.parse(property.images) : [];
+                          const firstImage = Array.isArray(images) ? images[0] : null;
+                          return firstImage ? (
+                            <div className="h-32 overflow-hidden bg-slate-100">
+                              <img
+                                src={firstImage}
+                                alt={property.title || 'Imóvel'}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  e.target.style.display = 'none';
+                                }}
+                              />
+                            </div>
+                          ) : null;
+                        } catch (e) {
+                          return null;
+                        }
+                      })()}
+                      
+                      {/* Conteúdo */}
+                      <div className="p-3">
+                        <h4 className="font-bold text-sm text-slate-900 mb-2 line-clamp-1">
+                          {property.title || 'Imóvel'}
+                        </h4>
+                        
+                        <div className="flex items-center gap-2 mb-2 text-xs text-slate-600">
+                          {property.beds && <span>🛏️ {property.beds}</span>}
+                          {property.baths && <span>🚿 {property.baths}</span>}
+                          {property.area && <span>📏 {property.area}m²</span>}
+                        </div>
+                        
+                        <p className="text-lg font-bold text-emerald-600 mb-3">
+                          {formatPrice(property.price)}
+                        </p>
+                        
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/property/${property.id}`);
+                          }}
+                          className="w-full px-3 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors"
+                        >
+                          Ver Detalhes
+                        </button>
+                      </div>
+                    </div>
+                    
+                    {/* Seta apontando para o marcador */}
+                    <div
+                      className="absolute left-1/2 -translate-x-1/2 w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[8px] border-t-white pointer-events-none"
+                      style={{ top: '100%', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))' }}
+                    />
+                  </div>
                 )}
               </div>
             </OverlayView>
@@ -483,13 +600,23 @@ export default function InteractiveMap({
       {/* Custom Zoom Controls */}
       <div className="absolute bottom-6 right-4 bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
         <button
-          onClick={() => mapRef.current?.setZoom((mapRef.current?.getZoom() || 12) + 1)}
+          onClick={() => {
+            if (mapRef.current) {
+              const currentZoom = mapRef.current.getZoom() || 12;
+              mapRef.current.setZoom(currentZoom + 1);
+            }
+          }}
           className="block px-4 py-3 hover:bg-slate-50 transition-colors text-slate-700 font-bold text-lg border-b border-slate-200"
         >
           +
         </button>
         <button
-          onClick={() => mapRef.current?.setZoom((mapRef.current?.getZoom() || 12) - 1)}
+          onClick={() => {
+            if (mapRef.current) {
+              const currentZoom = mapRef.current.getZoom() || 12;
+              mapRef.current.setZoom(currentZoom - 1);
+            }
+          }}
           className="block px-4 py-3 hover:bg-slate-50 transition-colors text-slate-700 font-bold text-lg"
         >
           −
@@ -503,9 +630,9 @@ export default function InteractiveMap({
         </div>
       )}
 
-      {/* Property Count Badge */}
+      {/* Property Count Badge - Reposicionado */}
       {properties.length > 0 && (
-        <div className="absolute bottom-6 left-4 bg-white rounded-lg shadow-lg border border-slate-200 px-4 py-2">
+        <div className="absolute top-20 left-4 bg-white rounded-lg shadow-lg border border-slate-200 px-4 py-2">
           <p className="text-sm font-semibold text-slate-900">
             {properties.length} {properties.length === 1 ? 'imóvel' : 'imóveis'} no mapa
           </p>
