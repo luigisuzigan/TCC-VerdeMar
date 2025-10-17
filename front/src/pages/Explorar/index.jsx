@@ -58,39 +58,51 @@ export default function Explorar() {
     
     (async () => {
       try {
-        // Se tem filtro de área desenhada, buscar TODOS os imóveis para filtrar localmente
-        const query = buildApiQuery(filters);
+        console.log('=== useEffect FETCH iniciado ===');
+        console.log('filteredPropertyIds:', filteredPropertyIds);
+        console.log('filters:', filters);
+        
+        // Se tem filtro de área desenhada, NÃO usar filtro de location
+        const filtersToUse = filteredPropertyIds 
+          ? { ...filters, location: undefined } // Remove location quando tem IDs filtrados
+          : filters;
+        
+        const query = buildApiQuery(filtersToUse);
         const offset = filteredPropertyIds ? 0 : (currentPage - 1) * itemsPerPage;
         const limit = filteredPropertyIds ? 1000 : itemsPerPage; // Buscar mais se tem filtro de área
         
-        console.log('Fazendo fetch com query:', query);
-        console.log('Filtros ativos:', filters);
-        console.log('IDs filtrados:', filteredPropertyIds);
+        console.log('Query final:', query);
+        console.log('Offset:', offset, 'Limit:', limit);
+        console.log('URL completa:', `/properties?${query}&offset=${offset}&limit=${limit}`);
         
         const { data } = await api.get(`/properties?${query}&offset=${offset}&limit=${limit}`);
         if (!active) return;
         
         let arr = Array.isArray(data?.items) ? data.items : Array.isArray(data) ? data : [];
-        console.log('Propriedades recebidas da API:', arr.length);
+        console.log('✅ Propriedades recebidas da API:', arr.length);
+        console.log('Primeiros 3 IDs da API:', arr.slice(0, 3).map(p => p.id));
         
         // Se tem filtro de área desenhada, filtrar apenas os IDs selecionados
         if (filteredPropertyIds && filteredPropertyIds.length > 0) {
-          console.log('Filtrando por IDs:', filteredPropertyIds);
+          console.log('🔍 Filtrando por IDs:', filteredPropertyIds);
+          const before = arr.length;
           arr = arr.filter(item => filteredPropertyIds.includes(item.id));
-          console.log('Propriedades após filtro de IDs:', arr.length);
+          console.log(`Filtrou ${before} → ${arr.length} imóveis`);
+          console.log('IDs encontrados:', arr.map(p => p.id));
           
           // Aplicar paginação local
           const startIndex = (currentPage - 1) * itemsPerPage;
           const endIndex = startIndex + itemsPerPage;
           arr = arr.slice(startIndex, endIndex);
-          console.log(`Página ${currentPage}: mostrando ${arr.length} imóveis (${startIndex} a ${endIndex})`);
+          console.log(`📄 Página ${currentPage}: mostrando ${arr.length} imóveis`);
         }
         
+        console.log('✅ setItems com', arr.length, 'imóveis');
         setItems(arr);
         setTotalItems(filteredPropertyIds ? filteredPropertyIds.length : (data?.total || arr.length));
       } catch (e) {
         if (!active) return;
-        console.error('Erro no fetch de propriedades:', e);
+        console.error('❌ Erro no fetch de propriedades:', e);
         setItems([]);
         setTotalItems(0);
       } finally {
@@ -109,6 +121,7 @@ export default function Explorar() {
     
     // Location
     if (filters.location) {
+      console.log('🔍 Filtro de localização (city):', filters.location);
       params.set('city', filters.location);
     }
     
@@ -237,33 +250,35 @@ export default function Explorar() {
 
   const handleLocationApply = (locationText, properties, boundaryData) => {
     try {
-      console.log('Aplicando filtro de localização:', {
-        locationText,
-        propertiesCount: properties?.length,
-        boundaryData: boundaryData ? 'presente' : 'ausente'
-      });
+      console.log('=== handleLocationApply chamado ===');
+      console.log('locationText:', locationText);
+      console.log('properties:', properties);
+      console.log('properties.length:', properties?.length);
+      console.log('boundaryData:', boundaryData);
+      console.log('currentFilters:', filters);
       
       // Se tem área desenhada com propriedades filtradas, salvar os IDs
       if (boundaryData && properties && properties.length > 0) {
         const propertyIds = properties.map(p => p.id);
-        console.log('IDs das propriedades filtradas:', propertyIds);
+        console.log('✅ Filtro de área ATIVO - IDs:', propertyIds);
         setFilteredPropertyIds(propertyIds);
-        console.log(`Filtro de área aplicado: ${propertyIds.length} imóveis`);
         
         // NÃO aplicar filtro de texto, apenas IDs
-        // Limpar o filtro de localização de texto se existir
+        // Limpar COMPLETAMENTE o filtro de localização de texto
         const newFilters = { ...filters };
         delete newFilters.location;
+        console.log('Filtros após remover location:', newFilters);
         setFilters(newFilters);
         setCurrentPage(1);
         
         const params = filtersToUrlParams(newFilters);
+        console.log('URL params:', params.toString());
         navigate(`/explorar?${params.toString()}`, { replace: true });
       } else {
         // Sem área desenhada, usar busca por texto
-        updateFilter('location', locationText);
+        console.log('❌ SEM filtro de área - usando texto:', locationText);
         setFilteredPropertyIds(null);
-        console.log('Sem filtro de área, usando localização de texto:', locationText);
+        updateFilter('location', locationText);
       }
       
       setShowLocationModal(false);

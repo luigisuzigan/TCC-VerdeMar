@@ -35,6 +35,7 @@ export default function InteractiveMap({
   showDrawTools = true,
   showLayers = true,
   onBoundaryChange,
+  resetKey = 0, // Nova prop para resetar desenhos
 }) {
   const navigate = useNavigate();
   
@@ -106,7 +107,7 @@ export default function InteractiveMap({
     }
   }, [onBoundaryChange]);
 
-  const clearDrawing = () => {
+  const clearDrawing = useCallback(() => {
     drawnShapes.forEach(shape => {
       if (shape.overlay) {
         shape.overlay.setMap(null);
@@ -117,7 +118,19 @@ export default function InteractiveMap({
     if (onBoundaryChange) {
       onBoundaryChange(null);
     }
-  };
+  }, [drawnShapes, onBoundaryChange]);
+
+  // Limpar desenhos quando resetKey mudar
+  const prevResetKeyRef = useRef(0);
+  
+  useEffect(() => {
+    if (resetKey > 0 && resetKey !== prevResetKeyRef.current) {
+      console.log('🧹 Limpando desenhos do mapa (resetKey:', resetKey, ')');
+      prevResetKeyRef.current = resetKey;
+      clearDrawing();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resetKey]); // Só observa resetKey
 
   const formatPrice = (price) => {
     if (!price) return 'R$ 0';

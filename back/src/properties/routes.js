@@ -6,7 +6,7 @@ import { createProperty, deleteProperty, getProperty, listProperties, updateProp
 const router = Router();
 
 const listValidators = [
-  query('limit').optional().isInt({ min: 1, max: 100 }),
+  query('limit').optional().isInt({ min: 1, max: 2000 }),
   query('offset').optional().isInt({ min: 0 }),
   query('minPrice').optional().isFloat({ min: 0 }),
   query('maxPrice').optional().isFloat({ min: 0 }),
@@ -23,7 +23,10 @@ const listValidators = [
 
 router.get('/', listValidators, async (req, res) => {
   const errors = validationResult(req);
-  if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+  if (!errors.isEmpty()) {
+    console.log('Validation errors:', errors.array());
+    return res.status(400).json({ errors: errors.array() });
+  }
   
   const { 
     search, 
@@ -44,6 +47,8 @@ router.get('/', listValidators, async (req, res) => {
     published = true 
   } = req.query;
   
+  console.log('List properties request:', { limit, offset, published, city, search });
+  
   const result = await listProperties({ 
     search, 
     city, 
@@ -58,8 +63,8 @@ router.get('/', listValidators, async (req, res) => {
     minParkingSpaces,
     minSuites,
     sortBy,
-    limit, 
-    offset, 
+    limit: Number(limit) || 20, 
+    offset: Number(offset) || 0, 
     published 
   });
   

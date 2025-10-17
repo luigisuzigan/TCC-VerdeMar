@@ -17,6 +17,7 @@ export default function LocationModal({ isOpen, onClose, location, onApply }) {
   const [filteredProperties, setFilteredProperties] = useState([]);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [drawnBoundary, setDrawnBoundary] = useState(null);
+  const [reloadKey, setReloadKey] = useState(0); // Para forçar reload
   const autocompleteRef = useRef(null);
   
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
@@ -27,12 +28,27 @@ export default function LocationModal({ isOpen, onClose, location, onApply }) {
     libraries: libraries,
   });
 
+  // Resetar estados quando o modal abre
+  useEffect(() => {
+    if (isOpen) {
+      console.log('🔄 Modal aberto - resetando estados e forçando reload');
+      setSearchText(location || '');
+      setDrawnBoundary(null);
+      setIsFullscreen(false);
+      setReloadKey(prev => prev + 1); // Força reload das propriedades
+    }
+  }, [isOpen, location]);
+
   // Buscar propriedades próximas à localização
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) {
+      console.log('❌ Modal fechado - mantendo propriedades');
+      return;
+    }
     
     const fetchProperties = async () => {
       try {
+        console.log('📡 Buscando propriedades para o mapa... (reload #' + reloadKey + ')');
         const { data } = await api.get('/properties', {
           params: {
             published: true,
@@ -52,20 +68,25 @@ export default function LocationModal({ isOpen, onClose, location, onApply }) {
           properties = data.data;
         }
         
-        console.log('Propriedades carregadas no mapa:', properties.length);
-        console.log('Primeira propriedade:', properties[0]);
+        console.log('✅ Propriedades carregadas no mapa:', properties.length);
+        if (properties.length > 0) {
+          console.log('Primeira propriedade:', properties[0]);
+          console.log('Cidade da primeira:', properties[0]?.city);
+          console.log('Localização:', { lat: properties[0]?.latitude, lng: properties[0]?.longitude });
+        }
         console.log('Propriedades com lat/lng:', properties.filter(p => p.latitude && p.longitude).length);
+        
         setNearbyProperties(properties);
         setFilteredProperties(properties);
       } catch (error) {
-        console.error('Erro ao buscar propriedades:', error);
+        console.error('❌ Erro ao buscar propriedades:', error);
         setNearbyProperties([]);
         setFilteredProperties([]);
       }
     };
     
     fetchProperties();
-  }, [isOpen, mapCenter]);
+  }, [reloadKey, isOpen]); // Reordenado: reloadKey primeiro
 
   // Filtrar propriedades pela área desenhada
   const filterPropertiesByBoundary = (boundary) => {
@@ -170,10 +191,12 @@ export default function LocationModal({ isOpen, onClose, location, onApply }) {
   };
 
   const handleClear = () => {
+    console.log('🧹 Limpando filtros do modal');
     setSearchText('');
     setDrawnBoundary(null);
-    setFilteredProperties(nearbyProperties);
+    setFilteredProperties(nearbyProperties); // Restaura todas as propriedades
     setMapCenter(DEFAULT_CENTER);
+    console.log('✅ Filtros limpos - propriedades restauradas:', nearbyProperties.length);
   };
   
   // Se não tiver API Key
@@ -307,7 +330,7 @@ export default function LocationModal({ isOpen, onClose, location, onApply }) {
           </div>
 
           {/* Content - Layout VERTICAL: busca em cima, mapa embaixo */}
-          <div className="flex flex-col flex-1 min-h-0">
+          <div className="flex flex-col flex-1 overflow-hidden">
             {/* Seção de Busca */}
             <div className="p-6 border-b border-slate-200 flex-shrink-0">
               {/* Barra de busca com Autocomplete */}
@@ -345,7 +368,7 @@ export default function LocationModal({ isOpen, onClose, location, onApply }) {
 
               {/* Estatísticas em linha quando tem filtro */}
               {drawnBoundary && (
-                <div className="px-6 py-3 bg-emerald-50 border-y border-emerald-200 flex-shrink-0">
+                <div className="px-6 py-3 bg-emerald-50 border-b border-emerald-200 flex-shrink-0">
                   <p className="text-sm text-emerald-900">
                     <span className="font-semibold">{filteredProperties.length}</span> {filteredProperties.length === 1 ? 'imóvel encontrado' : 'imóveis encontrados'} na área desenhada
                   </p>
@@ -353,15 +376,16 @@ export default function LocationModal({ isOpen, onClose, location, onApply }) {
               )}
 
             {/* Seção do Mapa - ABAIXO da busca */}
-            <div className={`relative bg-slate-100 ${
-              isFullscreen ? 'flex-1 min-h-[400px]' : 'h-[320px]'
+            <div className={`relative bg-slate-100 flex-shrink-0 ${
+              isFullscreen ? 'h-[calc(100vh-300px)]' : 'h-[280px]'
             }`}>
               <InteractiveMap
                 properties={nearbyProperties}
                 initialCenter={mapCenter}
-                height={isFullscreen ? '100%' : '320px'}
+                height={isFullscreen ? '100%' : '280px'}
                 showDrawTools={true}
                 showLayers={true}
+                resetKey={reloadKey}
                 onPropertyClick={(property) => {
                   console.log('Property clicked:', property);
                 }}
@@ -371,32 +395,24 @@ export default function LocationModal({ isOpen, onClose, location, onApply }) {
           </div>
 
           {/* Footer - sempre visível */}
-          <div className="flex justify-between gap-3 p-6 border-t border-slate-200 bg-slate-50 flex-shrink-0">
+          <div className="flex justify-end gap-3 p-6 border-t border-slate-200 bg-slate-50 flex-shrink-0">
             <button
-              onClick={handleClear}
+              onClick={onClose}
               className="px-6 py-2 text-slate-600 hover:bg-slate-200 rounded-lg transition-colors font-medium"
             >
-              Limpar
+              Cancelar
             </button>
-            <div className="flex gap-3">
-              <button
-                onClick={onClose}
-                className="px-6 py-2 text-slate-600 hover:bg-slate-200 rounded-lg transition-colors font-medium"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={handleApply}
-                className="px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium flex items-center gap-2"
-              >
-                {drawnBoundary && (
-                  <span className="px-2 py-0.5 bg-emerald-700 rounded text-xs">
-                    {filteredProperties.length}
-                  </span>
-                )}
-                Aplicar Localização
-              </button>
-            </div>
+            <button
+              onClick={handleApply}
+              className="px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium flex items-center gap-2"
+            >
+              {drawnBoundary && (
+                <span className="px-2 py-0.5 bg-emerald-700 rounded text-xs">
+                  {filteredProperties.length}
+                </span>
+              )}
+              Aplicar Localização
+            </button>
           </div>
         </Dialog.Panel>
       </div>

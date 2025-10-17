@@ -17,6 +17,7 @@ Plataforma moderna de anúncios imobiliários focada em propriedades de praia em
 # 1. Backend
 cd back
 npm install
+npm install axios
 npx prisma migrate dev
 npx prisma db seed
 npm run dev
