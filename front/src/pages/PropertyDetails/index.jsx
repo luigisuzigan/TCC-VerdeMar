@@ -5,6 +5,11 @@ import { api } from '../../api/client.js';
 import ImageGallery from '../../components/PropertyDetails/ImageGallery.jsx';
 import PriceAndStats from '../../components/PropertyDetails/PriceAndStats.jsx';
 import PropertyInfo from '../../components/PropertyDetails/PropertyInfo.jsx';
+import PropertyCategory from '../../components/PropertyDetails/PropertyCategory.jsx';
+import PropertyStyle from '../../components/PropertyDetails/PropertyStyle.jsx';
+import PropertyAmenitiesEnhanced from '../../components/PropertyDetails/PropertyAmenitiesEnhanced.jsx';
+import NaturalConditions from '../../components/PropertyDetails/NaturalConditions.jsx';
+import CondoInfo from '../../components/PropertyDetails/CondoInfo.jsx';
 import Amenities from '../../components/PropertyDetails/Amenities.jsx';
 import Description from '../../components/PropertyDetails/Description.jsx';
 import ContactCard from '../../components/PropertyDetails/ContactCard.jsx';
@@ -153,13 +158,26 @@ export default function PropertyDetails() {
           <div className="lg:col-span-2">
             <PriceAndStats property={property} formatCurrency={formatCurrency} />
             
+            {/* Categoria e Tipo */}
+            <PropertyCategory category={property.category} type={property.type} />
+            
+            {/* Estilo (se existir) */}
+            {property.style && <PropertyStyle style={property.style} />}
+            
             <PropertyInfo 
               property={property} 
               formatCurrency={formatCurrency}
               getPropertyTypeLabel={getPropertyTypeLabel}
             />
 
-            <Amenities property={property} />
+            {/* Comodidades e Amenidades (Nova versão aprimorada) */}
+            <PropertyAmenitiesEnhanced property={property} />
+
+            {/* Condições Naturais */}
+            <NaturalConditions property={property} />
+
+            {/* Informações de Condomínio */}
+            <CondoInfo property={property} formatCurrency={formatCurrency} />
 
             <Description description={property.description} />
 

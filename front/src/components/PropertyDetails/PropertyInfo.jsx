@@ -1,9 +1,18 @@
-import { Home, Calendar, Car, Maximize2, Landmark } from 'lucide-react';
+import { Home, Calendar, Car, Maximize2, BedDouble, Building2, Layers } from 'lucide-react';
 
+/**
+ * Componente que exibe informações do imóvel de forma CONDICIONAL
+ * Mostra apenas o que existe para aquele tipo de imóvel
+ */
 export default function PropertyInfo({ property, formatCurrency, getPropertyTypeLabel }) {
+  // Determinar o tipo de imóvel
+  const isApartment = property.type?.toLowerCase().includes('apartamento') || 
+                      property.type?.toLowerCase().includes('cobertura');
+  const isHouse = property.type?.toLowerCase().includes('casa');
+
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
-      {/* Property Type */}
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
+      {/* Tipo de Imóvel - SEMPRE */}
       <div className="bg-white rounded-2xl p-5 border-2 border-slate-100 hover:border-blue-200 transition-colors shadow-sm">
         <div className="flex items-center gap-2 text-slate-600 text-sm mb-2">
           <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center">
@@ -16,21 +25,23 @@ export default function PropertyInfo({ property, formatCurrency, getPropertyType
         </div>
       </div>
 
-      {/* Year Built */}
-      <div className="bg-white rounded-2xl p-5 border-2 border-slate-100 hover:border-blue-200 transition-colors shadow-sm">
-        <div className="flex items-center gap-2 text-slate-600 text-sm mb-2">
-          <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center">
-            <Calendar size={16} />
+      {/* Ano de Construção - SE EXISTIR */}
+      {property.yearBuilt && (
+        <div className="bg-white rounded-2xl p-5 border-2 border-slate-100 hover:border-blue-200 transition-colors shadow-sm">
+          <div className="flex items-center gap-2 text-slate-600 text-sm mb-2">
+            <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center">
+              <Calendar size={16} />
+            </div>
+            <span className="font-medium">Construído</span>
           </div>
-          <span className="font-medium">Construído</span>
+          <div className="text-lg font-bold text-slate-900">
+            {property.yearBuilt}
+          </div>
         </div>
-        <div className="text-lg font-bold text-slate-900">
-          {property.yearBuilt || '2024'}
-        </div>
-      </div>
+      )}
 
-      {/* Parking */}
-      {property.parkingSpaces ? (
+      {/* Vagas de Garagem - SE EXISTIR */}
+      {property.parkingSpaces > 0 && (
         <div className="bg-white rounded-2xl p-5 border-2 border-slate-100 hover:border-blue-200 transition-colors shadow-sm">
           <div className="flex items-center gap-2 text-slate-600 text-sm mb-2">
             <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center">
@@ -42,35 +53,87 @@ export default function PropertyInfo({ property, formatCurrency, getPropertyType
             {property.parkingSpaces} {property.parkingSpaces === 1 ? 'vaga' : 'vagas'}
           </div>
         </div>
-      ) : null}
+      )}
 
-      {/* Lot Size */}
-      {property.lotSize ? (
+      {/* Suítes - SE EXISTIR */}
+      {property.suites > 0 && (
+        <div className="bg-white rounded-2xl p-5 border-2 border-slate-100 hover:border-blue-200 transition-colors shadow-sm">
+          <div className="flex items-center gap-2 text-slate-600 text-sm mb-2">
+            <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center">
+              <BedDouble size={16} />
+            </div>
+            <span className="font-medium">Suítes</span>
+          </div>
+          <div className="text-lg font-bold text-slate-900">
+            {property.suites} {property.suites === 1 ? 'suíte' : 'suítes'}
+          </div>
+        </div>
+      )}
+
+      {/* Andar - APENAS PARA APARTAMENTOS */}
+      {isApartment && property.floor && (
+        <div className="bg-white rounded-2xl p-5 border-2 border-slate-100 hover:border-blue-200 transition-colors shadow-sm">
+          <div className="flex items-center gap-2 text-slate-600 text-sm mb-2">
+            <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center">
+              <Layers size={16} />
+            </div>
+            <span className="font-medium">Andar</span>
+          </div>
+          <div className="text-lg font-bold text-slate-900">
+            {property.floor}º andar
+            {property.totalFloors && (
+              <span className="text-sm text-slate-500 font-normal"> / {property.totalFloors}</span>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Área do Lote - APENAS PARA CASAS */}
+      {isHouse && property.lotSize && (
         <div className="bg-white rounded-2xl p-5 border-2 border-slate-100 hover:border-blue-200 transition-colors shadow-sm">
           <div className="flex items-center gap-2 text-slate-600 text-sm mb-2">
             <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center">
               <Maximize2 size={16} />
             </div>
-            <span className="font-medium">Lote</span>
+            <span className="font-medium">Terreno</span>
           </div>
           <div className="text-lg font-bold text-slate-900">
             {property.lotSize} m²
           </div>
         </div>
-      ) : null}
+      )}
 
-      {/* HOA */}
-      <div className="bg-white rounded-2xl p-5 border-2 border-slate-100 hover:border-blue-200 transition-colors shadow-sm">
-        <div className="flex items-center gap-2 text-slate-600 text-sm mb-2">
-          <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center">
-            <Landmark size={16} />
+      {/* Condomínio - APENAS SE TIVER VALOR */}
+      {property.condoFee && (
+        <div className="bg-white rounded-2xl p-5 border-2 border-emerald-100 hover:border-emerald-200 transition-colors shadow-sm">
+          <div className="flex items-center gap-2 text-emerald-700 text-sm mb-2">
+            <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center">
+              <Building2 size={16} className="text-emerald-600" />
+            </div>
+            <span className="font-medium">Condomínio</span>
           </div>
-          <span className="font-medium">Condomínio</span>
+          <div className="text-lg font-bold text-emerald-700">
+            {formatCurrency(property.condoFee)}
+            <span className="text-xs text-emerald-600 font-normal">/mês</span>
+          </div>
         </div>
-        <div className="text-lg font-bold text-slate-900">
-          {property.hoa ? formatCurrency(property.hoa) : 'R$ 0'}
+      )}
+
+      {/* IPTU - SE EXISTIR */}
+      {property.iptu && (
+        <div className="bg-white rounded-2xl p-5 border-2 border-slate-100 hover:border-blue-200 transition-colors shadow-sm">
+          <div className="flex items-center gap-2 text-slate-600 text-sm mb-2">
+            <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center">
+              <Calendar size={16} />
+            </div>
+            <span className="font-medium">IPTU</span>
+          </div>
+          <div className="text-lg font-bold text-slate-900">
+            {formatCurrency(property.iptu)}
+            <span className="text-xs text-slate-500 font-normal">/ano</span>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

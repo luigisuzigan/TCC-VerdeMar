@@ -8,6 +8,29 @@ datasource db {
   shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
 }
 
+// ========================================
+// 📋 ENUMS - Valores fixos
+// ========================================
+
+enum PropertyCategory {
+  Residencial
+  Comercial
+  Industrial
+  Terreno
+  Especial
+}
+
+enum PropertyCondition {
+  Novo
+  Seminovo
+  Usado
+  Reformado
+}
+
+// ========================================
+// 👤 USER - Usuários do sistema
+// ========================================
+
 model User {
   id           String     @id @default(uuid())
   name         String
@@ -25,41 +48,69 @@ model User {
   reviews      Review[]
 }
 
+// ========================================
+// 🏠 PROPERTY - Propriedades/Imóveis
+// ========================================
+
 model Property {
-  id                String         @id @default(uuid())
+  id                String              @id @default(uuid())
   userId            String
   title             String
   description       String?
-  type              String         @default("Apartamento")
+  category          PropertyCategory    @default(Residencial)
+  type              String              @default("Apartamento")
+  style             String?             // Moderno, Rústico, Container, Luxo, etc.
   price             Float
-  currency          String         @default("BRL")
+  currency          String              @default("BRL")
+  
+  // Localização
   address           String         @default("")
   city              String
   state             String         @default("")
   country           String
+  neighborhood      String?        // Bairro
   zipCode           String?
   latitude          Float?
   longitude         Float?
-  area              Int
+  
+  // Características
+  area              Int            // m²
   beds              Int
   baths             Int
-  amenities         String         @default("[]")
+  suites            Int            @default(0)
+  parkingSpaces     Int            @default(0)
+  
+  // Campos de condomínio
+  condoFee          Float?         // Valor do condomínio
+  iptu              Float?         // IPTU anual
+  
+  // Características do imóvel
+  floor             Int?                // Andar (para apartamentos)
+  totalFloors       Int?                // Total de andares do prédio
+  yearBuilt         Int?                // Ano de construção
+  propertyCondition PropertyCondition?  // Novo, Seminovo, Usado, Reformado
+  
+  // Arrays JSON
+  amenities         String         @default("[]") @db.Text
+  naturalConditions String?        @default("[]") @db.Text
+  nearbyPlaces      String?        @default("{}") @db.LongText // Google Maps API data (pode ser grande)
+  
+  // Mídia
   images            String
   mainImage         String?
-  rating            Float?         @default(0)
+  
+  // Métricas
+  rating            Float?         @default(0) // Avaliação de especialista 0-10
   viewCount         Int            @default(0)
+  
+  // Status
   published         Boolean        @default(false)
+  
+  // Timestamps
   createdAt         DateTime       @default(now())
   updatedAt         DateTime       @updatedAt
-  naturalConditions String?        @default("[]")
-  nearbyPlaces      String?
-  style             String?
-  category          String?        @default("Venda")
-  parkingSpaces     Int            @default(0)
-  suites            Int            @default(0)
-  featured          Boolean        @default(false)
-  guests            Int            @default(4)
-  reviewCount       Int            @default(0)
+  
+  // Relacionamentos
   favorites         Favorite[]
   user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   PropertyView      PropertyView[]
@@ -68,8 +119,12 @@ model Property {
   @@index([userId])
   @@index([city])
   @@index([published])
-  @@index([featured])
+  @@index([category])
 }
+
+// ========================================
+// ⭐ FAVORITE - Favoritos (Many-to-Many)
+// ========================================
 
 model Favorite {
   id         String   @id @default(uuid())
@@ -83,6 +138,10 @@ model Favorite {
   @@index([userId])
   @@index([propertyId])
 }
+
+// ========================================
+// 💬 REVIEW - Avaliações de usuários
+// ========================================
 
 model Review {
   id             String   @id @default(uuid())

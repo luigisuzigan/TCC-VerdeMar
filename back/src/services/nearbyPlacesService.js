@@ -5,18 +5,20 @@ const GOOGLE_PLACES_URL = 'https://maps.googleapis.com/maps/api/place/nearbysear
 
 /**
  * Categorias de locais e seus tipos do Google Maps
+ * Raio de busca: 20km (20000 metros)
+ * Os resultados são ordenados por distância, então sempre pega os mais próximos
  */
 const PLACE_CATEGORIES = {
-  schools: { type: 'school', maxResults: 5, radius: 2000 },
-  supermarkets: { type: 'supermarket', maxResults: 5, radius: 2000 },
-  hospitals: { type: 'hospital', maxResults: 3, radius: 3000 },
-  pharmacies: { type: 'pharmacy', maxResults: 5, radius: 1500 },
-  banks: { type: 'bank', maxResults: 5, radius: 2000 },
-  restaurants: { type: 'restaurant', maxResults: 5, radius: 1000 },
-  transit_stations: { type: 'transit_station', maxResults: 5, radius: 1000 },
-  parks: { type: 'park', maxResults: 3, radius: 2000 },
-  shopping_malls: { type: 'shopping_mall', maxResults: 3, radius: 5000 },
-  gyms: { type: 'gym', maxResults: 3, radius: 2000 },
+  schools: { type: 'school', maxResults: 5, radius: 20000 },
+  supermarkets: { type: 'supermarket', maxResults: 5, radius: 20000 },
+  hospitals: { type: 'hospital', maxResults: 5, radius: 20000 },
+  pharmacies: { type: 'pharmacy', maxResults: 5, radius: 20000 },
+  banks: { type: 'bank', maxResults: 5, radius: 20000 },
+  restaurants: { type: 'restaurant', maxResults: 5, radius: 20000 },
+  transit_stations: { type: 'transit_station', maxResults: 5, radius: 20000 },
+  parks: { type: 'park', maxResults: 5, radius: 20000 },
+  shopping_malls: { type: 'shopping_mall', maxResults: 5, radius: 20000 },
+  gyms: { type: 'gym', maxResults: 5, radius: 20000 },
 };
 
 /**
