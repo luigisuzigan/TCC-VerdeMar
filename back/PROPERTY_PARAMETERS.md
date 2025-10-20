@@ -180,21 +180,21 @@ Esta documentação detalha todos os parâmetros que cada imóvel possui no sist
 
 ### `zipCode` (String, Opcional)
 - **Descrição**: CEP do imóvel
-- **Obrigatório**: Não
+- **Obrigatório**: Sim
 - **Formato**: `"XXXXX-XXX"` (Brasil) ou sem máscara
 - **Exemplo**: `"88015-000"` ou `"88015000"`
 - **Uso**: Busca de endereço via API, cálculo de distâncias
 
 ### `latitude` (Float, Opcional)
 - **Descrição**: Coordenada de latitude para exibição no mapa
-- **Obrigatório**: Não (recomendado para mapa)
+- **Obrigatório**: Sim (recomendado para mapa)
 - **Formato**: Decimal (-90 a +90)
 - **Exemplo**: `-27.5954`
 - **Uso**: **Exibição no mapa**, filtro por área geográfica
 
 ### `longitude` (Float, Opcional)
 - **Descrição**: Coordenada de longitude para exibição no mapa
-- **Obrigatório**: Não (recomendado para mapa)
+- **Obrigatório**: São (recomendado para mapa)
 - **Formato**: Decimal (-180 a +180)
 - **Exemplo**: `-48.5480`
 - **Uso**: **Exibição no mapa**, filtro por área geográfica
@@ -232,84 +232,294 @@ Esta documentação detalha todos os parâmetros que cada imóvel possui no sist
 - **Uso**: Filtros de banheiros, ícone na listagem
 - **Observação**: Considerar lavabos? (definir critério)
 
-### `guests` (Int)
-- **Descrição**: Capacidade de hóspedes (para aluguel por temporada)
-- **Obrigatório**: Sim
-- **Formato**: Número inteiro
-- **Mínimo**: 0
-- **Exemplo**: `6` (6 pessoas)
-- **Uso**: Filtros para aluguel, informação de capacidade
-- **Observação**: Relevante principalmente para temporada
-
 ---
 
 ## 🛋️ Comodidades e Amenidades
 
 ### `amenities` (String - JSON Array)
-- **Descrição**: Lista de comodidades/amenidades do imóvel
-- **Obrigatório**: Não (padrão: `"[]"`)
-- **Formato**: Array JSON stringificado
-- **Exemplo**: `'["Piscina", "WiFi", "Ar-condicionado", "Churrasqueira", "Garagem"]'`
-- **Uso**: Filtros de comodidades, exibição de ícones
-- **Valores sugeridos**:
+- **Formato**: Array JSON | **Exemplo**: `["Piscina", "WiFi", "2 Vagas"]`
 
-#### 🏊 Lazer e Conforto
-- `"Piscina"`
-- `"Academia"`
-- `"Sauna"`
-- `"Churrasqueira"`
-- `"Área Gourmet"`
-- `"Jardim"`
-- `"Varanda"`
-- `"Sacada"`
-- `"Terraço"`
+**🏊 Lazer:** Piscina • Piscina Aquecida • Hidromassagem/Jacuzzi • Academia • Sauna • Spa • Churrasqueira • Área Gourmet • Forno Pizza • Jardim • Varanda • Sacada • Terraço • Deck • Gazebo • Quadra Poliesportiva • Quadra Tênis • Campo Futebol • Playground • Salão Jogos • Salão Festas • Cinema/Home Theater • Brinquedoteca
 
-#### 🌐 Tecnologia
-- `"WiFi"`
-- `"TV a Cabo"`
-- `"Smart TV"`
+**🌐 Tecnologia:** WiFi • Fibra Óptica • TV Cabo • Smart TV • Som Integrado • Automação • Interfone • Vídeo Porteiro • Portão Eletrônico
+
+**❄️ Climatização:** Ar-condicionado • AC Central • AC Split • Aquecedor • Aquecedor Gás • Aquecedor Solar • Ventilador Teto • Lareira • Lareira Lenha • Lareira Gás
+
+**🚗 Garagem:** Garagem Coberta • Garagem Descoberta • 1 Vaga • 2 Vagas • 3 Vagas • 4+ Vagas • Vaga Visitantes • Carregador Elétrico
+
+**🍳 Cozinha:** Cozinha Equipada • Cozinha Planejada • Cozinha Gourmet • Ilha/Bancada • Geladeira • Freezer • Fogão • Cooktop • Forno Elétrico • Forno Gás • Micro-ondas • Lava-louças • Máquina Lavar • Máquina Secar • Adega • Coifa • Purificador Água
+
+**🔒 Segurança:** Portaria 24h • Segurança 24h • Câmeras • CFTV • Alarme • Cerca Elétrica • Muros Altos • Grades • Porta Blindada • Cofre
+
+**♿ Acessibilidade:** Elevador • Elevador Social • Elevador Serviço • Acessível Cadeirantes • Rampa • Banheiro Adaptado • Corrimãos
+
+**🐕 Pets:** Aceita Pets • Aceita Cães • Aceita Gatos • Pet Place • Playground Infantil • Área Kids
+
+**🏢 Condomínio:** Salão Festas • Academia • Piscina • Coworking • Bicicletário • Lavanderia • Depósito • Zelador
+
+**🌊 Utilidades:** Caixa d'água • Cisterna • Aquecimento Solar • Bomba • Gerador • Energia Solar
+
+**🛏️ Quartos:** Suíte Master • Closet • Banheira • Box Blindex • Ducha • Armários Embutidos • Guarda-roupas
+
+**🏠 Acabamentos:** Pé-direito Alto • Piso Frio • Piso Laminado • Piso Madeira • Porcelanato • Gesso/Sancas • Molduras • Papel Parede • Pintura Nova
+
+> **💡 Sugestão**: Criar categorias de amenidades para melhor organização
+- `"Automação Residencial / Smart Home"`
 - `"Interfone"`
+- `"Vídeo Porteiro"`
 - `"Portão Eletrônico"`
 
 #### ❄️ Climatização
 - `"Ar-condicionado"`
+- `"Ar-condicionado Central"`
+- `"Ar-condicionado Split"`
 - `"Aquecedor"`
+- `"Aquecedor a Gás"`
+- `"Aquecedor Solar"`
 - `"Ventilador de Teto"`
 - `"Lareira"`
+- `"Lareira a Lenha"`
+- `"Lareira a Gás"`
 
-#### 🚗 Estacionamento
-- `"Garagem"`
-- `"Vaga Coberta"`
+#### 🚗 Estacionamento e Garagem
+- `"Garagem Coberta"`
+- `"Garagem Descoberta"`
+- `"1 Vaga"`
 - `"2 Vagas"`
 - `"3 Vagas"`
+- `"4+ Vagas"`
+- `"Vaga para Visitantes"`
+- `"Carregador para Carro Elétrico"`
 
-#### 🏠 Cozinha e Limpeza
+#### � Cozinha e Eletrodomésticos
 - `"Cozinha Equipada"`
+- `"Cozinha Planejada"`
+- `"Cozinha Gourmet"`
+- `"Ilha / Bancada Americana"`
 - `"Geladeira"`
+- `"Freezer"`
 - `"Fogão"`
+- `"Cooktop"`
+- `"Forno Elétrico"`
+- `"Forno a Gás"`
 - `"Micro-ondas"`
-- `"Máquina de Lavar"`
-- `"Máquina de Secar"`
 - `"Lava-louças"`
+- `"Máquina de Lavar Roupa"`
+- `"Máquina de Secar Roupa"`
+- `"Adega Climatizada"`
+- `"Coifa / Depurador"`
+- `"Purificador de Água"`
+- `"Filtro de Água"`
 
 #### 🔒 Segurança
 - `"Portaria 24h"`
+- `"Segurança 24h"`
 - `"Câmeras de Segurança"`
+- `"Circuito Fechado de TV (CFTV)"`
 - `"Alarme"`
 - `"Cerca Elétrica"`
+- `"Muros Altos"`
+- `"Grades nas Janelas"`
+- `"Porta Blindada"`
+- `"Cofre"`
 
 #### ♿ Acessibilidade
 - `"Elevador"`
+- `"Elevador Social"`
+- `"Elevador de Serviço"`
 - `"Acessível para Cadeirantes"`
 - `"Rampa de Acesso"`
+- `"Banheiro Adaptado"`
+- `"Corrimãos"`
 
 #### 🐕 Pets e Família
 - `"Aceita Pets"`
-- `"Playground"`
-- `"Salão de Festas"`
-- `"Quadra Esportiva"`
+- `"Aceita Cães"`
+- `"Aceita Gatos"`
+- `"Pet Place / Área para Pets"`
+- `"Playground Infantil"`
+- `"Área Kids"`
 
-> **💡 Sugestão**: Criar categorias de amenidades para melhor organização
+#### 🏢 Condomínio e Infraestrutura
+- `"Salão de Festas do Condomínio"`
+- `"Academia do Condomínio"`
+- `"Piscina do Condomínio"`
+- `"Espaço Coworking"`
+- `"Bicicletário"`
+- `"Lavanderia Coletiva"`
+- `"Depósito / Closet Privativo"`
+- `"Zelador / Síndico"`
+
+#### 🌊 Água e Utilidades
+- `"Caixa d'água"`
+- `"Cisterna"`
+- `"Aquecimento Solar"`
+- `"Bomba d'água"`
+- `"Gerador"`
+- `"Energia Solar / Painéis Fotovoltaicos"`
+
+#### 🛏️ Quartos e Banheiros
+- `"Suíte Master"`
+- `"Closet"`
+- `"Banheira"`
+- `"Box Blindex"`
+- `"Ducha"`
+- `"Armários Embutidos"`
+- `"Guarda-roupas Embutido"`
+
+#### 🏠 Estrutura e Acabamentos
+- `"Pé-direito Alto"`
+- `"Piso Frio"`
+- `"Piso Laminado"`
+- `"Piso de Madeira"`
+- `"Piso Porcelanato"`
+- `"Gesso / Sancas"`
+- `"Molduras / Rodatetos"`
+- `"Papel de Parede"`
+- `"Pintura Nova"`
+
+---
+
+## 🌤️ Condições Naturais e Características Ambientais
+
+### `naturalConditions` (String - JSON Array) - **NOVO CAMPO**
+- **Descrição**: Condições naturais e características ambientais do imóvel
+- **Obrigatório**: Não (padrão: `"[]"`)
+- **Formato**: Array JSON stringificado
+- **Exemplo**: `'["Vista para o mar", "Ventilação cruzada", "Sol da manhã", "Brisa marítima"]'`
+- **Uso**: Destaque de diferenciais naturais, conforto e bem-estar
+
+#### 🌊 Vista e Localização
+- `"Vista para o mar"`
+- `"Vista panorâmica do mar"`
+- `"Frente para o mar"`
+- `"Pé na areia"`
+- `"Vista para a praia"`
+- `"Vista para a montanha"`
+- `"Vista para o lago"`
+- `"Vista para o rio"`
+- `"Vista para a cidade"`
+- `"Vista para a natureza"`
+- `"Vista para o verde"`
+- `"Vista para o parque"`
+- `"Vista desobstruída"`
+- `"Vista privilegiada"`
+
+#### 💨 Ventilação e Circulação de Ar
+- `"Ventilação natural"`
+- `"Ventilação cruzada"`
+- `"Brisa marítima"`
+- `"Brisa constante"`
+- `"Circulação de ar excelente"`
+- `"Ambientes arejados"`
+- `"Janelas amplas"`
+- `"Portas de vidro"`
+
+#### ☀️ Iluminação e Orientação Solar
+- `"Sol da manhã"`
+- `"Sol da tarde"`
+- `"Sol o dia todo"`
+- `"Muito sol"`
+- `"Iluminação natural abundante"`
+- `"Claridade natural"`
+- `"Face norte"` (mais sol no Brasil)
+- `"Face sul"` (mais sombra)
+- `"Face leste"` (sol da manhã)
+- `"Face oeste"` (sol da tarde)
+- `"Claraboias / Luz zenital"`
+
+#### 🌡️ Clima e Conforto Térmico
+- `"Clima ameno"`
+- `"Clima tropical"`
+- `"Temperatura agradável"`
+- `"Fresco no verão"`
+- `"Quente no inverno"`
+- `"Sombra natural de árvores"`
+- `"Microclima agradável"`
+
+#### 🌳 Natureza e Meio Ambiente
+- `"Área verde"`
+- `"Arborizado"`
+- `"Jardim natural"`
+- `"Mata nativa"`
+- `"Árvores frutíferas"`
+- `"Pomar"`
+- `"Horta"`
+- `"Contato com a natureza"`
+- `"Fauna local"`
+- `"Pássaros"`
+- `"Borboletas"`
+- `"Ecossistema preservado"`
+
+#### 🏞️ Topografia e Terreno
+- `"Terreno plano"`
+- `"Terreno em declive"`
+- `"Terreno em aclive"`
+- `"Elevado / Ponto alto"`
+- `"Vista de cima"`
+- `"Solo firme"`
+- `"Solo drenado"`
+
+#### 🌅 Características Especiais
+- `"Nascer do sol"`
+- `"Pôr do sol"`
+- `"Céu estrelado"`
+- `"Noite tranquila"`
+- `"Silêncio / Ambiente calmo"`
+- `"Privacidade"`
+- `"Área isolada"`
+- `"Exclusividade"`
+
+#### 🏖️ Proximidade com Praia (para imóveis à beira-mar)
+- `"A 50m da praia"`
+- `"A 100m da praia"`
+- `"A 200m da praia"`
+- `"A 500m da praia"`
+- `"Caminhada até a praia"`
+- `"Acesso direto à praia"`
+- `"Praia privativa"`
+- `"Som das ondas"`
+
+#### 💧 Água e Recursos Naturais
+- `"Água de nascente"`
+- `"Poço artesiano"`
+- `"Rio próximo"`
+- `"Córrego"`
+- `"Cachoeira próxima"`
+- `"Lagos naturais"`
+
+#### � Proximidade à Natureza
+- `"Próximo a lago"`
+- `"Próximo a lagoa"`
+- `"Próximo a praça"`
+- `"Próximo a parque"`
+- `"Próximo a trilha"`
+- `"Próximo a reserva ambiental"`
+- `"Próximo a área de preservação"`
+- `"Próximo a bosque"`
+- `"Próximo a mata atlântica"`
+- `"Próximo a serra"`
+- `"Próximo a montanha"`
+- `"Próximo a rio"`
+- `"Próximo a praia"`
+- `"Próximo a cachoeira"`
+- `"Vista para área verde"`
+- `"Rua arborizada"`
+- `"Bairro com praças"`
+- `"Ciclovia próxima"`
+- `"Calçadão à beira-mar"`
+- `"Orla próxima"`
+
+#### �🌿 Sustentabilidade e Ecologia
+- `"Casa sustentável"`
+- `"Bioconstrução"`
+- `"Materiais naturais"`
+- `"Captação de água da chuva"`
+- `"Compostagem"`
+- `"Fossa ecológica"`
+- `"Biodigestor"`
+- `"Energia renovável"`
+- `"Baixo impacto ambiental"`
 
 ---
 
@@ -447,7 +657,7 @@ Esta documentação detalha todos os parâmetros que cada imóvel possui no sist
 - 🏖️ **Praias**: Nome e distância
 - 🏋️ **Academias/Esportes**: Nome e distância
 - 🛍️ **Shopping Centers**: Nome e distância
-- ⛪ **Igrejas/Templos**: Nome e distância
+- ⛪ **Igrejas**: Nome e distância
 
 ---
 

@@ -61,6 +61,9 @@ model Property {
   style        String?  // "Moderno", "Rústico", "Container", "Luxo", etc.
   nearbyPlaces String?  @db.LongText // JSON: {schools: [...], supermarkets: [...], etc.}
   
+  // Condições Naturais
+  naturalConditions String? @default("[]") // JSON: ["Vista para o mar", "Ventilação natural", "Sol da manhã"]
+  
   // Mídia
   images       String   // JSON: ["url1", "url2", "url3"]
   mainImage    String?
