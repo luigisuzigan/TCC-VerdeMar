@@ -1,5 +1,6 @@
 import { Outlet, useLocation } from "react-router-dom";
 import Header from "../components/layout/Header/Header";
+import Footer from "../components/layout/Footer";
 
 export default function MainLayout() {
   const location = useLocation();
@@ -17,6 +18,7 @@ export default function MainLayout() {
         </>
       )}
       <Outlet />
+      {!isAuthPage && <Footer />}
     </>
   );
 }
