@@ -285,7 +285,7 @@ function PropertyCard({ p }) {
             {currency.format(p.price)}
           </div>
           <Link
-            to={`/imovel/${p.id}`}
+            to={`/property/${p.id}`}
             className="rounded-full bg-sky-600 px-3 py-1.5 text-[12px] font-semibold text-white hover:bg-sky-700"
           >
             Ver detalhes
