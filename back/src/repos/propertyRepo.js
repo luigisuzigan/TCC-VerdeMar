@@ -1,14 +1,49 @@
 import prisma from '../prisma.js';
 
 function toRow(data) {
-  return { ...data, images: JSON.stringify(data.images ?? []), published: !!data.published };
+  const result = { ...data, published: !!data.published };
+  
+  // Converter images para JSON string se necessário
+  if (data.images) {
+    result.images = typeof data.images === 'string' ? data.images : JSON.stringify(data.images);
+  } else {
+    result.images = '[]';
+  }
+  
+  // Converter amenities para JSON string se necessário
+  if (data.amenities) {
+    result.amenities = typeof data.amenities === 'string' ? data.amenities : JSON.stringify(data.amenities);
+  } else {
+    result.amenities = '[]';
+  }
+  
+  return result;
 }
 
 function fromRow(row) {
   if (!row) return row;
-  let images = [];
-  try { images = Array.isArray(row.images) ? row.images : JSON.parse(row.images || '[]'); } catch {}
-  return { ...row, images };
+  
+  const result = { ...row };
+  
+  // Parse images
+  try {
+    result.images = Array.isArray(row.images) 
+      ? row.images 
+      : JSON.parse(row.images || '[]');
+  } catch {
+    result.images = [];
+  }
+  
+  // Parse amenities
+  try {
+    result.amenities = Array.isArray(row.amenities)
+      ? row.amenities
+      : JSON.parse(row.amenities || '[]');
+  } catch {
+    result.amenities = [];
+  }
+  
+  return result;
 }
 
 export async function listProperties({ 
