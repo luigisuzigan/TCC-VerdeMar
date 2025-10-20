@@ -31,9 +31,9 @@ Esta documentação detalha todos os parâmetros que cada imóvel possui no sist
 - **Exemplo**: `"Apartamento Luxuoso Vista Mar - 3 Quartos"`
 - **Uso**: Exibido como título principal nos cards e página de detalhes
 
-### `description` (String, Opcional)
+### `description` (String)
 - **Descrição**: Descrição detalhada do imóvel
-- **Obrigatório**: Sim
+- **Obrigatório**: Não
 - **Limite**: Até 800 caracteres
 - **Exemplo**: `"Apartamento completamente mobiliado com vista panorâmica para o mar. Localizado em condomínio de alto padrão com academia, piscina e área gourmet."`
 - **Uso**: Exibido na página de detalhes
@@ -152,7 +152,7 @@ Esta documentação detalha todos os parâmetros que cada imóvel possui no sist
 
 ### `address` (String)
 - **Descrição**: Endereço completo (rua, número, complemento)
-- **Obrigatório**: Não (padrão: `""`)
+- **Obrigatório**: Sim (padrão: `""`)
 - **Exemplo**: `"Rua das Flores, 123, Apto 501"`
 - **Uso**: Exibido na página de detalhes
 - **Observação**: Pode ser ocultado por privacidade até contato
@@ -166,7 +166,7 @@ Esta documentação detalha todos os parâmetros que cada imóvel possui no sist
 
 ### `state` (String)
 - **Descrição**: Estado/UF do imóvel
-- **Obrigatório**: Não (padrão: `""`)
+- **Obrigatório**: Sim 
 - **Exemplo**: `"Santa Catarina"` ou `"SC"`
 - **Uso**: Filtros avançados, breadcrumb
 - **Sugestão**: Usar sigla (2 letras) para padronização
@@ -177,6 +177,13 @@ Esta documentação detalha todos os parâmetros que cada imóvel possui no sist
 - **Exemplo**: `"Brasil"`
 - **Uso**: Filtros internacionais (futuro), exibição
 - **Sugestão**: Padronizar em português
+
+### `neighborhood` (String, Opcional)
+- **Descrição**: Bairro do imóvel
+- **Obrigatório**: Não
+- **Exemplo**: `"Lagoa da Conceição"`
+- **Uso**: Filtros de localização mais específicos, exibição nos cards
+- **Observação**: Campo importante para busca por região
 
 ### `zipCode` (String, Opcional)
 - **Descrição**: CEP do imóvel
@@ -194,7 +201,7 @@ Esta documentação detalha todos os parâmetros que cada imóvel possui no sist
 
 ### `longitude` (Float, Opcional)
 - **Descrição**: Coordenada de longitude para exibição no mapa
-- **Obrigatório**: São (recomendado para mapa)
+- **Obrigatório**: Sim (recomendado para mapa)
 - **Formato**: Decimal (-180 a +180)
 - **Exemplo**: `-48.5480`
 - **Uso**: **Exibição no mapa**, filtro por área geográfica
@@ -231,6 +238,26 @@ Esta documentação detalha todos os parâmetros que cada imóvel possui no sist
 - **Exemplo**: `2` (2 banheiros)
 - **Uso**: Filtros de banheiros, ícone na listagem
 - **Observação**: Considerar lavabos? (definir critério)
+
+### `suites` (Int)
+- **Descrição**: Número de suítes (quartos com banheiro privativo)
+- **Obrigatório**: Sim
+- **Formato**: Número inteiro
+- **Padrão**: `0`
+- **Mínimo**: 0
+- **Exemplo**: `1` (1 suíte)
+- **Uso**: Filtros de suítes, diferencial do imóvel
+- **Observação**: Suítes já estão incluídas em `beds`
+
+### `parkingSpaces` (Int)
+- **Descrição**: Número de vagas de garagem/estacionamento
+- **Obrigatório**: Sim
+- **Formato**: Número inteiro
+- **Padrão**: `0`
+- **Mínimo**: 0
+- **Exemplo**: `2` (2 vagas)
+- **Uso**: Filtros de vagas, ícone na listagem
+- **Observação**: Vagas cobertas e descobertas somadas
 
 ---
 
@@ -548,144 +575,16 @@ Esta documentação detalha todos os parâmetros que cada imóvel possui no sist
 
 ---
 
-## �️ Informações de Proximidade - **NOVA SEÇÃO**
-
-### `nearbyPlaces` (String - JSON Object) - **NOVO CAMPO**
-- **Descrição**: Informações sobre locais próximos ao imóvel
-- **Obrigatório**: Não (padrão: `"{}"`)
-- **Formato**: Objeto JSON stringificado com categorias
-- **Exemplo**:
-```json
-{
-  "schools": [
-    {
-      "name": "Escola Municipal João da Silva",
-      "distance": "500m",
-      "type": "Pública",
-      "level": "Fundamental"
-    },
-    {
-      "name": "Colégio Santa Maria",
-      "distance": "1.2km",
-      "type": "Particular",
-      "level": "Ensino Médio"
-    }
-  ],
-  "supermarkets": [
-    {
-      "name": "Supermercado Angeloni",
-      "distance": "300m"
-    },
-    {
-      "name": "Mercado Central",
-      "distance": "800m"
-    }
-  ],
-  "hospitals": [
-    {
-      "name": "Hospital São José",
-      "distance": "2.5km",
-      "type": "Particular"
-    }
-  ],
-  "pharmacies": [
-    {
-      "name": "Farmácia Santa Cruz",
-      "distance": "200m"
-    }
-  ],
-  "banks": [
-    {
-      "name": "Banco do Brasil",
-      "distance": "600m"
-    }
-  ],
-  "restaurants": [
-    {
-      "name": "Restaurante Sabor do Mar",
-      "distance": "400m",
-      "cuisine": "Frutos do Mar"
-    }
-  ],
-  "publicTransport": [
-    {
-      "name": "Parada de Ônibus - Linha 101",
-      "distance": "150m"
-    }
-  ],
-  "parks": [
-    {
-      "name": "Parque Municipal",
-      "distance": "1km"
-    }
-  ],
-  "beaches": [
-    {
-      "name": "Praia de Jurerê",
-      "distance": "3km"
-    }
-  ],
-  "gyms": [
-    {
-      "name": "Academia Corpo e Forma",
-      "distance": "500m"
-    }
-  ]
-}
-```
-
-**Uso**: Exibição na página de detalhes, seção "O que há por perto"
-
-**Interface no Formulário**:
-- Seção expansível "Locais Próximos"
-- Para cada categoria, botão "+ Adicionar [Escola/Supermercado/etc]"
-- Campos por local:
-  - Nome (texto)
-  - Distância (texto com unidade: m/km)
-  - Tipo (dropdown opcional)
-  - Outros detalhes conforme categoria
-
-**Categorias sugeridas**:
-- 🏫 **Escolas**: Tipo (Pública/Particular), Nível (Infantil/Fundamental/Médio/Superior)
-- 🛒 **Supermercados**: Nome e distância
-- 🏥 **Hospitais/Clínicas**: Tipo (Público/Particular/Convênio)
-- 💊 **Farmácias**: Nome e distância
-- 🏦 **Bancos/Caixas Eletrônicos**: Nome e distância
-- 🍽️ **Restaurantes/Bares**: Tipo de culinária
-- 🚌 **Transporte Público**: Linhas de ônibus, metrô
-- 🌳 **Parques/Áreas de Lazer**: Nome e distância
-- 🏖️ **Praias**: Nome e distância
-- 🏋️ **Academias/Esportes**: Nome e distância
-- 🛍️ **Shopping Centers**: Nome e distância
-- ⛪ **Igrejas**: Nome e distância
-
----
-
-## �📊 Métricas e Estatísticas
+## 📊 Métricas e Estatísticas
 
 ### `rating` (Float, Opcional)
-- **Descrição**: Avaliação média do imóvel (calculada)
+- **Descrição**: Avaliação do imóvel feita por especialista
 - **Obrigatório**: Não (padrão: `0`)
-- **Formato**: Decimal (1.0 a 5.0)
-- **Exemplo**: `4.7`
-- **Uso**: Exibição de estrelas, ordenação por avaliação
-- **Cálculo**: Média das avaliações em `Review`
-
-### `reviewCount` (Int)
-- **Descrição**: Número total de avaliações
-- **Obrigatório**: Não (padrão: `0`)
-- **Formato**: Número inteiro
-- **Exemplo**: `23`
-- **Uso**: Exibição "(4.7 ⭐ - 23 avaliações)"
-- **Cálculo**: Contador de reviews relacionados
-
-### `viewCount` (Int)
-- **Descrição**: Número de visualizações do imóvel
-- **Obrigatório**: Não (padrão: `0`)
-- **Formato**: Número inteiro
-- **Exemplo**: `154`
-- **Uso**: Analytics, ordenação por popularidade
-- **Incremento**: A cada visualização da página de detalhes
+- **Formato**: Decimal (0.0 a 10.0)
+- **Exemplo**: `8.5`
+- **Uso**: Nota de qualidade do imóvel, ordenação por avaliação
+- **Quem avalia**: Especialista/Corretor certificado
+- **Critérios**: Localização, estado de conservação, infraestrutura, acabamentos, potencial de valorização
 
 ---
 
@@ -698,14 +597,6 @@ Esta documentação detalha todos os parâmetros que cada imóvel possui no sist
 - **Valores**: `true` ou `false`
 - **Uso**: Filtro principal (só mostra se `published = true`)
 - **Observação**: Rascunhos ficam com `false`
-
-### `featured` (Boolean)
-- **Descrição**: Se o imóvel é destaque na home
-- **Obrigatório**: Sim
-- **Padrão**: `false`
-- **Valores**: `true` ou `false`
-- **Uso**: Seção "Imóveis em Destaque" na página inicial
-- **Controle**: Admin/Seller pode marcar imóveis premium
 
 ---
 
@@ -841,67 +732,45 @@ async function fetchNearbyPlaces(lat, lng, radius = 2000) {
 
 ---
 
-## �📋 Campos Faltando / Sugestões de Melhoria
+## 📋 Campos Sugeridos para Implementação Futura
 
-### ❌ Campos que podem estar faltando:
+### ❌ Campos que podem ser adicionados no futuro:
 
-1. **`neighborhood` (String)** - Bairro do imóvel
-   - Importante para filtros mais específicos
-   - Exemplo: `"Lagoa da Conceição"`
-
-2. **`parkingSpaces` (Int)** - Número de vagas de garagem
-   - Atualmente só tem em amenities como texto
-   - Exemplo: `2` (2 vagas)
-   - Uso: Filtro de vagas
-
-3. **`suites` (Int)** - Número de suítes
-   - Diferente de quartos comuns
-   - Exemplo: `1` (1 suíte)
-   - Uso: Filtro de suítes
-
-4. **`propertyCondition` (String)** - Estado do imóvel
+1. **`propertyCondition` (String)** - Estado do imóvel
    - Valores: `"Novo"`, `"Seminovo"`, `"Usado"`, `"Reformado"`
    - Uso: Filtro de condição
 
-5. **`condoAmenities` (String - JSON)** - Amenidades do condomínio
+2. **`condoAmenities` (String - JSON)** - Amenidades do condomínio
    - Separar amenidades do imóvel das do condomínio
    - Exemplo: `["Piscina do Condomínio", "Salão de Festas", "Quadra"]`
 
-6. **`condoFee` (Float)** - Valor do condomínio
-   - Importante para decisão de compra/aluguel
+3. **`condoFee` (Float)** - Valor do condomínio
+   - Importante para decisão de compra
    - Exemplo: `450.00`
 
-7. **`iptu` (Float)** - Valor do IPTU anual ou mensal
+4. **`iptu` (Float)** - Valor do IPTU anual ou mensal
    - Custos adicionais importantes
    - Exemplo: `1200.00` (anual)
 
-8. **`floor` (Int)** - Andar do apartamento
+5. **`floor` (Int)** - Andar do apartamento
    - Relevante para apartamentos
    - Exemplo: `5` (5º andar)
 
-9. **`totalFloors` (Int)** - Total de andares do prédio
+6. **`totalFloors` (Int)** - Total de andares do prédio
    - Contexto do imóvel
    - Exemplo: `12` (12 andares)
 
-10. **`yearBuilt` (Int)** - Ano de construção
-    - Idade do imóvel
-    - Exemplo: `2018`
+7. **`yearBuilt` (Int)** - Ano de construção
+   - Idade do imóvel
+   - Exemplo: `2018`
 
-11. **`purpose` (String)** - Finalidade
-    - Valores: `"Venda"`, `"Aluguel"`, `"Temporada"`, `"Venda e Aluguel"`
-    - **IMPORTANTE**: Define como o imóvel será usado
+8. **`orientation` (String)** - Orientação solar
+   - Valores: `"Norte"`, `"Sul"`, `"Leste"`, `"Oeste"`, `"Nordeste"`, etc.
+   - Relevante para conforto térmico
 
-12. **`orientation` (String)** - Orientação solar
-    - Valores: `"Norte"`, `"Sul"`, `"Leste"`, `"Oeste"`, `"Nordeste"`, etc.
-    - Relevante para conforto térmico
-
-13. **`furnished` (Boolean)** - Se é mobiliado
-    - Valores: `true` ou `false`
-    - Uso: Filtro importante para temporada
-
-14. **`availableFrom` (DateTime)** - Data de disponibilidade
-    - Para aluguéis/temporada
-    - Exemplo: `"2025-11-01T00:00:00.000Z"`
+9. **`furnished` (Boolean)** - Se é mobiliado
+   - Valores: `true` ou `false`
+   - Uso: Filtro importante
 
 ---
 
@@ -911,9 +780,12 @@ async function fetchNearbyPlaces(lat, lng, radius = 2000) {
 {
   "id": "550e8400-e29b-41d4-a716-446655440000",
   "userId": "123e4567-e89b-12d3-a456-426614174000",
+  
   "title": "Apartamento Luxuoso Vista Mar - 3 Quartos",
   "description": "Apartamento completamente mobiliado com vista panorâmica para o mar. Localizado em condomínio de alto padrão com academia, piscina e área gourmet.",
+  "category": "Residencial",
   "type": "Apartamento",
+  "style": "Moderno",
   "price": 850000.00,
   "currency": "BRL",
   
@@ -921,6 +793,7 @@ async function fetchNearbyPlaces(lat, lng, radius = 2000) {
   "city": "Florianópolis",
   "state": "SC",
   "country": "Brasil",
+  "neighborhood": "Lagoa da Conceição",
   "zipCode": "88015-000",
   "latitude": -27.5954,
   "longitude": -48.5480,
@@ -928,18 +801,18 @@ async function fetchNearbyPlaces(lat, lng, radius = 2000) {
   "area": 120,
   "beds": 3,
   "baths": 2,
-  "guests": 6,
-  "amenities": "[\"Piscina\", \"WiFi\", \"Ar-condicionado\", \"Churrasqueira\", \"Garagem\", \"Varanda\", \"Portaria 24h\"]",
+  "suites": 1,
+  "parkingSpaces": 2,
+  "amenities": "[\"Piscina\", \"WiFi\", \"Ar-condicionado\", \"Churrasqueira\", \"Varanda\", \"Portaria 24h\"]",
+  "naturalConditions": "[\"Vista para o mar\", \"Ventilação cruzada\", \"Sol da manhã\", \"Brisa marítima\"]",
   
   "images": "[\"https://exemplo.com/img1.jpg\", \"https://exemplo.com/img2.jpg\", \"https://exemplo.com/img3.jpg\"]",
   "mainImage": "https://exemplo.com/capa.jpg",
   
-  "rating": 4.7,
-  "reviewCount": 23,
+  "rating": 8.5,
   "viewCount": 154,
   
   "published": true,
-  "featured": false,
   
   "createdAt": "2025-10-17T14:30:00.000Z",
   "updatedAt": "2025-10-17T15:45:00.000Z"
@@ -950,20 +823,20 @@ async function fetchNearbyPlaces(lat, lng, radius = 2000) {
 
 ## 🎯 Próximos Passos
 
-1. **Revisar campos faltantes** e decidir quais adicionar
-2. **Padronizar valores** de campos como `type`, `state`, `amenities`
-3. **Criar enums** para campos com valores fixos
-4. **Atualizar schema do Prisma** com novos campos
-5. **Migrar dados existentes** se necessário
-6. **Atualizar formulários** de criação/edição de imóveis
-7. **Atualizar filtros** na página de busca
+1. ✅ **Campos novos adicionados**: `category`, `neighborhood`, `suites`, `parkingSpaces`
+2. ✅ **Campos removidos**: `featured`, `reviewCount`, `guests`
+3. ✅ **Rating atualizado**: Sistema 0-10 (avaliação de especialista)
+4. 🔄 **Executar migration**: Aplicar mudanças no banco de dados
+5. 📝 **Atualizar formulários**: Adicionar campos novos na interface de criação/edição
+6. 🔍 **Atualizar filtros**: Incluir filtros por `category`, `suites`, `parkingSpaces`, `neighborhood`
+7. 🗺️ **Implementar Google Maps API**: Para busca automática de locais próximos
 
 ---
 
 ## 📝 Notas Importantes
 
 - ⚠️ **Campos obrigatórios** devem sempre ser validados
-- 🔍 **Campos indexados** (`city`, `published`, `featured`) melhoram performance de busca
+- 🔍 **Campos indexados** (`city`, `published`) melhoram performance de busca
 - 📍 **Latitude/Longitude** são essenciais para funcionalidade do mapa
 - 🏷️ **Amenidades** devem ser padronizadas para facilitar filtros
 - 💰 **Preço** deve ser armazenado sem formatação (apenas número)

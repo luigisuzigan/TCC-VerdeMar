@@ -3,140 +3,152 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider          = "mysql"
+  url               = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
 }
 
-// ========================================
-// 👤 USER - Usuários do sistema
-// ========================================
 model User {
-  id           String   @id @default(uuid())
+  id           String     @id @default(uuid())
   name         String
-  email        String   @unique
+  email        String     @unique
   passwordHash String
   phone        String?
   avatar       String?
   bio          String?
-  role         String   @default("USER") // USER, SELLER, ADMIN
-  isActive     Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  
-  // Relacionamentos
-  properties   Property[]
+  role         String     @default("USER")
+  isActive     Boolean    @default(true)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
   favorites    Favorite[]
+  properties   Property[]
   reviews      Review[]
 }
 
-// ========================================
-// 🏠 PROPERTY - Propriedades/Imóveis
-// ========================================
 model Property {
-  id           String   @id @default(uuid())
-  userId       String   // FK: Dono da propriedade
-  title        String
-  description  String?
-  type         String   @default("Apartamento") // Casa, Apartamento, Chalé, Cobertura, Terreno
-  price        Float
-  currency     String   @default("BRL")
-  
-  // Localização
-  address      String   @default("")
-  city         String
-  state        String   @default("")
-  country      String
-  zipCode      String?
-  latitude     Float?
-  longitude    Float?
-  
-  // Características
-  area         Int      // m²
-  beds         Int
-  baths        Int
-  guests       Int
-  amenities    String   @default("[]") // JSON: ["Piscina", "WiFi", "Ar-condicionado"]
-  
-  // Estilo e Proximidade
-  style        String?  // "Moderno", "Rústico", "Container", "Luxo", etc.
-  nearbyPlaces String?  // JSON: {schools: [...], supermarkets: [...], etc.}
-  
-  // Condições Naturais
-  naturalConditions String? @default("[]") // JSON: ["Vista para o mar", "Ventilação natural", "Sol da manhã"]
-  
-  // Mídia
-  images       String   // JSON: ["url1", "url2", "url3"]
-  mainImage    String?
-  
-  // Métricas (calculadas)
-  rating       Float?   @default(0)
-  reviewCount  Int      @default(0)
-  viewCount    Int      @default(0)
-  
-  // Status
-  published    Boolean  @default(false)
-  featured     Boolean  @default(false) // Destaque na home
-  
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  
-  // Relacionamentos
-  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  favorites    Favorite[]
-  reviews      Review[]
-  
-  // Índices para performance
+  id                String         @id @default(uuid())
+  userId            String
+  title             String
+  description       String?
+  type              String         @default("Apartamento")
+  price             Float
+  currency          String         @default("BRL")
+  address           String         @default("")
+  city              String
+  state             String         @default("")
+  country           String
+  zipCode           String?
+  latitude          Float?
+  longitude         Float?
+  area              Int
+  beds              Int
+  baths             Int
+  amenities         String         @default("[]")
+  images            String
+  mainImage         String?
+  rating            Float?         @default(0)
+  viewCount         Int            @default(0)
+  published         Boolean        @default(false)
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  naturalConditions String?        @default("[]")
+  nearbyPlaces      String?
+  style             String?
+  category          String?        @default("Venda")
+  parkingSpaces     Int            @default(0)
+  suites            Int            @default(0)
+  featured          Boolean        @default(false)
+  guests            Int            @default(4)
+  reviewCount       Int            @default(0)
+  favorites         Favorite[]
+  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  PropertyView      PropertyView[]
+  reviews           Review[]
+
   @@index([userId])
   @@index([city])
   @@index([published])
   @@index([featured])
 }
 
-// ========================================
-// ⭐ FAVORITE - Favoritos (Tabela Pivot M:N)
-// ========================================
 model Favorite {
   id         String   @id @default(uuid())
-  userId     String   // FK: Usuário que favoritou
-  propertyId String   // FK: Propriedade favoritada
+  userId     String
+  propertyId String
   createdAt  DateTime @default(now())
-  
-  // Relacionamentos
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-  
-  // Constraints
-  @@unique([userId, propertyId]) // Não permitir favoritar 2x a mesma propriedade
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, propertyId])
   @@index([userId])
   @@index([propertyId])
 }
 
-// ========================================
-// 💬 REVIEW - Avaliações de propriedades
-// ========================================
 model Review {
   id             String   @id @default(uuid())
-  userId         String   // FK: Quem avaliou
-  propertyId     String   // FK: Propriedade avaliada
-  
-  // Avaliações (1-5 estrelas)
-  rating         Float    // Nota geral
-  cleanRating    Float?   // Limpeza
-  valueRating    Float?   // Custo-benefício
-  locationRating Float?   // Localização
-  
-  comment        String?  // Comentário opcional
+  userId         String
+  propertyId     String
+  rating         Float
+  cleanRating    Float?
+  valueRating    Float?
+  locationRating Float?
+  comment        String?
   isPublished    Boolean  @default(true)
-  
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
-  
-  // Relacionamentos
-  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   property       Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-  
-  // Constraints
-  @@unique([userId, propertyId]) // Um usuário só pode avaliar cada propriedade 1x
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, propertyId])
   @@index([propertyId])
   @@index([rating])
+}
+
+model ActivityLog {
+  id         String   @id
+  userId     String?
+  action     String
+  entityType String?
+  entityId   String?
+  metadata   String?
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+
+  @@index([action])
+  @@index([createdAt])
+  @@index([userId])
+}
+
+model ContactMessage {
+  id         String    @id
+  name       String
+  email      String
+  phone      String?
+  subject    String?
+  message    String
+  propertyId String?
+  status     String    @default("NEW")
+  reply      String?
+  repliedAt  DateTime?
+  repliedBy  String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime
+
+  @@index([createdAt])
+  @@index([propertyId])
+  @@index([status])
+}
+
+model PropertyView {
+  id         String   @id
+  propertyId String
+  userId     String?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+  Property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@index([createdAt])
+  @@index([propertyId])
+  @@index([userId])
 }
