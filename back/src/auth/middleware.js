@@ -1,13 +1,13 @@
 import jwt from 'jsonwebtoken';
 import { findUserById } from '../repos/userRepo.js';
 
-export function authMiddleware(req, res, next) {
+export async function authMiddleware(req, res, next) {
   const header = req.headers['authorization'] || '';
   const token = header.startsWith('Bearer ') ? header.slice(7) : null;
   if (!token) return res.status(401).json({ error: 'Unauthorized' });
   try {
     const payload = jwt.verify(token, process.env.JWT_SECRET || 'dev');
-    const user = findUserById(payload.sub);
+    const user = await findUserById(payload.sub);
     if (!user) return res.status(401).json({ error: 'Unauthorized' });
     req.user = { id: user.id, email: user.email, name: user.name, role: user.role };
     next();

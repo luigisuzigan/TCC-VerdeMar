@@ -16,6 +16,10 @@ import SellerDashboard from '../pages/Seller/Dashboard.jsx';
 import SellerPropertiesList from '../pages/Seller/Properties/List.jsx';
 import SellerPropertyForm from '../pages/Seller/Properties/Form.jsx';
 import AdminDashboard from '../pages/Admin/Dashboard.jsx';
+import AdminPropertiesList from '../pages/Admin/Properties/List.jsx';
+import AdminPropertyForm from '../pages/Admin/Properties/Form.jsx';
+import AdminUsersList from '../pages/Admin/Users/List.jsx';
+import AdminSettings from '../pages/Admin/Settings/index.jsx';
 
 // Guards
 function RequireAuth({ children }) {
@@ -34,7 +38,6 @@ function RequireAdmin({ children }) {
 function RequireSeller({ children }) {
   const { user } = useAuth();
   if (!user) return <Navigate to="/login" replace />;
-  // Allow admins as well for convenience in dev
   if (!(user.role === 'SELLER' || user.role === 'ADMIN')) return <Navigate to="/" replace />;
   return children;
 }
@@ -53,27 +56,22 @@ export default function AppRoutes() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/property/:id" element={<PropertyDetails />} />
-          {/* NOVO: Painel do usuário */}
           <Route path="/account" element={<RequireAuth><Account /></RequireAuth>} />
-          {/* Seller Dashboard */}
           <Route path="/seller" element={<RequireSeller><SellerDashboard /></RequireSeller>} />
           <Route path="/seller/properties" element={<RequireSeller><SellerPropertiesList /></RequireSeller>} />
           <Route path="/seller/properties/new" element={<RequireSeller><SellerPropertyForm /></RequireSeller>} />
           <Route path="/seller/properties/:id" element={<RequireSeller><SellerPropertyForm /></RequireSeller>} />
         </Route>
 
-        {/* Admin Routes - Separate Layout */}
         <Route element={<RequireAdmin><AdminLayout /></RequireAdmin>}>
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/properties" element={<AdminPropertiesList />} />
           <Route path="/admin/properties/new" element={<AdminPropertyForm />} />
           <Route path="/admin/properties/:id" element={<AdminPropertyForm />} />
+          <Route path="/admin/users" element={<AdminUsersList />} />
+          <Route path="/admin/settings" element={<AdminSettings />} />
         </Route>
       </Routes>
     </Router>
   );
 }
-
-// Lazy-ish local imports to avoid circular issues
-import AdminPropertiesList from '../pages/Admin/Properties/List.jsx';
-import AdminPropertyForm from '../pages/Admin/Properties/Form.jsx';

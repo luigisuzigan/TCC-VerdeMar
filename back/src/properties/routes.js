@@ -83,26 +83,42 @@ router.get('/:id', [param('id').isString()], async (req, res) => {
 
 const propertyValidators = [
   body('title').isString().isLength({ min: 1, max: 120 }),
-  body('description').optional().isString().isLength({ max: 800 }),
+  body('description').optional().isString().isLength({ max: 2000 }),
+  body('type').optional().isString().isLength({ max: 50 }),
   body('price').isFloat({ min: 0 }),
-  body('currency').isIn(['BRL']),
+  body('currency').isIn(['BRL', 'USD', 'EUR']),
+  body('address').optional().isString().isLength({ max: 200 }),
   body('city').isString().isLength({ min: 1, max: 80 }),
+  body('state').optional().isString().isLength({ max: 50 }),
   body('country').isString().isLength({ min: 1, max: 80 }),
+  body('zipCode').optional().isString().isLength({ max: 20 }),
+  body('latitude').optional().isFloat({ min: -90, max: 90 }),
+  body('longitude').optional().isFloat({ min: -180, max: 180 }),
   body('area').isInt({ min: 0 }).toInt(),
   body('beds').isInt({ min: 0 }).toInt(),
   body('baths').isInt({ min: 0 }).toInt(),
   body('guests').isInt({ min: 0 }).toInt(),
+  body('amenities').optional().isString(), // JSON string
+  body('style').optional().isString().isLength({ max: 50 }),
+  body('images').optional().isString(), // JSON string
+  body('mainImage').optional().isURL(),
   body('rating').optional().isFloat({ min: 0, max: 5 }).toFloat(),
-  body('reviews').optional().isInt({ min: 0 }).toInt(),
-  body('images').isArray(),
-  body('images.*').isURL(),
+  body('reviewCount').optional().isInt({ min: 0 }).toInt(),
   body('published').optional().isBoolean().toBoolean(),
+  body('featured').optional().isBoolean().toBoolean(),
 ];
 
 router.post('/', authMiddleware, requireAdmin, propertyValidators, async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
-  const item = await createProperty(req.body);
+  
+  // Adicionar userId do usuário autenticado
+  const data = {
+    ...req.body,
+    userId: req.user.id
+  };
+  
+  const item = await createProperty(data);
   res.status(201).json(item);
 });
 
@@ -139,7 +155,7 @@ router.post('/:id/nearby-places', authMiddleware, requireAdmin, [param('id').isS
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const propertyId = parseInt(req.params.id);
+  const propertyId = req.params.id;
     
     // Verificar se o imóvel existe
     const property = await prisma.property.findUnique({
@@ -160,7 +176,7 @@ router.post('/:id/nearby-places', authMiddleware, requireAdmin, [param('id').isS
     console.log(`🔍 Buscando locais próximos para imóvel #${propertyId}`);
 
     // Buscar e atualizar locais próximos
-    const updated = await updatePropertyNearbyPlaces(prisma, propertyId);
+  const updated = await updatePropertyNearbyPlaces(prisma, propertyId);
     
     const nearbyPlaces = JSON.parse(updated.nearbyPlaces || '{}');
     const totalPlaces = Object.values(nearbyPlaces).reduce((sum, arr) => sum + arr.length, 0);

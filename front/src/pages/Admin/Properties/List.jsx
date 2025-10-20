@@ -42,10 +42,17 @@ export default function AdminPropertiesList() {
       };
       
       const { data } = await api.get('/properties', { params });
-      setProperties(data.properties || []);
-      setTotal(data.total || 0);
+      
+      // Adaptar resposta para diferentes formatos
+      const items = data.items || data.properties || [];
+      const totalCount = data.total || items.length;
+      
+      setProperties(items);
+      setTotal(totalCount);
     } catch (error) {
       console.error('Erro ao buscar propriedades:', error);
+      setProperties([]);
+      setTotal(0);
     } finally {
       setLoading(false);
     }
@@ -283,17 +290,41 @@ export default function AdminPropertiesList() {
                 >
                   {/* Image with Checkbox Overlay */}
                   <div className="relative h-48 bg-slate-200">
-                    {property.images && property.images.length > 0 ? (
-                      <img
-                        src={property.images[0]}
-                        alt={property.title}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <Home className="text-slate-400" size={48} />
-                      </div>
-                    )}
+                    {(() => {
+                      try {
+                        const imgs = typeof property.images === 'string' 
+                          ? JSON.parse(property.images) 
+                          : property.images;
+                        const firstImage = Array.isArray(imgs) && imgs.length > 0 ? imgs[0] : null;
+                        
+                        return firstImage ? (
+                          <img
+                            src={firstImage}
+                            alt={property.title}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                              e.target.nextSibling.style.display = 'flex';
+                            }}
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <Home className="text-slate-400" size={48} />
+                          </div>
+                        );
+                      } catch {
+                        return (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <Home className="text-slate-400" size={48} />
+                          </div>
+                        );
+                      }
+                    })()}
+                    
+                    {/* Fallback para erro de imagem */}
+                    <div className="w-full h-full items-center justify-center" style={{ display: 'none' }}>
+                      <Home className="text-slate-400" size={48} />
+                    </div>
                     
                     {/* Checkbox */}
                     <div className="absolute top-3 left-3">

@@ -154,7 +154,7 @@ async function fetchNearbyPlaces(lat, lng) {
 /**
  * Atualiza locais próximos de um imóvel (chama API e salva no DB)
  * @param {Object} prisma - Cliente Prisma
- * @param {number} propertyId - ID do imóvel
+ * @param {string} propertyId - ID do imóvel
  * @returns {Promise<Object>} Dados atualizados do imóvel
  */
 async function updatePropertyNearbyPlaces(prisma, propertyId) {

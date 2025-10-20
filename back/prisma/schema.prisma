@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -59,7 +59,7 @@ model Property {
   
   // Estilo e Proximidade
   style        String?  // "Moderno", "Rústico", "Container", "Luxo", etc.
-  nearbyPlaces String?  @db.LongText // JSON: {schools: [...], supermarkets: [...], etc.}
+  nearbyPlaces String?  // JSON: {schools: [...], supermarkets: [...], etc.}
   
   // Mídia
   images       String   // JSON: ["url1", "url2", "url3"]
