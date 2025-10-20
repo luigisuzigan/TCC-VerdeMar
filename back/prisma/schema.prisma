@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
@@ -37,6 +37,7 @@ model Property {
   userId       String   // FK: Dono da propriedade
   title        String
   description  String?
+  category     String?  @default("Venda") // Venda, Aluguel, Temporada (manter compatibilidade)
   type         String   @default("Apartamento") // Casa, Apartamento, Chalé, Cobertura, Terreno
   price        Float
   currency     String   @default("BRL")
@@ -54,7 +55,9 @@ model Property {
   area         Int      // m²
   beds         Int
   baths        Int
-  guests       Int
+  suites       Int      @default(0)
+  guests       Int      @default(4)
+  parkingSpaces Int     @default(0)
   amenities    String   @default("[]") // JSON: ["Piscina", "WiFi", "Ar-condicionado"]
   
   // Estilo e Proximidade
@@ -84,6 +87,7 @@ model Property {
   user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   favorites    Favorite[]
   reviews      Review[]
+  views        PropertyView[]
   
   // Índices para performance
   @@index([userId])
@@ -139,4 +143,67 @@ model Review {
   @@unique([userId, propertyId]) // Um usuário só pode avaliar cada propriedade 1x
   @@index([propertyId])
   @@index([rating])
+}
+
+// ========================================
+// 👁️ PROPERTY VIEW - Rastreamento de visualizações
+// ========================================
+model PropertyView {
+  id         String   @id @default(uuid())
+  propertyId String   // FK: Propriedade visualizada
+  userId     String?  // FK: Usuário que visualizou (opcional - pode ser anônimo)
+  ipAddress  String?  // IP para rastreamento de anônimos
+  userAgent  String?  // Browser/device info
+  createdAt  DateTime @default(now())
+  
+  // Relacionamento
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  
+  @@index([propertyId])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+// ========================================
+// 📧 CONTACT MESSAGE - Mensagens de contato
+// ========================================
+model ContactMessage {
+  id          String   @id @default(uuid())
+  name        String
+  email       String
+  phone       String?
+  subject     String?
+  message     String
+  propertyId  String?  // FK: Propriedade relacionada (opcional)
+  
+  // Status
+  status      String   @default("NEW") // NEW, READ, REPLIED, ARCHIVED
+  reply       String?  // Resposta do admin
+  repliedAt   DateTime?
+  repliedBy   String?  // ID do admin que respondeu
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([status])
+  @@index([createdAt])
+  @@index([propertyId])
+}
+
+// ========================================
+// 📊 ACTIVITY LOG - Logs de atividades importantes
+// ========================================
+model ActivityLog {
+  id          String   @id @default(uuid())
+  userId      String?  // FK: Usuário que fez a ação
+  action      String   // PROPERTY_CREATED, PROPERTY_UPDATED, USER_REGISTERED, etc.
+  entityType  String?  // Property, User, etc.
+  entityId    String?  // ID da entidade afetada
+  metadata    String?  // JSON com dados adicionais
+  ipAddress   String?
+  createdAt   DateTime @default(now())
+  
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
 }

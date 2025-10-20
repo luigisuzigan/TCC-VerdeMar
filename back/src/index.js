@@ -7,6 +7,7 @@ import bcrypt from "bcryptjs";
 import authRoutes from "./auth/routes.js";
 import propertyRoutes from "./properties/routes.js";
 import userRoutes from "./users/routes.js";
+import dashboardRoutes from "./dashboard/routes.js";
 import { ensureAdmin } from "./repos/userRepo.js";
 
 const app = express();
@@ -33,6 +34,7 @@ app.get("/api/health", (_, res) => res.json({ ok: true }));
 app.use("/api/auth", authRoutes);
 app.use("/api/properties", propertyRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 
 // Global error fallback
 app.use((err, req, res, next) => {
