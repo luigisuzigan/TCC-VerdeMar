@@ -1,4 +1,6 @@
 import HeroSection from '../../components/Home/HeroSection';
+import IntroSection from '../../components/Home/IntroSection';
+import NearbyProperties from '../../components/Home/NearbyProperties';
 import Section1 from '../../components/Home/Section1';
 import Section2 from '../../components/Home/Section2';
 import Section3 from '../../components/Home/Section3';
@@ -12,6 +14,8 @@ function Home() {
   return (
     <>
       <HeroSection />
+      <IntroSection />
+      <NearbyProperties />
       <Section1 />
       {/* Você pode recolocar depois ou mover: */}
       {/* <NearbyProperties /> */}

@@ -1,6 +1,6 @@
 import "dotenv/config";
 import bcrypt from "bcryptjs";
-import { prisma } from "../prisma.js";
+import prisma from "../prisma.js";
 import readline from "readline";
 
 const rl = readline.createInterface({

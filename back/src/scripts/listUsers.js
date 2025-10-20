@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { prisma } from "../prisma.js";
+import prisma from "../prisma.js";
 
 async function listUsers() {
   console.log("\n👥 === LISTA DE USUÁRIOS ===\n");

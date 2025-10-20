@@ -1,4 +1,4 @@
-import { prisma } from "../prisma.js";
+import prisma from "../prisma.js";
 
 export const Roles = { ADMIN: "ADMIN", USER: "USER", SELLER: "SELLER" };
 

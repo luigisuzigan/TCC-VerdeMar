@@ -1,4 +1,4 @@
-import { prisma } from '../prisma.js';
+import prisma from '../prisma.js';
 
 function toRow(data) {
   return { ...data, images: JSON.stringify(data.images ?? []), published: !!data.published };
