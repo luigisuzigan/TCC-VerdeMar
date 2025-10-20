@@ -8,6 +8,7 @@ import PropertyInfo from '../../components/PropertyDetails/PropertyInfo.jsx';
 import Amenities from '../../components/PropertyDetails/Amenities.jsx';
 import Description from '../../components/PropertyDetails/Description.jsx';
 import ContactCard from '../../components/PropertyDetails/ContactCard.jsx';
+import LocationMap from '../../components/PropertyDetails/LocationMap.jsx';
 import NearbyPlacesSection from '../../components/PropertyDetails/NearbyPlacesSection.jsx';
 
 export default function PropertyDetails() {
@@ -161,6 +162,9 @@ export default function PropertyDetails() {
             <Amenities property={property} />
 
             <Description description={property.description} />
+
+            {/* Localização e Mapa */}
+            <LocationMap property={property} />
           </div>
 
           {/* Right Column - Contact Card (Sticky) */}
