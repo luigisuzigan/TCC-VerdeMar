@@ -97,6 +97,35 @@ Esta documentação detalha todos os parâmetros que cada imóvel possui no sist
 - **Uso**: Filtros de busca detalhados e categorização específica
 - **Interface**: Dropdown dependente da `category` selecionada
 
+### `style` (String, Opcional) - **NOVO CAMPO**
+- **Descrição**: Estilo arquitetônico/construtivo do imóvel
+- **Obrigatório**: Não
+- **Valores sugeridos**:
+  - `"Moderno"` - Arquitetura contemporânea, linhas retas, minimalista
+  - `"Clássico"` - Arquitetura tradicional, elegante
+  - `"Rústico"` - Madeira, pedras, estilo country/fazenda
+  - `"Industrial"` - Concreto aparente, tijolo à vista, loft
+  - `"Minimalista"` - Design clean, poucos detalhes
+  - `"Colonial"` - Estilo português/brasileiro tradicional
+  - `"Contemporâneo"` - Mix moderno com toques tradicionais
+  - `"Tropical"` - Materiais naturais, integração com natureza
+  - `"Container"` - Construção com containers marítimos
+  - `"Steel Frame"` - Construção em estrutura metálica leve
+  - `"Madeira"` - Predominância de madeira na estrutura
+  - `"Sustentável"` - Eco-friendly, green building
+  - `"Luxo"` - Alto padrão, acabamentos premium
+  - `"Compacto"` - Otimizado para espaços pequenos
+  - `"Loft"` - Pé-direito alto, espaços integrados
+- **Exemplo**: `"Moderno"`
+- **Uso**: Filtro visual no Home e página Explorar, diferencial do imóvel
+- **Interface**: Select/Tags no formulário, cards visuais no Home
+
+**Por que este campo é importante:**
+- 🎨 **Marketing Visual**: Permite criar seção "Estilos em Destaque" no Home
+- 🔍 **Diferenciação**: Cliente busca por preferência estética
+- 📸 **Curadoria**: Facilita agrupar imóveis por estilo para campanhas
+- ⭐ **Destaque**: Imóveis com estilos únicos (Container, Sustentável) ganham visibilidade
+
 ---
 
 ## 💰 Valores e Preços

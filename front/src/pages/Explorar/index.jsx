@@ -12,6 +12,7 @@ import LocationModal from '../../components/Search/Modals/LocationModal.jsx';
 import PriceModal from '../../components/Explorar/Modals/PriceModal.jsx';
 import PropertyTypeModal from '../../components/Explorar/Modals/PropertyTypeModal.jsx';
 import RoomsModal from '../../components/Explorar/Modals/RoomsModal.jsx';
+import StyleModal from '../../components/Explorar/Modals/StyleModal.jsx';
 
 export default function Explorar() {
   const [searchParams] = useSearchParams();
@@ -28,6 +29,7 @@ export default function Explorar() {
   const [showPriceModal, setShowPriceModal] = useState(false);
   const [showPropertyTypeModal, setShowPropertyTypeModal] = useState(false);
   const [showRoomsModal, setShowRoomsModal] = useState(false);
+  const [showStyleModal, setShowStyleModal] = useState(false);
   const [filteredPropertyIds, setFilteredPropertyIds] = useState(null); // IDs das propriedades filtradas por área
   const itemsPerPage = 24;
   const topFiltersRef = useRef(null);
@@ -239,6 +241,9 @@ export default function Explorar() {
         break;
       case 'rooms':
         setShowRoomsModal(true);
+        break;
+      case 'style':
+        setShowStyleModal(true);
         break;
       case 'more':
         setShowFiltersModal(true);
@@ -466,6 +471,15 @@ export default function Explorar() {
         onClose={() => setShowRoomsModal(false)}
         filters={filters}
         onApply={handleRoomsApply}
+      />
+
+      <StyleModal
+        isOpen={showStyleModal}
+        onClose={() => setShowStyleModal(false)}
+        filters={filters}
+        onApply={(newFilters) => {
+          applyFilters({ ...filters, ...newFilters });
+        }}
       />
 
       {/* Filters Modal */}

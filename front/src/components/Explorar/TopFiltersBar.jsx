@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { MapPin, DollarSign, Home, Sliders, Search } from 'lucide-react';
+import { MapPin, DollarSign, Home, Sliders, Search, Sparkles } from 'lucide-react';
 
 export default function TopFiltersBar({ filters, onFilterClick, onSearch }) {
   const [searchText, setSearchText] = useState('');
@@ -46,6 +46,16 @@ export default function TopFiltersBar({ filters, onFilterClick, onSearch }) {
     if (filters.bathrooms) parts.push(`${filters.bathrooms}+ banheiros`);
     if (parts.length > 0) return parts.join(', ');
     return 'Quartos e banheiros';
+  };
+
+  const getStyleText = () => {
+    if (filters.styles?.length > 0) {
+      if (filters.styles.length === 1) {
+        return filters.styles[0];
+      }
+      return `${filters.styles.length} estilos`;
+    }
+    return 'Estilo';
   };
 
   const formatPrice = (value) => {
@@ -129,6 +139,19 @@ export default function TopFiltersBar({ filters, onFilterClick, onSearch }) {
           }`}
         >
           <span className="font-medium whitespace-nowrap">{getRoomsText()}</span>
+        </button>
+
+        {/* Style Filter */}
+        <button
+          onClick={() => onFilterClick('style')}
+          className={`hidden xl:flex items-center gap-2 px-4 py-3 border rounded-xl hover:bg-slate-50 transition-colors ${
+            filters.styles?.length > 0
+              ? 'border-blue-600 bg-blue-50 text-blue-700'
+              : 'border-slate-300 text-slate-700'
+          }`}
+        >
+          <Sparkles size={18} />
+          <span className="font-medium whitespace-nowrap">{getStyleText()}</span>
         </button>
 
         {/* More Filters Button */}

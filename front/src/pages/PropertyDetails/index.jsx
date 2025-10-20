@@ -32,6 +32,7 @@ import {
   Landmark
 } from 'lucide-react';
 import { api } from '../../api/client.js';
+import NearbyPlacesSection from '../../components/PropertyDetails/NearbyPlacesSection.jsx';
 
 export default function PropertyDetails() {
   const { id } = useParams();
@@ -599,6 +600,11 @@ export default function PropertyDetails() {
               </div>
             </div>
           </div>
+
+          {/* Seção: O que há por perto */}
+          {property.nearbyPlaces && (
+            <NearbyPlacesSection nearbyPlaces={property.nearbyPlaces} />
+          )}
         </div>
       </div>
     </div>

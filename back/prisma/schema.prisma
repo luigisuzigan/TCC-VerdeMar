@@ -57,6 +57,10 @@ model Property {
   guests       Int
   amenities    String   @default("[]") // JSON: ["Piscina", "WiFi", "Ar-condicionado"]
   
+  // Estilo e Proximidade
+  style        String?  // "Moderno", "Rústico", "Container", "Luxo", etc.
+  nearbyPlaces String?  @db.LongText // JSON: {schools: [...], supermarkets: [...], etc.}
+  
   // Mídia
   images       String   // JSON: ["url1", "url2", "url3"]
   mainImage    String?

@@ -2,6 +2,8 @@ import { Router } from 'express';
 import { body, param, query, validationResult } from 'express-validator';
 import { authMiddleware, requireAdmin } from '../auth/middleware.js';
 import { createProperty, deleteProperty, getProperty, listProperties, updateProperty } from '../repos/propertyRepo.js';
+import { updatePropertyNearbyPlaces } from '../services/nearbyPlacesService.js';
+import prisma from '../prisma.js';
 
 const router = Router();
 
@@ -126,6 +128,61 @@ router.delete('/:id', authMiddleware, requireAdmin, [param('id').isString()], as
   const ok = await deleteProperty(req.params.id);
   if (!ok) return res.status(404).json({ error: 'Not found' });
   res.status(204).send();
+});
+
+// POST /api/properties/:id/nearby-places
+// Busca e atualiza locais próximos de um imóvel usando Google Maps API
+router.post('/:id/nearby-places', authMiddleware, requireAdmin, [param('id').isString()], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const propertyId = parseInt(req.params.id);
+    
+    // Verificar se o imóvel existe
+    const property = await prisma.property.findUnique({
+      where: { id: propertyId },
+      select: { id: true, latitude: true, longitude: true },
+    });
+
+    if (!property) {
+      return res.status(404).json({ error: 'Imóvel não encontrado' });
+    }
+
+    if (!property.latitude || !property.longitude) {
+      return res.status(400).json({ 
+        error: 'Imóvel não possui coordenadas. Adicione latitude e longitude primeiro.' 
+      });
+    }
+
+    console.log(`🔍 Buscando locais próximos para imóvel #${propertyId}`);
+
+    // Buscar e atualizar locais próximos
+    const updated = await updatePropertyNearbyPlaces(prisma, propertyId);
+    
+    const nearbyPlaces = JSON.parse(updated.nearbyPlaces || '{}');
+    const totalPlaces = Object.values(nearbyPlaces).reduce((sum, arr) => sum + arr.length, 0);
+
+    console.log(`✅ ${totalPlaces} locais encontrados e salvos`);
+
+    res.json({
+      success: true,
+      message: `${totalPlaces} locais próximos encontrados e atualizados`,
+      nearbyPlaces: nearbyPlaces,
+      summary: Object.entries(nearbyPlaces).map(([category, places]) => ({
+        category,
+        count: places.length,
+      })),
+    });
+  } catch (error) {
+    console.error('❌ Erro ao buscar locais próximos:', error);
+    res.status(500).json({ 
+      error: 'Erro ao buscar locais próximos', 
+      message: error.message 
+    });
+  }
 });
 
 export default router;

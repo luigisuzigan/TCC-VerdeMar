@@ -68,6 +68,12 @@ export function parseFiltersFromUrl(searchParams) {
     filters.propertyCondition = condition;
   }
 
+  // Estilos
+  const styles = searchParams.get('style') || searchParams.get('styles');
+  if (styles) {
+    filters.styles = styles.split(',');
+  }
+
   return filters;
 }
 
@@ -117,6 +123,9 @@ export function filtersToUrlParams(filters) {
   }
   if (filters.propertyCondition) {
     params.append('condition', filters.propertyCondition);
+  }
+  if (filters.styles?.length > 0) {
+    params.append('styles', filters.styles.join(','));
   }
 
   return params;
@@ -194,6 +203,14 @@ export function getFilterDescriptions(filters) {
     descriptions.push(`${filters.suites}+ suítes`);
   }
 
+  if (filters.styles?.length > 0) {
+    if (filters.styles.length === 1) {
+      descriptions.push(`Estilo: ${filters.styles[0]}`);
+    } else {
+      descriptions.push(`${filters.styles.length} estilos`);
+    }
+  }
+
   return descriptions;
 }
 
@@ -216,6 +233,7 @@ export function countActiveFilters(filters) {
   if (filters.amenities?.length > 0) count++;
   if (filters.condoAmenities?.length > 0) count++;
   if (filters.propertyCondition) count++;
+  if (filters.styles?.length > 0) count++;
 
   return count;
 }
@@ -239,5 +257,6 @@ export function clearAllFilters() {
     amenities: [],
     condoAmenities: [],
     propertyCondition: '',
+    styles: [],
   };
 }
