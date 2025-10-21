@@ -1,4 +1,4 @@
-import { Home, Calendar, Car, Maximize2, BedDouble, Building2, Layers } from 'lucide-react';
+import { Home, Calendar, Car, Maximize2, BedDouble, Layers } from 'lucide-react';
 
 /**
  * Componente que exibe informações do imóvel de forma CONDICIONAL
@@ -99,38 +99,6 @@ export default function PropertyInfo({ property, formatCurrency, getPropertyType
           </div>
           <div className="text-lg font-bold text-slate-900">
             {property.lotSize} m²
-          </div>
-        </div>
-      )}
-
-      {/* Condomínio - APENAS SE TIVER VALOR */}
-      {property.condoFee && (
-        <div className="bg-white rounded-2xl p-5 border-2 border-emerald-100 hover:border-emerald-200 transition-colors shadow-sm">
-          <div className="flex items-center gap-2 text-emerald-700 text-sm mb-2">
-            <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center">
-              <Building2 size={16} className="text-emerald-600" />
-            </div>
-            <span className="font-medium">Condomínio</span>
-          </div>
-          <div className="text-lg font-bold text-emerald-700">
-            {formatCurrency(property.condoFee)}
-            <span className="text-xs text-emerald-600 font-normal">/mês</span>
-          </div>
-        </div>
-      )}
-
-      {/* IPTU - SE EXISTIR */}
-      {property.iptu && (
-        <div className="bg-white rounded-2xl p-5 border-2 border-slate-100 hover:border-blue-200 transition-colors shadow-sm">
-          <div className="flex items-center gap-2 text-slate-600 text-sm mb-2">
-            <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center">
-              <Calendar size={16} />
-            </div>
-            <span className="font-medium">IPTU</span>
-          </div>
-          <div className="text-lg font-bold text-slate-900">
-            {formatCurrency(property.iptu)}
-            <span className="text-xs text-slate-500 font-normal">/ano</span>
           </div>
         </div>
       )}

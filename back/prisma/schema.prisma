@@ -83,10 +83,12 @@ model Property {
   // Campos de condomínio
   condoFee          Float?         // Valor do condomínio
   iptu              Float?         // IPTU anual
+  homeInsurance     Float?         // Seguro residencial mensal (NOVO)
   
   // Características do imóvel
   floor             Int?                // Andar (para apartamentos)
   totalFloors       Int?                // Total de andares do prédio
+  lotSize           Int?                // Área do terreno/lote (NOVO)
   yearBuilt         Int?                // Ano de construção
   propertyCondition PropertyCondition?  // Novo, Seminovo, Usado, Reformado
   

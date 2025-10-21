@@ -3,6 +3,7 @@ import { body, param, query, validationResult } from 'express-validator';
 import { authMiddleware, requireAdmin } from '../auth/middleware.js';
 import { createProperty, deleteProperty, getProperty, listProperties, updateProperty } from '../repos/propertyRepo.js';
 import { updatePropertyNearbyPlaces } from '../services/nearbyPlacesService.js';
+import { validatePropertyFields } from '../config/propertyFieldsConfig.js';
 import prisma from '../prisma.js';
 
 const router = Router();
@@ -112,6 +113,21 @@ router.post('/', authMiddleware, requireAdmin, propertyValidators, async (req, r
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
   
+  // Validação condicional de campos baseada no tipo
+  const { type } = req.body;
+  if (type) {
+    const fieldErrors = validatePropertyFields(type, req.body);
+    if (fieldErrors.length > 0) {
+      return res.status(400).json({ 
+        errors: fieldErrors.map(e => ({ 
+          msg: e.message, 
+          param: e.field, 
+          type: e.type 
+        }))
+      });
+    }
+  }
+  
   // Adicionar userId do usuário autenticado
   const data = {
     ...req.body,
@@ -125,6 +141,22 @@ router.post('/', authMiddleware, requireAdmin, propertyValidators, async (req, r
 router.put('/:id', authMiddleware, requireAdmin, [param('id').isString(), ...propertyValidators], async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+  
+  // Validação condicional de campos baseada no tipo
+  const { type } = req.body;
+  if (type) {
+    const fieldErrors = validatePropertyFields(type, req.body);
+    if (fieldErrors.length > 0) {
+      return res.status(400).json({ 
+        errors: fieldErrors.map(e => ({ 
+          msg: e.message, 
+          param: e.field, 
+          type: e.type 
+        }))
+      });
+    }
+  }
+  
   const updated = await updateProperty(req.params.id, req.body);
   if (!updated) return res.status(404).json({ error: 'Not found' });
   res.json(updated);

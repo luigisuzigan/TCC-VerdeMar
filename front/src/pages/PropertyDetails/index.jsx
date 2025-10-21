@@ -4,6 +4,8 @@ import { ChevronLeft, Share2, Heart, X } from 'lucide-react';
 import { api } from '../../api/client.js';
 import ImageGallery from '../../components/PropertyDetails/ImageGallery.jsx';
 import PriceAndStats from '../../components/PropertyDetails/PriceAndStats.jsx';
+import PropertyCharacteristics from '../../components/PropertyDetails/PropertyCharacteristics.jsx';
+import ValuesSection from '../../components/PropertyDetails/ValuesSection.jsx';
 import PropertyInfo from '../../components/PropertyDetails/PropertyInfo.jsx';
 import PropertyCategory from '../../components/PropertyDetails/PropertyCategory.jsx';
 import PropertyStyle from '../../components/PropertyDetails/PropertyStyle.jsx';
@@ -158,8 +160,14 @@ export default function PropertyDetails() {
           <div className="lg:col-span-2">
             <PriceAndStats property={property} formatCurrency={formatCurrency} />
             
+            {/* Características (área, quartos, banheiros, lotSize) - CONDICIONAL */}
+            <PropertyCharacteristics property={property} />
+            
             {/* Categoria e Tipo */}
             <PropertyCategory category={property.category} type={property.type} />
+            
+            {/* Seção de Valores (Condomínio, IPTU, Financiamento, etc) - NOVA SEÇÃO */}
+            <ValuesSection property={property} formatCurrency={formatCurrency} />
             
             {/* Estilo (se existir) */}
             {property.style && <PropertyStyle style={property.style} />}
