@@ -20,6 +20,13 @@ const listValidators = [
   query('minBathrooms').optional().isInt({ min: 0 }),
   query('minParkingSpaces').optional().isInt({ min: 0 }),
   query('minSuites').optional().isInt({ min: 0 }),
+  query('neighborhood').optional().isString(),
+  query('minCondoFee').optional().isFloat({ min: 0 }),
+  query('maxCondoFee').optional().isFloat({ min: 0 }),
+  query('minFloor').optional().isInt({ min: 0 }),
+  query('maxFloor').optional().isInt({ min: 0 }),
+  query('minYearBuilt').optional().isInt({ min: 1900 }),
+  query('category').optional().isString(),
   query('sortBy').optional().isString(),
   query('published').optional().isBoolean().toBoolean(),
 ];
@@ -44,13 +51,20 @@ router.get('/', listValidators, async (req, res) => {
     minBathrooms,
     minParkingSpaces,
     minSuites,
+    neighborhood,
+    minCondoFee,
+    maxCondoFee,
+    minFloor,
+    maxFloor,
+    minYearBuilt,
+    category,
     sortBy,
     limit = 20, 
     offset = 0, 
     published = true 
   } = req.query;
   
-  console.log('List properties request:', { limit, offset, published, city, search });
+  console.log('List properties request:', { limit, offset, published, city, search, category, neighborhood });
   
   const result = await listProperties({ 
     search, 
@@ -65,6 +79,13 @@ router.get('/', listValidators, async (req, res) => {
     minBathrooms,
     minParkingSpaces,
     minSuites,
+    neighborhood,
+    minCondoFee,
+    maxCondoFee,
+    minFloor,
+    maxFloor,
+    minYearBuilt,
+    category,
     sortBy,
     limit: Number(limit) || 20, 
     offset: Number(offset) || 0, 
@@ -80,6 +101,54 @@ router.get('/:id', [param('id').isString()], async (req, res) => {
   const item = await getProperty(req.params.id);
   if (!item) return res.status(404).json({ error: 'Not found' });
   res.json(item);
+});
+
+// Endpoint para buscar locais próximos e atualizar o imóvel
+router.post('/:id/nearby-places', [
+  authMiddleware,
+  param('id').isString()
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const propertyId = req.params.id;
+    
+    // Verificar se o imóvel existe
+    const property = await getProperty(propertyId);
+    if (!property) {
+      return res.status(404).json({ error: 'Imóvel não encontrado' });
+    }
+
+    // Verificar se o usuário é o dono do imóvel ou admin
+    if (property.userId !== req.user.id && req.user.role !== 'ADMIN') {
+      return res.status(403).json({ error: 'Sem permissão para atualizar este imóvel' });
+    }
+
+    // Verificar se tem coordenadas
+    if (!property.latitude || !property.longitude) {
+      return res.status(400).json({ 
+        error: 'Imóvel não possui coordenadas. Adicione latitude e longitude primeiro.' 
+      });
+    }
+
+    // Buscar locais próximos e atualizar o imóvel
+    const updated = await updatePropertyNearbyPlaces(prisma, propertyId);
+    
+    res.json({ 
+      success: true, 
+      message: 'Locais próximos atualizados com sucesso',
+      nearbyPlaces: updated.nearbyPlaces 
+    });
+  } catch (error) {
+    console.error('Erro ao buscar locais próximos:', error);
+    res.status(500).json({ 
+      error: 'Erro ao buscar locais próximos', 
+      details: error.message 
+    });
+  }
 });
 
 const propertyValidators = [
