@@ -9,7 +9,7 @@ export default function Blog() {
     <main>
       <section className="mx-auto w-[min(96vw,1200px)] px-4 py-12">
         <h1 className="text-3xl font-extrabold">Blog Verde Mar</h1>
-        <p className="mt-2 max-w-2xl text-slate-600">Roteiros, dicas e inspirações para você viajar melhor pelo litoral.</p>
+        <p className="mt-2 max-w-2xl text-slate-600">Erro 404</p>
 
         {/* Grid de cards */}
         <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
