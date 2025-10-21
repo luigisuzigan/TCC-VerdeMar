@@ -1,10 +1,10 @@
-import { Home, Building2, Factory, MapPin, Sparkles } from 'lucide-react';
+import { Home, Building2, Factory, MapPin, Sparkles, Palette } from 'lucide-react';
 
 /**
- * Componente para exibir Categoria e Tipo do imóvel
- * Exemplo: "Residencial - Casa"
+ * Componente para exibir Categoria, Tipo e Estilo do imóvel
+ * Exemplo: "Residencial - Casa - Moderno"
  */
-export default function PropertyCategory({ category, type }) {
+export default function PropertyCategory({ category, type, style }) {
   // Ícones por categoria
   const categoryIcons = {
     Residencial: Home,
@@ -32,6 +32,17 @@ export default function PropertyCategory({ category, type }) {
             <span className="text-slate-400">•</span>
             <span className="text-lg text-slate-700">{type || 'Apartamento'}</span>
           </div>
+          
+          {/* Estilo Arquitetônico (se existir) */}
+          {style && (
+            <div className="mt-3 pt-3 border-t border-slate-100">
+              <p className="text-xs text-slate-500 font-medium mb-1">Estilo Arquitetônico</p>
+              <div className="flex items-center gap-2">
+                <Palette className="w-4 h-4 text-purple-500" />
+                <span className="text-base text-slate-900 font-semibold">{style}</span>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
