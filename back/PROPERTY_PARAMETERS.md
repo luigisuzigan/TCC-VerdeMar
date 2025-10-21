@@ -148,6 +148,53 @@ Esta documentação detalha todos os parâmetros que cada imóvel possui no sist
 
 ---
 
+## 💵 Valores Estimados e Custos Mensais (OPCIONAIS)
+
+> **💡 Importante**: Estes campos são **totalmente opcionais** e devem ser preenchidos apenas se o proprietário/admin tiver essas informações. São úteis para dar ao comprador uma visão completa dos custos mensais do imóvel.
+
+### `condoFee` (Float, Opcional)
+- **Descrição**: Valor mensal do condomínio
+- **Obrigatório**: Condicional (veja tabela de campos condicionais)
+- **Formato**: Número decimal
+- **Exemplo**: `450.00` (R$ 450,00/mês)
+- **Uso**: Cálculo de custos totais mensais, filtros
+- **Quando preencher**: Se o imóvel estiver em condomínio fechado
+- **Aplicável para**: Apartamentos, Coberturas, Condomínios fechados, Salas comerciais em prédios
+- **Não aplicável para**: Casas sem condomínio, Terrenos, Galpões
+
+### `iptu` (Float, Opcional)
+- **Descrição**: Valor **anual** do IPTU (Imposto Predial e Territorial Urbano)
+- **Obrigatório**: Não
+- **Formato**: Número decimal
+- **Exemplo**: `1200.00` (R$ 1.200,00/ano → R$ 100,00/mês)
+- **Uso**: Cálculo de custos mensais totais (divide por 12)
+- **Quando preencher**: Se souber o valor do IPTU do imóvel
+- **Aplicável para**: Todos os tipos de imóveis
+- **Observação**: Valor é anual, mas exibido mensalmente (IPTU/12) na interface
+
+### `homeInsurance` (Float, Opcional) - **NOVO CAMPO**
+- **Descrição**: Valor mensal estimado do seguro residencial
+- **Obrigatório**: Não
+- **Formato**: Número decimal
+- **Exemplo**: `80.00` (R$ 80,00/mês)
+- **Uso**: Cálculo de custos mensais totais, transparência financeira
+- **Quando preencher**: Se houver seguro ou valor estimado
+- **Aplicável para**: Todos os tipos residenciais
+- **Valores típicos**: R$ 50-200/mês (dependendo do valor do imóvel)
+- **Observação**: Campo informativo, não obrigatório
+
+### `monthlyCosts` (Float, Calculado Automaticamente) - **NOVO CAMPO**
+- **Descrição**: Custo mensal total estimado (condoFee + iptu/12 + homeInsurance)
+- **Obrigatório**: Não (calculado automaticamente)
+- **Formato**: Número decimal
+- **Exemplo**: `630.00` (R$ 450 + R$ 100 + R$ 80)
+- **Cálculo**: `condoFee + (iptu / 12) + homeInsurance`
+- **Uso**: Exibição de custo total mensal para o comprador
+- **Quando exibir**: Se pelo menos um dos campos (condoFee, iptu, homeInsurance) estiver preenchido
+- **Observação**: Campo calculado no backend ou frontend, não armazenado no banco
+
+---
+
 ## 📍 Localização
 
 ### `address` (String)
@@ -212,52 +259,109 @@ Esta documentação detalha todos os parâmetros que cada imóvel possui no sist
 
 ## 🏗️ Características do Imóvel
 
+> **⚠️ IMPORTANTE**: Os campos abaixo têm obrigatoriedade **condicional** baseada no `type` do imóvel. Veja a seção "Campos Condicionais por Tipo" no final deste documento.
+
 ### `area` (Int)
 - **Descrição**: Área total do imóvel em metros quadrados (m²)
-- **Obrigatório**: Sim
+- **Obrigatório**: Sim (para todos os tipos)
 - **Formato**: Número inteiro
 - **Mínimo**: 0
 - **Exemplo**: `120` (120 m²)
 - **Uso**: Filtros de área (min/max), exibição
-- **Observação**: Considerar área útil ou total? (definir padrão)
+- **Observação**: Área útil ou total conforme padrão local
 
 ### `beds` (Int)
 - **Descrição**: Número de quartos/dormitórios
-- **Obrigatório**: Sim
+- **Obrigatório**: Condicional (veja tabela abaixo)
 - **Formato**: Número inteiro
 - **Mínimo**: 0
 - **Exemplo**: `3` (3 quartos)
 - **Uso**: Filtros de quartos, ícone na listagem
 - **Valores comuns**: 0 (studio), 1, 2, 3, 4, 5+
+- **Não aplicável para**: Terrenos, Salas comerciais, Galpões
 
 ### `baths` (Int)
 - **Descrição**: Número de banheiros
-- **Obrigatório**: Sim
+- **Obrigatório**: Condicional (veja tabela abaixo)
 - **Formato**: Número inteiro
 - **Mínimo**: 0
 - **Exemplo**: `2` (2 banheiros)
 - **Uso**: Filtros de banheiros, ícone na listagem
-- **Observação**: Considerar lavabos? (definir critério)
+- **Observação**: Inclui lavabos
+- **Não aplicável para**: Terrenos
 
 ### `suites` (Int)
 - **Descrição**: Número de suítes (quartos com banheiro privativo)
-- **Obrigatório**: Sim
+- **Obrigatório**: Não (opcional)
 - **Formato**: Número inteiro
 - **Padrão**: `0`
 - **Mínimo**: 0
 - **Exemplo**: `1` (1 suíte)
 - **Uso**: Filtros de suítes, diferencial do imóvel
 - **Observação**: Suítes já estão incluídas em `beds`
+- **Não aplicável para**: Terrenos, Salas comerciais, Galpões, Kitnets
 
 ### `parkingSpaces` (Int)
 - **Descrição**: Número de vagas de garagem/estacionamento
-- **Obrigatório**: Sim
+- **Obrigatório**: Condicional (veja tabela abaixo)
 - **Formato**: Número inteiro
 - **Padrão**: `0`
 - **Mínimo**: 0
 - **Exemplo**: `2` (2 vagas)
 - **Uso**: Filtros de vagas, ícone na listagem
 - **Observação**: Vagas cobertas e descobertas somadas
+
+---
+
+## 🏢 Campos Específicos de Condomínio e Estrutura
+
+### `floor` (Int, Opcional)
+- **Descrição**: Andar do imóvel (para imóveis verticais)
+- **Obrigatório**: Condicional (veja tabela abaixo)
+- **Formato**: Número inteiro
+- **Exemplo**: `7` (7º andar)
+- **Uso**: Filtros, preferências de localização no prédio
+- **Aplicável para**: Apartamentos, Coberturas, Salas comerciais em prédios
+- **Não aplicável para**: Casas, Sobrados, Terrenos, Galpões
+
+### `totalFloors` (Int, Opcional)
+- **Descrição**: Total de andares do prédio (ou da casa, para sobrados)
+- **Obrigatório**: Condicional (veja tabela abaixo)
+- **Formato**: Número inteiro
+- **Exemplo**: `12` (prédio de 12 andares)
+- **Uso**: Contexto da posição do imóvel
+- **Aplicável para**: Apartamentos, Coberturas, Condomínios, Salas comerciais em prédios
+- **Para Sobrados**: Representa número de andares da própria casa (ex: 2 andares)
+
+### `yearBuilt` (Int, Opcional)
+- **Descrição**: Ano de construção do imóvel
+- **Obrigatório**: Não
+- **Formato**: Número inteiro (4 dígitos)
+- **Exemplo**: `2018`
+- **Uso**: Filtros de idade, avaliação de conservação
+- **Aplicável para**: Todos os tipos
+
+### `propertyCondition` (Enum, Opcional)
+- **Descrição**: Estado de conservação do imóvel
+- **Obrigatório**: Não
+- **Valores**: `"Novo"`, `"Seminovo"`, `"Usado"`, `"Reformado"`
+- **Exemplo**: `"Novo"`
+- **Uso**: Filtros de condição, expectativa de manutenção
+- **Aplicável para**: Todos os tipos exceto Terrenos
+
+### `lotSize` (Int, Opcional) - **NOVO CAMPO**
+- **Descrição**: Área total do terreno/lote em metros quadrados
+- **Obrigatório**: Não
+- **Formato**: Número inteiro
+- **Exemplo**: `500` (500 m² de terreno)
+- **Uso**: Importante para casas, sobrados, chácaras, terrenos
+- **Quando usar**: 
+  - **Casas/Sobrados**: Área do lote (diferente da área construída)
+  - **Terrenos**: Igual ao campo `area`
+  - **Apartamentos**: Não aplicável (deixar `null`)
+- **Aplicável para**: Casas, Sobrados, Chácaras, Sítios, Fazendas, Terrenos
+- **Não aplicável para**: Apartamentos, Coberturas, Kitnets, Salas comerciais
+- **Observação**: Para terrenos, `lotSize` = `area`. Para casas, `lotSize` >= `area`
 
 ---
 
@@ -732,45 +836,113 @@ async function fetchNearbyPlaces(lat, lng, radius = 2000) {
 
 ---
 
-## 📋 Campos Sugeridos para Implementação Futura
+## 📋 Campos Condicionais por Tipo de Imóvel
 
-### ❌ Campos que podem ser adicionados no futuro:
+Esta tabela define quais campos são **obrigatórios**, **opcionais** ou **não aplicáveis** para cada tipo de imóvel:
 
-1. **`propertyCondition` (String)** - Estado do imóvel
-   - Valores: `"Novo"`, `"Seminovo"`, `"Usado"`, `"Reformado"`
-   - Uso: Filtro de condição
+| Tipo de Imóvel | `beds` | `baths` | `suites` | `parkingSpaces` | `floor` | `totalFloors` | `condoFee` | `lotSize` | `homeInsurance` |
+|----------------|:------:|:-------:|:--------:|:---------------:|:-------:|:-------------:|:----------:|:---------:|:---------------:|
+| **🏢 Apartamento** | ✅ Obrig. | ✅ Obrig. | ⚠️ Opc. | ✅ Obrig. | ✅ Obrig. | ✅ Obrig. | ✅ Obrig. | ❌ N/A | ⚠️ Opc. |
+| **🏠 Casa** | ✅ Obrig. | ✅ Obrig. | ⚠️ Opc. | ✅ Obrig. | ❌ N/A | ❌ N/A | ⚠️ Opc.* | ✅ Obrig. | ⚠️ Opc. |
+| **🏘️ Sobrado** | ✅ Obrig. | ✅ Obrig. | ⚠️ Opc. | ✅ Obrig. | ❌ N/A | ⚠️ Opc.** | ⚠️ Opc.* | ✅ Obrig. | ⚠️ Opc. |
+| **🏖️ Cobertura** | ✅ Obrig. | ✅ Obrig. | ⚠️ Opc. | ✅ Obrig. | ✅ Obrig. | ✅ Obrig. | ✅ Obrig. | ❌ N/A | ⚠️ Opc. |
+| **📦 Kitnet/Studio/Loft** | ⚠️ Opc.*** | ✅ Obrig. | ❌ N/A | ⚠️ Opc. | ⚠️ Opc. | ⚠️ Opc. | ⚠️ Opc. | ❌ N/A | ⚠️ Opc. |
+| **🏘️ Condomínio residencial** | ⚠️ Opc. | ⚠️ Opc. | ⚠️ Opc. | ⚠️ Opc. | ❌ N/A | ✅ Obrig. | ✅ Obrig. | ⚠️ Opc. | ⚠️ Opc. |
+| **🌳 Chácara/Sítio/Fazenda** | ⚠️ Opc. | ⚠️ Opc. | ⚠️ Opc. | ⚠️ Opc. | ❌ N/A | ❌ N/A | ❌ N/A | ✅ Obrig. | ⚠️ Opc. |
+| **📍 Terreno (qualquer tipo)** | ❌ N/A | ❌ N/A | ❌ N/A | ❌ N/A | ❌ N/A | ❌ N/A | ⚠️ Opc.**** | ✅ Obrig. | ❌ N/A |
+| **🏢 Sala comercial/Escritório** | ❌ N/A | ⚠️ Opc. | ❌ N/A | ✅ Obrig. | ✅ Obrig. | ✅ Obrig. | ✅ Obrig. | ❌ N/A | ⚠️ Opc. |
+| **🏪 Loja/Ponto comercial** | ❌ N/A | ⚠️ Opc. | ❌ N/A | ✅ Obrig. | ⚠️ Opc. | ⚠️ Opc. | ⚠️ Opc. | ⚠️ Opc. | ⚠️ Opc. |
+| **🏭 Galpão (ind./com.)** | ❌ N/A | ⚠️ Opc. | ❌ N/A | ✅ Obrig. | ❌ N/A | ❌ N/A | ❌ N/A | ✅ Obrig. | ⚠️ Opc. |
+| **🏢 Prédio comercial** | ❌ N/A | ⚠️ Opc. | ❌ N/A | ✅ Obrig. | ❌ N/A | ✅ Obrig. | ❌ N/A | ⚠️ Opc. | ⚠️ Opc. |
 
-2. **`condoAmenities` (String - JSON)** - Amenidades do condomínio
-   - Separar amenidades do imóvel das do condomínio
-   - Exemplo: `["Piscina do Condomínio", "Salão de Festas", "Quadra"]`
+**Legenda:**
+- ✅ **Obrigatório**: Campo deve ser preenchido
+- ⚠️ **Opcional**: Campo pode ser preenchido se aplicável
+- ❌ **N/A (Não aplicável)**: Campo não deve ser exibido/preenchido
 
-3. **`condoFee` (Float)** - Valor do condomínio
-   - Importante para decisão de compra
-   - Exemplo: `450.00`
+**Notas:**
+- `*` **condoFee em Casas/Sobrados**: Obrigatório apenas se em condomínio fechado
+- `**` **totalFloors em Sobrados**: Representa o número de andares da própria casa (ex: sobrado de 2 andares)
+- `***` **beds em Kitnet/Studio**: Geralmente 0 ou 1
+- `****` **condoFee em Terrenos**: Apenas se for "Terreno em condomínio"
 
-4. **`iptu` (Float)** - Valor do IPTU anual ou mensal
-   - Custos adicionais importantes
-   - Exemplo: `1200.00` (anual)
+**Campos Financeiros (Sempre Opcionais):**
+- `iptu`: Opcional para todos os tipos
+- `homeInsurance`: Opcional para tipos residenciais e comerciais (N/A para terrenos)
 
-5. **`floor` (Int)** - Andar do apartamento
-   - Relevante para apartamentos
-   - Exemplo: `5` (5º andar)
+---
 
-6. **`totalFloors` (Int)** - Total de andares do prédio
-   - Contexto do imóvel
-   - Exemplo: `12` (12 andares)
+## 🎯 Regras de Validação Recomendadas
 
-7. **`yearBuilt` (Int)** - Ano de construção
-   - Idade do imóvel
-   - Exemplo: `2018`
+### **No Formulário de Cadastro/Edição:**
 
-8. **`orientation` (String)** - Orientação solar
-   - Valores: `"Norte"`, `"Sul"`, `"Leste"`, `"Oeste"`, `"Nordeste"`, etc.
-   - Relevante para conforto térmico
+1. **Campos Dinâmicos**: Mostrar/ocultar campos baseado no `type` selecionado
+2. **Validação em Tempo Real**: Validar obrigatoriedade ao mudar o tipo
+3. **Mensagens Contextuais**: Ex: "Este campo não é aplicável para Terrenos"
+4. **Valores Padrão**: Campos N/A devem ser `null` ou `0` no banco
 
-9. **`furnished` (Boolean)** - Se é mobiliado
-   - Valores: `true` ou `false`
-   - Uso: Filtro importante
+### **Exemplos de Validação:**
+
+```javascript
+// Exemplo: Apartamento DEVE ter floor e condoFee
+if (type === 'Apartamento') {
+  if (!floor) errors.push('Andar é obrigatório para Apartamentos');
+  if (!condoFee) errors.push('Valor do condomínio é obrigatório para Apartamentos');
+}
+
+// Exemplo: Casa NÃO deve ter floor
+if (type === 'Casa' && floor !== null) {
+  warnings.push('Campo "Andar" não se aplica a Casas');
+}
+
+// Exemplo: Terreno NÃO deve ter beds/baths
+if (type.includes('Terreno')) {
+  if (beds || baths || suites) {
+    errors.push('Terrenos não devem ter quartos ou banheiros');
+  }
+}
+```
+
+---
+
+## 💡 Campos Sugeridos para Implementação Futura
+
+### **Campos adicionais que podem melhorar a plataforma:**
+
+1. **`orientation` (String)** - Orientação solar
+   - Valores: `"Norte"`, `"Sul"`, `"Leste"`, `"Oeste"`, `"Nordeste"`, `"Noroeste"`, `"Sudeste"`, `"Sudoeste"`
+   - Relevante para: Apartamentos, Casas, Sobrados
+   - Uso: Conforto térmico, iluminação natural
+
+2. **`furnished` (Boolean)** - Imóvel mobiliado
+   - Valores: `true` (mobiliado) ou `false` (sem móveis)
+   - Relevante para: Todos os tipos residenciais
+   - Uso: Filtro importante para inquilinos
+
+3. **`hasElevator` (Boolean)** - Possui elevador
+   - Relevante para: Apartamentos, Coberturas, Salas comerciais
+   - Uso: Acessibilidade, conforto
+
+4. **`petFriendly` (Boolean)** - Aceita animais de estimação
+   - Relevante para: Todos os residenciais
+   - Uso: Filtro crucial para proprietários de pets
+
+5. **`ceilingHeight` (Float)** - Pé-direito em metros
+   - Relevante para: Lofts, Galpões, Salas comerciais
+   - Uso: Diferencial, requisito técnico (galpões)
+
+6. **`hasLoadingDock` (Boolean)** - Possui doca de carga
+   - Relevante para: Galpões, Lojas, Pontos comerciais
+   - Uso: Requisito logístico
+
+7. **`energyRating` (String)** - Classificação energética
+   - Valores: `"A"`, `"B"`, `"C"`, `"D"`, `"E"`
+   - Relevante para: Todos os tipos
+   - Uso: Sustentabilidade, economia
+
+8. **`hasSecuritySystem` (Boolean)** - Sistema de segurança
+   - Relevante para: Todos os tipos
+   - Uso: Diferencial de segurança
 
 ---
 
@@ -803,6 +975,16 @@ async function fetchNearbyPlaces(lat, lng, radius = 2000) {
   "baths": 2,
   "suites": 1,
   "parkingSpaces": 2,
+  
+  "condoFee": 450.00,
+  "iptu": 1200.00,
+  "homeInsurance": 95.00,
+  "floor": 5,
+  "totalFloors": 12,
+  "lotSize": null,
+  "yearBuilt": 2020,
+  "propertyCondition": "Seminovo",
+  
   "amenities": "[\"Piscina\", \"WiFi\", \"Ar-condicionado\", \"Churrasqueira\", \"Varanda\", \"Portaria 24h\"]",
   "naturalConditions": "[\"Vista para o mar\", \"Ventilação cruzada\", \"Sol da manhã\", \"Brisa marítima\"]",
   
@@ -819,17 +1001,67 @@ async function fetchNearbyPlaces(lat, lng, radius = 2000) {
 }
 ```
 
+### 💰 Exemplo de Cálculo de Custos Mensais
+
+Para o imóvel acima, o custo mensal total seria:
+
+```javascript
+const monthlyCosts = (condoFee || 0) + ((iptu || 0) / 12) + (homeInsurance || 0);
+// monthlyCosts = 450.00 + (1200.00 / 12) + 95.00
+// monthlyCosts = 450.00 + 100.00 + 95.00
+// monthlyCosts = R$ 645,00/mês
+```
+
+**Observações:**
+- `iptu` é anual, então dividimos por 12 para obter o valor mensal
+- `condoFee` e `homeInsurance` já são valores mensais
+- Se algum campo for `null`, use `0` no cálculo
+- Exiba apenas se pelo menos um dos valores existir
+
 ---
 
-## 🎯 Próximos Passos
+## 🎯 Próximos Passos para Implementação
 
-1. ✅ **Campos novos adicionados**: `category`, `neighborhood`, `suites`, `parkingSpaces`
+### ✅ **Já Implementado:**
+1. ✅ **Campos novos adicionados**: `category`, `neighborhood`, `suites`, `parkingSpaces`, `condoFee`, `iptu`, `floor`, `totalFloors`, `yearBuilt`, `propertyCondition`
 2. ✅ **Campos removidos**: `featured`, `reviewCount`, `guests`
 3. ✅ **Rating atualizado**: Sistema 0-10 (avaliação de especialista)
-4. 🔄 **Executar migration**: Aplicar mudanças no banco de dados
-5. 📝 **Atualizar formulários**: Adicionar campos novos na interface de criação/edição
-6. 🔍 **Atualizar filtros**: Incluir filtros por `category`, `suites`, `parkingSpaces`, `neighborhood`
-7. 🗺️ **Implementar Google Maps API**: Para busca automática de locais próximos
+4. ✅ **Schema Prisma atualizado**: Todos os campos novos incluídos
+
+### 🔄 **Pendente de Implementação:**
+
+#### **Backend:**
+1. 📝 **Criar arquivo de configuração**: `back/src/config/propertyFieldsConfig.js`
+   - Definir campos obrigatórios/opcionais por tipo
+   - Exportar função `getFieldsForPropertyType(type)`
+
+2. 🔒 **Atualizar validações**: `back/src/properties/routes.js`
+   - Validação condicional baseada no tipo
+   - Retornar erros específicos por campo/tipo
+   - Impedir campos N/A de serem salvos
+
+3. �️ **Implementar Google Maps API**: `back/src/services/nearbyPlacesService.js`
+   - Buscar locais próximos automaticamente
+   - Salvar em `nearbyPlaces` (JSON)
+
+#### **Frontend:**
+1. 🎨 **Criar formulário dinâmico**: `front/src/pages/Admin/Properties/PropertyForm.jsx`
+   - Mostrar/ocultar campos baseado no tipo selecionado
+   - Marcar campos obrigatórios dinamicamente
+   - Adicionar tooltips explicativos
+
+2. 🔍 **Atualizar filtros**: `front/src/components/Explorar/TopFilters.jsx`
+   - Filtros por `category`, `suites`, `parkingSpaces`, `neighborhood`
+   - Filtros por `condoFee`, `floor`, `yearBuilt`
+
+3. � **Atualizar detalhes do imóvel**: `front/src/pages/PropertyDetails/index.jsx`
+   - Exibir campos condicionalmente (não mostrar "Andar" para casas)
+   - Seção "Custos" (condoFee + IPTU)
+   - Seção "Estrutura do Prédio" (floor, totalFloors)
+
+4. 🗂️ **Criar helper de campos**: `front/src/utils/propertyFieldsHelper.js`
+   - Função para determinar quais campos exibir
+   - Sincronizar com config do backend
 
 ---
 
@@ -844,6 +1076,440 @@ async function fetchNearbyPlaces(lat, lng, radius = 2000) {
 
 ---
 
+## 🔧 Implementação Técnica Recomendada
+
+### **Arquivo de Configuração (✅ CRIADO):**
+
+**Localização**: `back/src/config/propertyFieldsConfig.js`
+
+```javascript
+// back/src/config/propertyFieldsConfig.js
+
+export const REQUIRED_FIELDS = {
+  'Apartamento': ['floor', 'totalFloors', 'condoFee', 'beds', 'baths', 'parkingSpaces'],
+  'Casa': ['beds', 'baths', 'parkingSpaces'],
+  'Terreno residencial': ['area'],
+  // ... outros tipos
+};
+
+export const HIDDEN_FIELDS = {
+  'Casa': ['floor', 'totalFloors'],
+  'Terreno residencial': ['beds', 'baths', 'suites', 'floor', 'totalFloors', 'parkingSpaces'],
+  // ... outros tipos
+};
+
+export function validatePropertyFields(type, data) {
+  const required = REQUIRED_FIELDS[type] || [];
+  const hidden = HIDDEN_FIELDS[type] || [];
+  
+  const errors = [];
+  
+  // Verificar campos obrigatórios
+  required.forEach(field => {
+    if (!data[field] && data[field] !== 0) {
+      errors.push(`Campo "${field}" é obrigatório para ${type}`);
+    }
+  });
+  
+  // Verificar campos que não devem existir
+  hidden.forEach(field => {
+    if (data[field]) {
+      errors.push(`Campo "${field}" não se aplica a ${type}`);
+    }
+  });
+  
+  return errors;
+}
+```
+
+### **Validações no Backend (✅ IMPLEMENTADO):**
+
+**Localização**: `back/src/properties/routes.js`
+
+As rotas `POST /api/properties` e `PUT /api/properties/:id` agora validam campos condicionalmente baseado no `type`.
+
+### **Helper do Frontend (✅ CRIADO):**
+
+**Localização**: `front/src/utils/propertyFieldsHelper.js`
+
+Funções disponíveis:
+- `shouldShowField(type, field)` - Determina se campo deve ser exibido
+- `isFieldRequired(type, field)` - Determina se campo é obrigatório
+- `getPropertyDetailsFields(type, property)` - Retorna campos formatados para PropertyDetails
+- `formatters` - Objeto com funções de formatação de valores
+- `fieldLabels` - Labels descritivos para cada campo
+
+---
+
+## 🎨 Guia de Implementação: Painel Admin - Criar/Editar Imóveis
+
+### **📋 Passo a Passo Completo**
+
+#### **1. Criar estrutura de pastas (se não existir)**
+
+```
+front/src/pages/Admin/Properties/
+├── PropertyForm.jsx          # Formulário principal
+├── PropertyList.jsx          # Lista de imóveis
+├── PropertyFormSteps.jsx     # Formulário multi-etapas (opcional)
+└── index.jsx                 # Export principal
+```
+
+---
+
+#### **2. Implementar PropertyForm.jsx com Campos Condicionais**
+
+```jsx
+import { useState, useEffect } from 'react';
+import { shouldShowField, isFieldRequired, PROPERTY_TYPES_BY_CATEGORY } from '../../../utils/propertyFieldsHelper';
+
+function PropertyForm({ property, onSubmit, onCancel }) {
+  const [formData, setFormData] = useState({
+    category: property?.category || 'Residencial',
+    type: property?.type || 'Casa',
+    title: property?.title || '',
+    description: property?.description || '',
+    price: property?.price || '',
+    // ... outros campos
+  });
+
+  const [selectedCategory, setSelectedCategory] = useState(property?.category || 'Residencial');
+  const [selectedType, setSelectedType] = useState(property?.type || 'Casa');
+
+  // Atualizar tipos disponíveis quando categoria mudar
+  const availableTypes = PROPERTY_TYPES_BY_CATEGORY[selectedCategory] || [];
+
+  const handleCategoryChange = (category) => {
+    setSelectedCategory(category);
+    // Resetar type para primeiro da nova categoria
+    const firstType = PROPERTY_TYPES_BY_CATEGORY[category][0];
+    setSelectedType(firstType);
+    setFormData(prev => ({
+      ...prev,
+      category,
+      type: firstType
+    }));
+  };
+
+  const handleTypeChange = (type) => {
+    setSelectedType(type);
+    setFormData(prev => ({ ...prev, type }));
+  };
+
+  return (
+    <form onSubmit={(e) => { e.preventDefault(); onSubmit(formData); }}>
+      
+      {/* SEÇÃO 1: Categoria e Tipo */}
+      <div className="mb-6">
+        <h3 className="text-lg font-bold mb-4">1. Categoria e Tipo</h3>
+        
+        {/* Categoria */}
+        <div className="mb-4">
+          <label className="block font-medium mb-2">Categoria *</label>
+          <select 
+            value={selectedCategory} 
+            onChange={(e) => handleCategoryChange(e.target.value)}
+            className="w-full px-4 py-2 border rounded-lg"
+            required
+          >
+            <option value="Residencial">Residencial</option>
+            <option value="Comercial">Comercial</option>
+            <option value="Industrial">Industrial</option>
+            <option value="Terreno">Terreno</option>
+            <option value="Especial">Especial</option>
+          </select>
+        </div>
+
+        {/* Tipo (dinâmico baseado na categoria) */}
+        <div className="mb-4">
+          <label className="block font-medium mb-2">Tipo *</label>
+          <select 
+            value={selectedType} 
+            onChange={(e) => handleTypeChange(e.target.value)}
+            className="w-full px-4 py-2 border rounded-lg"
+            required
+          >
+            {availableTypes.map(type => (
+              <option key={type} value={type}>{type}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {/* SEÇÃO 2: Informações Básicas */}
+      <div className="mb-6">
+        <h3 className="text-lg font-bold mb-4">2. Informações Básicas</h3>
+        
+        {/* Título */}
+        <input 
+          type="text"
+          placeholder="Título do imóvel"
+          value={formData.title}
+          onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+          required
+        />
+        
+        {/* Preço */}
+        <input 
+          type="number"
+          placeholder="Preço"
+          value={formData.price}
+          onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
+          required
+        />
+      </div>
+
+      {/* SEÇÃO 3: Características (CONDICIONAIS) */}
+      <div className="mb-6">
+        <h3 className="text-lg font-bold mb-4">3. Características</h3>
+        
+        {/* Área - sempre exibir */}
+        <div className="mb-4">
+          <label>Área (m²) {isFieldRequired(selectedType, 'area') && '*'}</label>
+          <input 
+            type="number"
+            value={formData.area || ''}
+            onChange={(e) => setFormData(prev => ({ ...prev, area: e.target.value }))}
+            required={isFieldRequired(selectedType, 'area')}
+          />
+        </div>
+
+        {/* Quartos - condicional */}
+        {shouldShowField(selectedType, 'beds') && (
+          <div className="mb-4">
+            <label>Quartos {isFieldRequired(selectedType, 'beds') && '*'}</label>
+            <input 
+              type="number"
+              value={formData.beds || ''}
+              onChange={(e) => setFormData(prev => ({ ...prev, beds: e.target.value }))}
+              required={isFieldRequired(selectedType, 'beds')}
+            />
+          </div>
+        )}
+
+        {/* Banheiros - condicional */}
+        {shouldShowField(selectedType, 'baths') && (
+          <div className="mb-4">
+            <label>Banheiros {isFieldRequired(selectedType, 'baths') && '*'}</label>
+            <input 
+              type="number"
+              value={formData.baths || ''}
+              onChange={(e) => setFormData(prev => ({ ...prev, baths: e.target.value }))}
+              required={isFieldRequired(selectedType, 'baths')}
+            />
+          </div>
+        )}
+
+        {/* Suítes - condicional */}
+        {shouldShowField(selectedType, 'suites') && (
+          <div className="mb-4">
+            <label>Suítes {isFieldRequired(selectedType, 'suites') && '*'}</label>
+            <input 
+              type="number"
+              value={formData.suites || ''}
+              onChange={(e) => setFormData(prev => ({ ...prev, suites: e.target.value }))}
+              required={isFieldRequired(selectedType, 'suites')}
+            />
+          </div>
+        )}
+
+        {/* Vagas - condicional */}
+        {shouldShowField(selectedType, 'parkingSpaces') && (
+          <div className="mb-4">
+            <label>Vagas de Garagem {isFieldRequired(selectedType, 'parkingSpaces') && '*'}</label>
+            <input 
+              type="number"
+              value={formData.parkingSpaces || ''}
+              onChange={(e) => setFormData(prev => ({ ...prev, parkingSpaces: e.target.value }))}
+              required={isFieldRequired(selectedType, 'parkingSpaces')}
+            />
+          </div>
+        )}
+      </div>
+
+      {/* SEÇÃO 4: Estrutura do Prédio (CONDICIONAIS) */}
+      {(shouldShowField(selectedType, 'floor') || shouldShowField(selectedType, 'totalFloors')) && (
+        <div className="mb-6">
+          <h3 className="text-lg font-bold mb-4">4. Estrutura do Prédio</h3>
+          
+          {/* Andar - condicional */}
+          {shouldShowField(selectedType, 'floor') && (
+            <div className="mb-4">
+              <label>Andar {isFieldRequired(selectedType, 'floor') && '*'}</label>
+              <input 
+                type="number"
+                value={formData.floor || ''}
+                onChange={(e) => setFormData(prev => ({ ...prev, floor: e.target.value }))}
+                required={isFieldRequired(selectedType, 'floor')}
+              />
+            </div>
+          )}
+
+          {/* Total de Andares - condicional */}
+          {shouldShowField(selectedType, 'totalFloors') && (
+            <div className="mb-4">
+              <label>Total de Andares {isFieldRequired(selectedType, 'totalFloors') && '*'}</label>
+              <input 
+                type="number"
+                value={formData.totalFloors || ''}
+                onChange={(e) => setFormData(prev => ({ ...prev, totalFloors: e.target.value }))}
+                required={isFieldRequired(selectedType, 'totalFloors')}
+              />
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* SEÇÃO 5: Custos (CONDICIONAIS) */}
+      <div className="mb-6">
+        <h3 className="text-lg font-bold mb-4">5. Custos</h3>
+        
+        {/* Condomínio - condicional */}
+        {shouldShowField(selectedType, 'condoFee') && (
+          <div className="mb-4">
+            <label>Condomínio (R$/mês) {isFieldRequired(selectedType, 'condoFee') && '*'}</label>
+            <input 
+              type="number"
+              step="0.01"
+              value={formData.condoFee || ''}
+              onChange={(e) => setFormData(prev => ({ ...prev, condoFee: e.target.value }))}
+              required={isFieldRequired(selectedType, 'condoFee')}
+            />
+          </div>
+        )}
+
+        {/* IPTU - sempre opcional */}
+        <div className="mb-4">
+          <label>IPTU (R$/ano)</label>
+          <input 
+            type="number"
+            step="0.01"
+            value={formData.iptu || ''}
+            onChange={(e) => setFormData(prev => ({ ...prev, iptu: e.target.value }))}
+          />
+        </div>
+      </div>
+
+      {/* Botões */}
+      <div className="flex gap-4">
+        <button type="submit" className="btn-primary">Salvar</button>
+        <button type="button" onClick={onCancel} className="btn-secondary">Cancelar</button>
+      </div>
+    </form>
+  );
+}
+
+export default PropertyForm;
+```
+
+---
+
+#### **3. Mensagens de Validação Dinâmicas**
+
+Adicionar feedback visual quando campos obrigatórios não são preenchidos:
+
+```jsx
+{shouldShowField(selectedType, 'beds') && (
+  <div className="mb-4">
+    <label>
+      Quartos {isFieldRequired(selectedType, 'beds') && <span className="text-red-500">*</span>}
+    </label>
+    <input 
+      type="number"
+      value={formData.beds || ''}
+      onChange={(e) => setFormData(prev => ({ ...prev, beds: e.target.value }))}
+      required={isFieldRequired(selectedType, 'beds')}
+      className={`border ${errors.beds ? 'border-red-500' : 'border-gray-300'}`}
+    />
+    {errors.beds && <p className="text-red-500 text-sm mt-1">{errors.beds}</p>}
+  </div>
+)}
+```
+
+---
+
+#### **4. Tooltip Explicativo**
+
+Adicionar tooltips para ajudar o admin a entender quando preencher cada campo:
+
+```jsx
+import { HelpCircle } from 'lucide-react'; // ou outro ícone
+
+{shouldShowField(selectedType, 'floor') && (
+  <div className="mb-4">
+    <label className="flex items-center gap-2">
+      Andar {isFieldRequired(selectedType, 'floor') && '*'}
+      <HelpCircle 
+        size={16} 
+        className="text-gray-400 cursor-help" 
+        title="Andar onde está localizado o imóvel (apenas para apartamentos e salas comerciais)"
+      />
+    </label>
+    <input type="number" ... />
+  </div>
+)}
+```
+
+---
+
+#### **5. Preview de Campos ao Mudar Tipo**
+
+Mostrar aviso ao admin sobre quais campos serão exibidos:
+
+```jsx
+<div className="bg-blue-50 p-4 rounded-lg mb-6">
+  <p className="font-medium text-blue-900">Campos obrigatórios para {selectedType}:</p>
+  <ul className="list-disc list-inside text-blue-700 text-sm mt-2">
+    {getFieldsConfig(selectedType).required.map(field => (
+      <li key={field}>{fieldLabels[field]}</li>
+    ))}
+  </ul>
+</div>
+```
+
+---
+
+#### **6. Checklist de Implementação**
+
+- [ ] Criar `PropertyForm.jsx` com campos condicionais
+- [ ] Implementar mudança de categoria → atualiza tipos disponíveis
+- [ ] Implementar mudança de tipo → mostra/oculta campos
+- [ ] Adicionar validação de campos obrigatórios
+- [ ] Adicionar tooltips explicativos
+- [ ] Testar todos os tipos de imóveis
+- [ ] Adicionar feedback visual (erros, avisos)
+- [ ] Implementar upload de imagens
+- [ ] Implementar seleção de amenidades
+- [ ] Implementar busca de coordenadas (Google Maps API)
+
+---
+
+**✅ Arquivos Prontos:**
+- `back/src/config/propertyFieldsConfig.js` ✅
+- `back/src/properties/routes.js` ✅ (com validação condicional)
+- `front/src/utils/propertyFieldsHelper.js` ✅
+
+**🔜 Próximo Passo:** Implementar o formulário no painel admin seguindo o código acima!
+
+---
+
 **Criado em**: 17/10/2025  
-**Versão**: 1.0  
+**Última atualização**: 21/10/2025  
+**Versão**: 2.0  
 **Autor**: Sistema VerdeMar
+
+---
+
+## 📝 Histórico de Alterações
+
+### v2.0 (21/10/2025)
+- ✅ Adicionada seção "Campos Condicionais por Tipo de Imóvel"
+- ✅ Documentada obrigatoriedade condicional de campos
+- ✅ Criada tabela de referência rápida por tipo
+- ✅ Adicionadas regras de validação
+- ✅ Removido campo `guests` (não aplicável ao negócio)
+- ✅ Expandida seção de campos específicos de condomínio
+
+### v1.0 (17/10/2025)
+- 🎉 Criação inicial do documento
+- ✅ Documentação completa dos campos básicos
