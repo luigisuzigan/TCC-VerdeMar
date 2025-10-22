@@ -30,7 +30,6 @@ enum PropertyCondition {
 // ========================================
 // 👤 USER - Usuários do sistema
 // ========================================
-
 model User {
   id           String     @id @default(uuid())
   name         String
@@ -39,26 +38,27 @@ model User {
   phone        String?
   avatar       String?
   bio          String?
-  role         String     @default("USER")
+  role         String     @default("USER") // USER, SELLER, ADMIN
   isActive     Boolean    @default(true)
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
-  favorites    Favorite[]
+  
+  // Relacionamentos
   properties   Property[]
+  favorites    Favorite[]
   reviews      Review[]
 }
 
 // ========================================
 // 🏠 PROPERTY - Propriedades/Imóveis
 // ========================================
-
 model Property {
   id                String              @id @default(uuid())
-  userId            String
+  userId            String              // FK: Dono da propriedade
   title             String
   description       String?
   category          PropertyCategory    @default(Residencial)
-  type              String              @default("Apartamento")
+  type              String              @default("Apartamento") // Casa, Apartamento, Chalé, Cobertura, Terreno
   style             String?             // Moderno, Rústico, Container, Luxo, etc.
   price             Float
   currency          String              @default("BRL")
@@ -98,10 +98,10 @@ model Property {
   nearbyPlaces      String?        @default("{}") @db.LongText // Google Maps API data (pode ser grande)
   
   // Mídia
-  images            String
+  images            String         // JSON: ["url1", "url2", "url3"]
   mainImage         String?
   
-  // Métricas
+  // Métricas (calculadas)
   rating            Float?         @default(0) // Avaliação de especialista 0-10
   viewCount         Int            @default(0)
   
@@ -113,11 +113,12 @@ model Property {
   updatedAt         DateTime       @updatedAt
   
   // Relacionamentos
-  favorites         Favorite[]
   user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  PropertyView      PropertyView[]
+  favorites         Favorite[]
   reviews           Review[]
-
+  views             PropertyView[]
+  
+  // Índices para performance
   @@index([userId])
   @@index([city])
   @@index([published])
@@ -125,91 +126,113 @@ model Property {
 }
 
 // ========================================
-// ⭐ FAVORITE - Favoritos (Many-to-Many)
+// ⭐ FAVORITE - Favoritos (Tabela Pivot M:N)
 // ========================================
-
 model Favorite {
   id         String   @id @default(uuid())
-  userId     String
-  propertyId String
+  userId     String   // FK: Usuário que favoritou
+  propertyId String   // FK: Propriedade favoritada
   createdAt  DateTime @default(now())
-  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  
+  // Relacionamentos
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, propertyId])
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  
+  // Constraints
+  @@unique([userId, propertyId]) // Não permitir favoritar 2x a mesma propriedade
   @@index([userId])
   @@index([propertyId])
 }
 
 // ========================================
-// 💬 REVIEW - Avaliações de usuários
+// 💬 REVIEW - Avaliações de propriedades
 // ========================================
-
 model Review {
   id             String   @id @default(uuid())
-  userId         String
-  propertyId     String
-  rating         Float
-  cleanRating    Float?
-  valueRating    Float?
-  locationRating Float?
-  comment        String?
+  userId         String   // FK: Quem avaliou
+  propertyId     String   // FK: Propriedade avaliada
+  
+  // Avaliações (1-5 estrelas)
+  rating         Float    // Nota geral
+  cleanRating    Float?   // Limpeza
+  valueRating    Float?   // Custo-benefício
+  locationRating Float?   // Localização
+  
+  comment        String?  // Comentário opcional
   isPublished    Boolean  @default(true)
+  
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
-  property       Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  
+  // Relacionamentos
   user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, propertyId])
+  property       Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  
+  // Constraints
+  @@unique([userId, propertyId]) // Um usuário só pode avaliar cada propriedade 1x
   @@index([propertyId])
   @@index([rating])
 }
 
-model ActivityLog {
-  id         String   @id
-  userId     String?
-  action     String
-  entityType String?
-  entityId   String?
-  metadata   String?
-  ipAddress  String?
+// ========================================
+// 👁️ PROPERTY VIEW - Rastreamento de visualizações
+// ========================================
+model PropertyView {
+  id         String   @id @default(uuid())
+  propertyId String   // FK: Propriedade visualizada
+  userId     String?  // FK: Usuário que visualizou (opcional - pode ser anônimo)
+  ipAddress  String?  // IP para rastreamento de anônimos
+  userAgent  String?  // Browser/device info
   createdAt  DateTime @default(now())
+  
+  // Relacionamento
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  
+  @@index([propertyId])
+  @@index([userId])
+  @@index([createdAt])
+}
 
+// ========================================
+// 📧 CONTACT MESSAGE - Mensagens de contato
+// ========================================
+model ContactMessage {
+  id          String   @id @default(uuid())
+  name        String
+  email       String
+  phone       String?
+  subject     String?
+  message     String
+  propertyId  String?  // FK: Propriedade relacionada (opcional)
+  
+  // Status
+  status      String   @default("NEW") // NEW, READ, REPLIED, ARCHIVED
+  reply       String?  // Resposta do admin
+  repliedAt   DateTime?
+  repliedBy   String?  // ID do admin que respondeu
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([status])
+  @@index([createdAt])
+  @@index([propertyId])
+}
+
+// ========================================
+// 📊 ACTIVITY LOG - Logs de atividades importantes
+// ========================================
+model ActivityLog {
+  id          String   @id @default(uuid())
+  userId      String?  // FK: Usuário que fez a ação
+  action      String   // PROPERTY_CREATED, PROPERTY_UPDATED, USER_REGISTERED, etc.
+  entityType  String?  // Property, User, etc.
+  entityId    String?  // ID da entidade afetada
+  metadata    String?  // JSON com dados adicionais
+  ipAddress   String?
+  createdAt   DateTime @default(now())
+  
+  @@index([userId])
   @@index([action])
   @@index([createdAt])
-  @@index([userId])
-}
-
-model ContactMessage {
-  id         String    @id
-  name       String
-  email      String
-  phone      String?
-  subject    String?
-  message    String
-  propertyId String?
-  status     String    @default("NEW")
-  reply      String?
-  repliedAt  DateTime?
-  repliedBy  String?
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime
-
-  @@index([createdAt])
-  @@index([propertyId])
-  @@index([status])
-}
-
-model PropertyView {
-  id         String   @id
-  propertyId String
-  userId     String?
-  ipAddress  String?
-  userAgent  String?
-  createdAt  DateTime @default(now())
-  Property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
-
-  @@index([createdAt])
-  @@index([propertyId])
-  @@index([userId])
 }

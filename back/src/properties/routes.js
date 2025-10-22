@@ -4,6 +4,7 @@ import { authMiddleware, requireAdmin } from '../auth/middleware.js';
 import { createProperty, deleteProperty, getProperty, listProperties, updateProperty } from '../repos/propertyRepo.js';
 import { updatePropertyNearbyPlaces } from '../services/nearbyPlacesService.js';
 import { validatePropertyFields } from '../config/propertyFieldsConfig.js';
+import { trackPropertyView } from './trackingMiddleware.js';
 import prisma from '../prisma.js';
 
 const router = Router();
@@ -95,7 +96,7 @@ router.get('/', listValidators, async (req, res) => {
   res.json(result);
 });
 
-router.get('/:id', [param('id').isString()], async (req, res) => {
+router.get('/:id', [param('id').isString()], trackPropertyView, async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
   const item = await getProperty(req.params.id);
