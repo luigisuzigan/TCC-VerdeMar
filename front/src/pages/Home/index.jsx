@@ -11,10 +11,10 @@ function Home() {
     <>
       <HeroSection />
       <IntroSection />
+      <NearbyProperties />
       <PropertyTypesSection /> {/* 💎 Nova: Tipos de Propriedades */}
       <FeaturedProperties /> {/* 🌟 Nova: Destaques da Semana */}
       <DestinationsSection /> {/* 📍 Nova: Destinos Populares */}
-      <NearbyProperties />
       <Section7 /> {/* 🎨 Estilos em Destaque */}
     </>
   );

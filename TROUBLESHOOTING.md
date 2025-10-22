@@ -36,6 +36,35 @@ node node_modules\prisma\build\index.js generate
 
 ---
 
+### ❌ Locais Próximos
+
+#### Problema: "Nenhum lugar próximo encontrado" na página de detalhes
+**Causa**: Dados de locais próximos não foram populados ou Google Maps API Key não configurada
+
+**Solução**:
+1. Configure a chave da API do Google Maps (veja [GOOGLE_MAPS_SETUP.md](./GOOGLE_MAPS_SETUP.md))
+2. Adicione no `back/.env`:
+   ```
+   GOOGLE_MAPS_API_KEY=sua_chave_aqui
+   ```
+3. Execute o script para buscar locais:
+   ```bash
+   cd back
+   node src/scripts/fetchNearbyPlaces.js
+   ```
+4. Reinicie o backend
+
+#### Problema: Imóvel aparece no mar no mapa
+**Causa**: Coordenadas incorretas no banco de dados
+
+**Solução**:
+```bash
+cd back
+node fix-coordinates.js
+```
+
+---
+
 ### ❌ Banco de Dados
 
 #### Problema: "Database connection failed"

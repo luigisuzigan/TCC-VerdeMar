@@ -352,7 +352,9 @@ export default function Explorar() {
       {showStickyButton && (
         <StickyFilterButton
           onClick={() => setShowFiltersModal(true)}
+          onClose={() => setShowFiltersModal(false)}
           filterCount={activeFiltersCount}
+          isOpen={showFiltersModal}
         />
       )}
 

@@ -62,12 +62,14 @@ npm run dev
 1. **Prisma Client**: SEMPRE execute `npx prisma generate` ou `node node_modules\prisma\build\index.js generate` após instalar dependências
 2. **Banco de dados**: O projeto usa MySQL na nuvem (já configurado no `.env`)
 3. **Seed**: Execute apenas 1x para popular dados iniciais
-4. **PowerShell**: Se encontrar erro de execução de scripts, use `node` diretamente ou CMD ao invés de PowerShell
+4. **Google Maps API**: Configure para mostrar locais próximos - veja [GOOGLE_MAPS_SETUP.md](./GOOGLE_MAPS_SETUP.md)
+5. **PowerShell**: Se encontrar erro de execução de scripts, use `node` diretamente ou CMD ao invés de PowerShell
 
 Acesse: **http://localhost:5173**
 
 ### 🆘 Problemas ao iniciar?
-Veja o **[TROUBLESHOOTING.md](./TROUBLESHOOTING.md)** para soluções de problemas comuns!
+- **[TROUBLESHOOTING.md](./TROUBLESHOOTING.md)** - Soluções de problemas comuns
+- **[GOOGLE_MAPS_SETUP.md](./GOOGLE_MAPS_SETUP.md)** - Como configurar Google Maps API
 
 ## 📂 Estrutura
 

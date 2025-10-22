@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { Camera, ChevronLeft, ChevronRight, X, Home } from 'lucide-react';
+import { Camera, ChevronLeft, ChevronRight, X, Home, Share2, Heart } from 'lucide-react';
 
-export default function ImageGallery({ images = [], title = '' }) {
+export default function ImageGallery({ images = [], title = '', onShare, isFavorite, onToggleFavorite }) {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [showGallery, setShowGallery] = useState(false);
 
@@ -62,7 +62,7 @@ export default function ImageGallery({ images = [], title = '' }) {
       )}
 
       {/* Image Gallery Grid - Arredondado e Moderno */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="relative">
           {hasImages ? (
             <div className="grid grid-cols-4 gap-2 h-[500px]">
@@ -92,16 +92,6 @@ export default function ImageGallery({ images = [], title = '' }) {
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all" />
-                  
-                  {/* Badge "Ver todas" na última imagem */}
-                  {idx === 3 && images.length > 5 && (
-                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                      <div className="text-white text-center">
-                        <Camera size={32} className="mx-auto mb-2" />
-                        <p className="text-lg font-semibold">+{images.length - 5} fotos</p>
-                      </div>
-                    </div>
-                  )}
                 </div>
               ))}
             </div>
@@ -113,18 +103,49 @@ export default function ImageGallery({ images = [], title = '' }) {
               </div>
             </div>
           )}
-          
-          {/* See All Photos Button - Moderno e flutuante */}
-          {hasImages && images.length > 1 && (
-            <button
-              onClick={() => setShowGallery(true)}
-              className="absolute bottom-6 right-6 flex items-center gap-2 px-6 py-3 bg-white/95 backdrop-blur-md border border-slate-200 rounded-2xl shadow-xl hover:bg-white hover:scale-105 transition-all duration-300 font-semibold"
-            >
-              <Camera size={20} />
-              <span>Ver todas as {images.length} fotos</span>
-            </button>
-          )}
         </div>
+
+        {/* Botões de Ação - Abaixo da galeria */}
+        {hasImages && (
+          <div className="flex items-center justify-end gap-3 mt-4">
+            {/* Botão Compartilhar */}
+            <button
+              onClick={onShare}
+              className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-300 rounded-xl shadow-sm hover:shadow-md hover:scale-105 transition-all duration-300 font-semibold text-slate-800"
+              title="Compartilhar"
+            >
+              <Share2 size={18} />
+              <span className="hidden sm:inline">Compartilhar</span>
+            </button>
+
+            {/* Botão Salvar/Favoritar */}
+            <button
+              onClick={onToggleFavorite}
+              className={`flex items-center gap-2 px-4 py-2.5 border rounded-xl shadow-sm hover:shadow-md hover:scale-105 transition-all duration-300 font-semibold ${
+                isFavorite
+                  ? 'bg-red-500 border-red-500 text-white'
+                  : 'bg-white border-slate-300 text-slate-800'
+              }`}
+              title={isFavorite ? 'Remover dos favoritos' : 'Salvar nos favoritos'}
+            >
+              <Heart size={18} fill={isFavorite ? 'currentColor' : 'none'} />
+              <span className="hidden sm:inline">
+                {isFavorite ? 'Salvo' : 'Salvar'}
+              </span>
+            </button>
+
+            {/* Botão Ver Todas as Fotos */}
+            {images.length > 1 && (
+              <button
+                onClick={() => setShowGallery(true)}
+                className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 border border-emerald-600 rounded-xl shadow-sm hover:shadow-md hover:scale-105 transition-all duration-300 font-semibold text-white"
+              >
+                <Camera size={18} />
+                <span>Ver todas ({images.length})</span>
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </>
   );

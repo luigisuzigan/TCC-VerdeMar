@@ -23,12 +23,32 @@ export default function NearbyPlacesSection({ nearbyPlaces }) {
   };
 
   // Parse JSON se necessário
-  const places = typeof nearbyPlaces === 'string' 
-    ? JSON.parse(nearbyPlaces || '{}') 
-    : nearbyPlaces || {};
+  let places = {};
+  
+  try {
+    console.log('🔍 NearbyPlaces recebido:', {
+      type: typeof nearbyPlaces,
+      value: nearbyPlaces,
+      length: nearbyPlaces?.length,
+      isString: typeof nearbyPlaces === 'string'
+    });
+    
+    if (typeof nearbyPlaces === 'string') {
+      places = JSON.parse(nearbyPlaces || '{}');
+      console.log('✅ JSON parseado com sucesso:', Object.keys(places));
+    } else {
+      places = nearbyPlaces || {};
+      console.log('📦 Objeto direto:', Object.keys(places));
+    }
+  } catch (error) {
+    console.error('❌ Erro ao parsear nearbyPlaces:', error);
+    places = {};
+  }
 
   // Locais da categoria selecionada
   const selectedPlaces = places[selectedCategory] || [];
+  
+  console.log(`📍 Categoria selecionada: ${selectedCategory}, locais: ${selectedPlaces.length}`);
 
   // Se não há nenhum local cadastrado
   if (Object.keys(places).length === 0 || Object.values(places).every(arr => arr.length === 0)) {
