@@ -13,22 +13,61 @@ Plataforma moderna de anúncios imobiliários focada em propriedades de praia em
 
 ## 🚀 Quick Start
 
+### Opção 1: Usando Scripts Automáticos (Recomendado para Windows)
+
+```bash
+# 1. Instalar dependências do Backend
+cd back
+npm install
+
+# 2. Gerar Prisma Client (OBRIGATÓRIO - só precisa fazer 1x)
+node node_modules\prisma\build\index.js generate
+
+# 3. Popular banco com dados iniciais (opcional - só 1x)
+node quick-seed.js
+
+# 4. Iniciar o servidor (duplo clique ou via terminal)
+start-backend.bat
+
+# 5. Frontend (novo terminal)
+cd ..\front
+npm install
+npm run dev
+```
+
+### Opção 2: Usando NPM (Se npx estiver habilitado)
+
 ```bash
 # 1. Backend
 cd back
 npm install
-npm install axios
-npx prisma migrate dev
-npx prisma db seed
+
+# 2. Gerar Prisma Client (OBRIGATÓRIO)
+npx prisma generate
+
+# 3. Popular banco (opcional)
+npm run seed
+
+# 4. Iniciar servidor
 npm run dev
 
-# 2. Frontend (novo terminal)
+# 5. Frontend (novo terminal)
 cd front
 npm install
 npm run dev
 ```
 
+### ⚠️ Passos Importantes
+
+1. **Prisma Client**: SEMPRE execute `npx prisma generate` ou `node node_modules\prisma\build\index.js generate` após instalar dependências
+2. **Banco de dados**: O projeto usa MySQL na nuvem (já configurado no `.env`)
+3. **Seed**: Execute apenas 1x para popular dados iniciais
+4. **PowerShell**: Se encontrar erro de execução de scripts, use `node` diretamente ou CMD ao invés de PowerShell
+
 Acesse: **http://localhost:5173**
+
+### 🆘 Problemas ao iniciar?
+Veja o **[TROUBLESHOOTING.md](./TROUBLESHOOTING.md)** para soluções de problemas comuns!
 
 ## 📂 Estrutura
 
