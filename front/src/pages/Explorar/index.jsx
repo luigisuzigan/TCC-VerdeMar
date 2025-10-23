@@ -32,6 +32,7 @@ export default function Explorar() {
   const [showRoomsModal, setShowRoomsModal] = useState(false);
   const [showStyleModal, setShowStyleModal] = useState(false);
   const [showLocationModal, setShowLocationModal] = useState(false);
+  const [showFloatingMap, setShowFloatingMap] = useState(false);
   const [filteredPropertyIds, setFilteredPropertyIds] = useState(null); // IDs das propriedades filtradas por área
   const [allProperties, setAllProperties] = useState([]); // Todas as propriedades para o mapa
   const [showMapToast, setShowMapToast] = useState(false); // Toast de feedback do mapa
@@ -50,7 +51,7 @@ export default function Explorar() {
     (async () => {
       try {
         console.log('🔄 Buscando propriedades para o mapa...');
-        const { data } = await api.get('/properties?published=true&limit=1000');
+        const { data } = await api.get(`/properties?published=true&limit=1000&_t=${Date.now()}`);
         const arr = Array.isArray(data?.items) ? data.items : Array.isArray(data) ? data : [];
         console.log('✅ Propriedades carregadas para o mapa:', arr.length);
         
@@ -155,6 +156,7 @@ export default function Explorar() {
     const params = new URLSearchParams();
     params.set('published', 'true');
     params.set('limit', '24');
+    params.set('_t', Date.now()); // Timestamp para evitar cache
     
     // Location
     if (filters.location) {
@@ -266,7 +268,7 @@ export default function Explorar() {
     // Open specific modal based on filter type
     switch (filterType) {
       case 'location':
-        setShowLocationModal(true);
+        setShowFloatingMap(true);
         break;
       case 'price':
         setShowPriceModal(true);
@@ -500,6 +502,8 @@ export default function Explorar() {
         initialSearchText={filters.location || ''}
         initialBoundary={null}
         allProperties={allProperties}
+        isOpenExternal={showFloatingMap}
+        onCloseExternal={() => setShowFloatingMap(false)}
       />
 
       <PriceModal

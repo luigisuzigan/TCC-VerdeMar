@@ -98,7 +98,7 @@ model Property {
   nearbyPlaces      String?        @default("{}") @db.LongText // Google Maps API data (pode ser grande)
   
   // Mídia
-  images            String         // JSON: ["url1", "url2", "url3"]
+  images            String         @db.Text // JSON: ["url1", "url2", "url3"] - Suporta mais de 255 caracteres
   mainImage         String?
   
   // Métricas (calculadas)

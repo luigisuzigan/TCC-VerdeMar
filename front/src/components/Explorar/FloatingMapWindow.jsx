@@ -6,7 +6,10 @@ export default function FloatingMapWindow({
   onApply, 
   initialSearchText = '', 
   initialBoundary = null,
-  allProperties = []
+  allProperties = [],
+  isOpenExternal = false,
+  onCloseExternal = null,
+  hideButton = false // Nova prop para esconder o botão
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [position, setPosition] = useState({ x: 100, y: 100 });
@@ -26,9 +29,26 @@ export default function FloatingMapWindow({
   // Tamanho mínimo da janela
   const minSize = { width: 400, height: 300 };
 
+  // Sincronizar com prop externa
+  useEffect(() => {
+    if (isOpenExternal) {
+      setIsOpen(true);
+    }
+  }, [isOpenExternal]);
+
   // Debug: Log das propriedades recebidas
   useEffect(() => {
     console.log('🗺️ FloatingMapWindow - Total de propriedades recebidas:', allProperties.length);
+    const withCoords = allProperties.filter(p => p.latitude && p.longitude);
+    console.log('📍 FloatingMapWindow - Propriedades com coordenadas:', withCoords.length);
+    if (allProperties.length > 0) {
+      console.log('📦 FloatingMapWindow - Primeira propriedade:', {
+        id: allProperties[0].id,
+        title: allProperties[0].title,
+        lat: allProperties[0].latitude,
+        lng: allProperties[0].longitude
+      });
+    }
   }, [allProperties]);
 
   // Atualizar estados iniciais quando props mudarem
@@ -197,6 +217,9 @@ export default function FloatingMapWindow({
       onApply('', [], null);
     }
     setIsOpen(false);
+    if (onCloseExternal) {
+      onCloseExternal();
+    }
   };
 
   // Estilos da janela
@@ -212,8 +235,8 @@ export default function FloatingMapWindow({
 
   return (
     <>
-      {/* Botão flutuante inferior */}
-      {!isOpen && (
+      {/* Botão flutuante inferior - só mostra quando NÃO está escondido */}
+      {!isOpen && !hideButton && (
         <button
           onClick={() => setIsOpen(true)}
           className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 

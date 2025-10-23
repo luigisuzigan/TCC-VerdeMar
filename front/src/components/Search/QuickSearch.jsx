@@ -1,15 +1,17 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, SlidersHorizontal } from 'lucide-react';
 import PropertyTypeModal from '../Explorar/Modals/PropertyTypeModal';
-import LocationModal from './Modals/LocationModal';
+import FloatingMapWindow from '../Explorar/FloatingMapWindow';
 import PriceModal from '../Explorar/Modals/PriceModal';
 import FiltersModal from '../Explorar/FiltersModal';
 import StyleModal from '../Explorar/Modals/StyleModal';
 import RoomsModal from '../Explorar/Modals/RoomsModal';
+import { api } from '../../api/client';
 
 export default function QuickSearch() {
   const navigate = useNavigate();
+  const [allProperties, setAllProperties] = useState([]);
   const [filters, setFilters] = useState({
     propertyTypes: [],
     location: '',
@@ -29,6 +31,50 @@ export default function QuickSearch() {
   });
 
   const [activeModal, setActiveModal] = useState(null);
+  const [showFloatingMap, setShowFloatingMap] = useState(false);
+
+  // Buscar todas as propriedades para o mapa
+  useEffect(() => {
+    (async () => {
+      try {
+        console.log('🔄 [QuickSearch] Buscando propriedades para o mapa...');
+        const { data } = await api.get(`/properties?published=true&limit=1000&_t=${Date.now()}`);
+        const arr = Array.isArray(data?.items) ? data.items : Array.isArray(data) ? data : [];
+        console.log('✅ [QuickSearch] Propriedades carregadas:', arr.length);
+        setAllProperties(arr);
+      } catch (e) {
+        console.error('❌ [QuickSearch] Erro ao buscar propriedades:', e);
+        setAllProperties([]);
+      }
+    })();
+  }, []);
+
+  const handleLocationApply = (boundary, propertyIds) => {
+    console.log('📍 [QuickSearch] Área selecionada:', { boundary, propertyIds });
+    setShowFloatingMap(false);
+    
+    if (propertyIds && propertyIds.length > 0) {
+      // Navegar para Explorar com os IDs filtrados
+      const params = new URLSearchParams();
+      params.append('mapFilter', 'true');
+      
+      // Incluir outros filtros existentes
+      if (filters.propertyTypes.length > 0) {
+        params.append('types', filters.propertyTypes.join(','));
+      }
+      if (filters.priceMin) params.append('priceMin', filters.priceMin);
+      if (filters.priceMax) params.append('priceMax', filters.priceMax);
+      if (filters.styles && filters.styles.length > 0) {
+        params.append('styles', filters.styles.join(','));
+      }
+      if (filters.bedrooms) params.append('bedrooms', filters.bedrooms);
+      if (filters.bathrooms) params.append('bathrooms', filters.bathrooms);
+      
+      navigate(`/explorar?${params.toString()}`, { 
+        state: { filteredPropertyIds: propertyIds } 
+      });
+    }
+  };
 
   const handleSearch = () => {
     console.log('Buscando com filtros:', filters);
@@ -143,7 +189,7 @@ export default function QuickSearch() {
           <SearchField
             label="Localização"
             value={filters.location || 'Cidade, bairro...'}
-            onClick={() => setActiveModal('location')}
+            onClick={() => setShowFloatingMap(true)}
             icon="📍"
           />
 
@@ -203,14 +249,15 @@ export default function QuickSearch() {
         }}
       />
 
-      <LocationModal
-        isOpen={activeModal === 'location'}
-        onClose={() => setActiveModal(null)}
-        location={filters.location}
-        onApply={(location) => {
-          setFilters({ ...filters, location });
-          setActiveModal(null);
-        }}
+      {/* Mapa Flutuante - substituindo LocationModal */}
+      <FloatingMapWindow
+        onApply={handleLocationApply}
+        initialSearchText={filters.location || ''}
+        initialBoundary={null}
+        allProperties={allProperties}
+        isOpenExternal={showFloatingMap}
+        onCloseExternal={() => setShowFloatingMap(false)}
+        hideButton={true}
       />
 
       <PriceModal

@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { 
@@ -151,10 +152,20 @@ export default function AdminPropertyForm() {
     
     try {
       const images = imagesText.split(/\n+/).map((s) => s.trim()).filter(Boolean);
+      
+      console.log('📸 Processamento de imagens:');
+      console.log('   - Texto bruto:', imagesText);
+      console.log('   - Array final:', images);
+      console.log('   - Quantidade:', images.length);
+      
+      // Se mainImage não está definida mas há imagens, usar a primeira
+      const mainImage = model.mainImage || (images.length > 0 ? images[0] : '');
+      
       const payload = { 
         ...model,
         images: JSON.stringify(images),
         amenities: JSON.stringify(selectedAmenities),
+        mainImage: mainImage || '',
         latitude: model.latitude ? parseFloat(model.latitude) : null,
         longitude: model.longitude ? parseFloat(model.longitude) : null,
         price: parseFloat(model.price) || 0,
@@ -166,16 +177,26 @@ export default function AdminPropertyForm() {
         reviewCount: parseInt(model.reviewCount) || 0
       };
       
+      console.log('📤 Enviando dados:', {
+        title: payload.title,
+        imagesJSON: payload.images,
+        hasImages: images.length > 0,
+        mainImage: !!mainImage
+      });
+      
       if (id) {
-        await api.put(`/properties/${id}`, payload);
+        const { data } = await api.put(`/properties/${id}`, payload);
+        console.log('✅ Imóvel atualizado:', data);
       } else {
-        await api.post('/properties', payload);
+        const { data } = await api.post('/properties', payload);
+        console.log('✅ Imóvel criado:', data);
       }
       navigate('/admin/properties');
     } catch (e) {
       const msg = e?.response?.data?.error || e?.response?.data?.errors?.[0]?.msg || 'Erro ao salvar';
       setError(msg);
-      console.error('Erro ao salvar:', e);
+      console.error('❌ Erro ao salvar:', e);
+      console.error('Detalhes:', e?.response?.data);
     } finally { 
       setSaving(false); 
     }

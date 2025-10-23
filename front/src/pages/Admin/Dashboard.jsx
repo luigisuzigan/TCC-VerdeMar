@@ -104,7 +104,7 @@ export default function Dashboard() {
     );
   }
 
-  const { overview, usersByRole, trends, distributions, topProperties, messages, financial } = stats;
+  const { overview, usersByRole, trends, distributions, topProperties, messages, recentActivity, financial } = stats;
 
   return (
     <div className="space-y-8">
@@ -322,6 +322,59 @@ export default function Dashboard() {
               </div>
             ))}
           </div>
+        </div>
+      </div>
+
+      {/* Atividade Recente (Favoritos) */}
+      <div className="bg-white p-6 rounded-lg shadow">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          <Activity className="w-5 h-5" />
+          Atividade Recente - Favoritos
+        </h2>
+        <div className="space-y-3">
+          {recentActivity && recentActivity.length > 0 ? (
+            recentActivity.map((activity) => (
+              <div
+                key={activity.id}
+                className="flex items-center gap-4 p-4 rounded-lg border border-gray-200 hover:border-emerald-300 hover:bg-emerald-50 transition-all"
+              >
+                {/* Avatar do Usuário */}
+                <div className="flex-shrink-0">
+                  <div className="w-10 h-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center">
+                    <Heart className="w-5 h-5 fill-current" />
+                  </div>
+                </div>
+
+                {/* Informações */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <p className="font-medium text-gray-900 text-sm">
+                      {activity.user.name}
+                    </p>
+                    <span className="text-gray-400">•</span>
+                    <p className="text-xs text-gray-500">
+                      {activity.user.email}
+                    </p>
+                  </div>
+                  <p className="text-sm text-gray-600">
+                    Favoritou: <span className="font-medium text-gray-900">{activity.property.title}</span>
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {activity.property.city} • {formatCurrency(activity.property.price)}
+                  </p>
+                </div>
+
+                {/* Tempo */}
+                <div className="flex-shrink-0 text-right">
+                  <p className="text-xs text-gray-500">
+                    {formatTimeAgo(activity.createdAt)}
+                  </p>
+                </div>
+              </div>
+            ))
+          ) : (
+            <p className="text-gray-500 text-center py-8">Nenhuma atividade recente</p>
+          )}
         </div>
       </div>
 

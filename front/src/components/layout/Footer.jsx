@@ -15,9 +15,7 @@ export default function Footer() {
   const footerLinks = {
     empresa: [
       { label: 'Sobre Nós', path: '/sobre' },
-      { label: 'Como Funciona', path: '/como-funciona' },
-      { label: 'Novidades', path: '/novidades' },
-      { label: 'Blog', path: '/blog' },
+      { label: 'Contato', path: '/contato' },
     ],
     imoveis: [
       { label: 'Explorar Imóveis', path: '/explorar' },
@@ -27,9 +25,8 @@ export default function Footer() {
     ],
     suporte: [
       { label: 'Central de Ajuda', path: '/ajuda' },
-      { label: 'Contato', path: '/contato' },
-      { label: 'Anunciar Imóvel', path: '/anunciar' },
       { label: 'Termos de Uso', path: '/termos' },
+      { label: 'Política de Privacidade', path: '/privacidade' },
     ],
   };
 
@@ -46,8 +43,8 @@ export default function Footer() {
               </h2>
             </Link>
             <p className="text-slate-300 mb-6 leading-relaxed max-w-sm">
-              Encontre o imóvel dos seus sonhos à beira-mar. 
-              Conectamos você aos melhores refúgios costeiros do Brasil.
+              Encontre o imóvel dos seus sonhos em todo o Brasil. 
+              Conectamos você às melhores oportunidades imobiliárias em localizações privilegiadas.
             </p>
             
             {/* Contact Info */}

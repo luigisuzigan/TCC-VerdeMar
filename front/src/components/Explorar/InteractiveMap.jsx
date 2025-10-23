@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { GoogleMap, useLoadScript, DrawingManager, OverlayView } from '@react-google-maps/api';
+import { GoogleMap, useLoadScript, DrawingManager, OverlayView, Marker, InfoWindow } from '@react-google-maps/api';
 import { Layers, Pencil, X, Square, Circle as CircleIcon, Trash2, MapPin } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -56,9 +56,11 @@ export default function InteractiveMap({
   const [currentZoom, setCurrentZoom] = useState(13);
   const [isDrawingFreehand, setIsDrawingFreehand] = useState(false);
   const [freehandPath, setFreehandPath] = useState([]);
+  const [googleMapsReady, setGoogleMapsReady] = useState(false);
 
   const mapRef = useRef(null);
   const freehandPolygonRef = useRef(null);
+  const markersRef = useRef([]);
 
   const onMapLoad = useCallback((map) => {
     mapRef.current = map;
@@ -67,7 +69,132 @@ export default function InteractiveMap({
     console.log('🗺️ Mapa carregado! Zoom inicial:', zoom);
     console.log('📊 Propriedades disponíveis no load:', properties.length);
     console.log('✅ isLoaded:', isLoaded);
+    console.log('🌐 window.google existe?', !!window.google);
+    console.log('🌐 window.google.maps existe?', !!window.google?.maps);
+    
+    // Marcar Google Maps como pronto
+    if (window.google && window.google.maps) {
+      setGoogleMapsReady(true);
+      console.log('✅ Google Maps marcado como PRONTO!');
+    }
   }, [properties, isLoaded]);
+
+  // Criar marcadores usando API nativa do Google Maps
+  useEffect(() => {
+    // Verificações rigorosas
+    if (!mapRef.current) {
+      console.log('⏳ MapRef ainda não existe');
+      return;
+    }
+    
+    if (!googleMapsReady) {
+      console.log('⏳ Google Maps ainda não está pronto');
+      return;
+    }
+    
+    if (!window.google?.maps) {
+      console.log('⏳ window.google.maps não está disponível');
+      return;
+    }
+
+    if (properties.length === 0) {
+      console.log('⏳ Nenhuma propriedade para exibir ainda');
+      return;
+    }
+
+    // Pequeno delay para garantir que o mapa está completamente renderizado
+    const timer = setTimeout(() => {
+      console.log('🎨 Iniciando criação de marcadores nativos...');
+      
+      // Limpar marcadores antigos
+      if (markersRef.current.length > 0) {
+        console.log('🗑️ Removendo', markersRef.current.length, 'marcadores antigos');
+        markersRef.current.forEach(marker => marker.setMap(null));
+        markersRef.current = [];
+      }
+
+      console.log('🎨 Criando marcadores nativos para', properties.length, 'propriedades');
+
+      // Filtrar propriedades válidas
+      const validProperties = properties.filter(p => p.latitude && p.longitude);
+      console.log('✅', validProperties.length, 'propriedades com coordenadas válidas');
+
+      if (validProperties.length === 0) {
+        console.log('❌ Nenhuma propriedade com coordenadas válidas');
+        return;
+      }
+
+      // Criar marcadores nativos
+      validProperties.forEach((property, index) => {
+        const position = {
+          lat: parseFloat(property.latitude),
+          lng: parseFloat(property.longitude)
+        };
+
+        console.log(`📍 [${index + 1}/${validProperties.length}] Criando marcador para:`, property.title, position);
+
+        try {
+          const marker = new window.google.maps.Marker({
+            position: position,
+            map: mapRef.current,
+            title: property.title,
+            icon: {
+              path: window.google.maps.SymbolPath.CIRCLE,
+              fillColor: '#2563eb',
+              fillOpacity: 0.9,
+              strokeColor: '#ffffff',
+              strokeWeight: 2.5,
+              scale: 9,
+            },
+            optimized: false, // Força renderização não otimizada
+            animation: window.google.maps.Animation.DROP, // Animação de queda
+          });
+
+          marker.addListener('click', () => {
+            console.log('🖱️ Marcador clicado:', property.title);
+            handlePropertyClick(property);
+          });
+
+          // Efeito hover
+          marker.addListener('mouseover', () => {
+            marker.setIcon({
+              path: window.google.maps.SymbolPath.CIRCLE,
+              fillColor: '#1d4ed8',
+              fillOpacity: 1,
+              strokeColor: '#ffffff',
+              strokeWeight: 3,
+              scale: 11,
+            });
+          });
+
+          marker.addListener('mouseout', () => {
+            marker.setIcon({
+              path: window.google.maps.SymbolPath.CIRCLE,
+              fillColor: '#2563eb',
+              fillOpacity: 0.9,
+              strokeColor: '#ffffff',
+              strokeWeight: 2.5,
+              scale: 9,
+            });
+          });
+
+          markersRef.current.push(marker);
+          console.log('✅ Marcador criado com sucesso!');
+        } catch (error) {
+          console.error('❌ Erro ao criar marcador:', error);
+        }
+      });
+
+      console.log('🎉 Total de marcadores criados:', markersRef.current.length);
+    }, 100); // Delay de 100ms
+
+    // Cleanup
+    return () => {
+      clearTimeout(timer);
+      markersRef.current.forEach(marker => marker.setMap(null));
+      markersRef.current = [];
+    };
+  }, [properties, googleMapsReady, mapRef.current]);
 
   // Atualizar zoom quando o mapa mover
   useEffect(() => {
@@ -408,186 +535,7 @@ export default function InteractiveMap({
           draggingCursor: drawingMode === 'freehand' ? 'crosshair' : 'grabbing',
         }}
       >
-        {/* Property Markers - Losango Azul Responsivo */}
-        {(() => {
-          const validProperties = properties.filter(p => p.latitude && p.longitude);
-          console.log('🎯 RENDERIZANDO MARCADORES:', validProperties.length);
-          console.log('🗺️ MapRef existe?', !!mapRef.current);
-          console.log('📦 Primeira propriedade:', validProperties[0]);
-          
-          return validProperties.map((property) => {
-            console.log('✅ Criando OverlayView para:', property.title);
-            return (
-            <OverlayView
-              key={property.id}
-              position={{
-                lat: parseFloat(property.latitude),
-                lng: parseFloat(property.longitude),
-              }}
-              mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
-            >
-              <div
-                onClick={() => handlePropertyClick(property)}
-                onMouseEnter={() => setHoveredProperty(property.id)}
-                onMouseLeave={() => setHoveredProperty(null)}
-                style={{ zIndex: hoveredProperty === property.id ? 1000 : 1 }}
-                className="absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer transition-transform duration-200"
-              >
-                {/* Losango (Marker) */}
-                <div
-                  className={`rounded-full transition-all duration-200 flex items-center justify-center ${
-                    hoveredProperty === property.id
-                      ? 'bg-blue-700 scale-125 shadow-xl'
-                      : 'bg-blue-600 shadow-lg'
-                  }`}
-                  style={{
-                    width: `${getMarkerSize(currentZoom)}px`,
-                    height: `${getMarkerSize(currentZoom)}px`,
-                    border: hoveredProperty === property.id ? '2px solid white' : '1.5px solid white',
-                  }}
-                >
-                  <MapPin 
-                    size={Math.max(12, getMarkerSize(currentZoom) * 0.5)} 
-                    className="text-white" 
-                    strokeWidth={2.5}
-                  />
-                </div>
-
-                {/* Card Hover */}
-                {hoveredProperty === property.id && (
-                  <div
-                    className="absolute left-1/2 -translate-x-1/2 animate-in fade-in zoom-in duration-200"
-                    style={{
-                      bottom: `${getMarkerSize(currentZoom) + 12}px`,
-                      zIndex: 2000,
-                    }}
-                    onMouseEnter={() => setHoveredProperty(property.id)}
-                    onMouseLeave={() => setHoveredProperty(null)}
-                  >
-                    <div className="bg-white rounded-xl shadow-2xl overflow-hidden border border-slate-200 w-64"
-                      style={{ pointerEvents: 'auto' }}
-                    >
-                      {/* Imagem */}
-                      {(() => {
-                        try {
-                          const images = property.images ? JSON.parse(property.images) : [];
-                          const firstImage = Array.isArray(images) ? images[0] : null;
-                          return firstImage ? (
-                            <div className="w-full h-40 overflow-hidden bg-slate-100 relative">
-                              <img
-                                src={firstImage}
-                                alt={property.title || 'Imóvel'}
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                          ) : (
-                            <div className="w-full h-40 bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center">
-                              <MapPin size={32} className="text-slate-400" />
-                            </div>
-                          );
-                        } catch (e) {
-                          return (
-                            <div className="w-full h-40 bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center">
-                              <MapPin size={32} className="text-slate-400" />
-                            </div>
-                          );
-                        }
-                      })()}
-                      
-                      {/* Conteúdo */}
-                      <div className="p-3">
-                        <p className="text-xl font-bold text-blue-700 mb-2">
-                          {formatPrice(property.salePrice || property.price)}
-                        </p>
-                        <h4 className="font-semibold text-sm text-slate-900 mb-2 line-clamp-2 leading-tight">
-                          {property.title || 'Imóvel disponível'}
-                        </h4>
-                        <div className="flex items-center gap-3 text-xs text-slate-600 mb-3">
-                          {property.bedrooms && <span className="flex items-center gap-1">🛏️ {property.bedrooms}</span>}
-                          {property.bathrooms && <span className="flex items-center gap-1">🚿 {property.bathrooms}</span>}
-                          {property.area && <span className="flex items-center gap-1">📐 {property.area}m²</span>}
-                        </div>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(`/property/${property.id}`);
-                          }}
-                          className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors shadow-sm"
-                        >
-                          Ver Detalhes
-                        </button>
-                      </div>
-                    </div>
-                    
-                    {/* Seta apontando para o marcador */}
-                    <div
-                      className="absolute left-1/2 -translate-x-1/2 w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-t-[10px] border-t-white"
-                      style={{ top: '100%', filter: 'drop-shadow(0 3px 6px rgba(0,0,0,0.15))' }}
-                    />
-                  </div>
-                )}
-              </div>
-            </OverlayView>
-            );
-          });
-        })()}
-
-        {/* Card hover personalizado */}
-        {hoveredProperty && (() => {
-          const property = properties.find(p => p.id === hoveredProperty);
-          if (!property) return null;
-          
-          return (
-            <OverlayView
-              key={`hover-${property.id}`}
-              position={{
-                lat: parseFloat(property.latitude),
-                lng: parseFloat(property.longitude),
-              }}
-              mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
-              getPixelPositionOffset={() => ({
-                x: -125,
-                y: -280,
-              })}
-            >
-              <div
-                className="relative cursor-pointer group"
-                onClick={() => handlePropertyClick(property)}
-                style={{ 
-                  zIndex: 1001,
-                  pointerEvents: 'auto',
-                }}
-              >
-                {/* Card hover */}
-                <div
-                  className="bg-white rounded-lg shadow-2xl overflow-hidden"
-                  style={{ width: '250px' }}
-                >
-                  <img
-                    src={property.images?.[0] || '/placeholder.jpg'}
-                    alt={property.title}
-                    className="w-full h-32 object-cover"
-                  />
-                  <div className="p-3">
-                    <h3 className="font-semibold text-sm mb-1 line-clamp-1">
-                      {property.title}
-                    </h3>
-                    <p className="text-blue-600 font-bold text-lg">
-                      {formatPrice(property.salePrice || property.price)}
-                    </p>
-                    {property.bedrooms && (
-                      <p className="text-xs text-gray-500 mt-1">
-                        {property.bedrooms} quartos • {property.bathrooms} banheiros
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </OverlayView>
-          );
-        })()}
-
-
+        {/* Marcadores agora são criados via useEffect com API nativa */}
 
         {/* Drawing Manager */}
         {drawingMode && (

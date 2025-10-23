@@ -59,13 +59,14 @@ router.get('/', listValidators, async (req, res) => {
     maxFloor,
     minYearBuilt,
     category,
+    styles,
     sortBy,
     limit = 20, 
     offset = 0, 
     published = true 
   } = req.query;
   
-  console.log('List properties request:', { limit, offset, published, city, search, category, neighborhood });
+  console.log('List properties request:', { limit, offset, published, city, search, category, neighborhood, styles });
   
   const result = await listProperties({ 
     search, 
@@ -87,6 +88,7 @@ router.get('/', listValidators, async (req, res) => {
     maxFloor,
     minYearBuilt,
     category,
+    styles,
     sortBy,
     limit: Number(limit) || 20, 
     offset: Number(offset) || 0, 
@@ -172,7 +174,7 @@ const propertyValidators = [
   body('amenities').optional().isString(), // JSON string
   body('style').optional().isString().isLength({ max: 50 }),
   body('images').optional().isString(), // JSON string
-  body('mainImage').optional().isURL(),
+  body('mainImage').optional().isString(),
   body('rating').optional().isFloat({ min: 0, max: 5 }).toFloat(),
   body('reviewCount').optional().isInt({ min: 0 }).toInt(),
   body('published').optional().isBoolean().toBoolean(),
@@ -180,56 +182,85 @@ const propertyValidators = [
 ];
 
 router.post('/', authMiddleware, requireAdmin, propertyValidators, async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
-  
-  // Validação condicional de campos baseada no tipo
-  const { type } = req.body;
-  if (type) {
-    const fieldErrors = validatePropertyFields(type, req.body);
-    if (fieldErrors.length > 0) {
-      return res.status(400).json({ 
-        errors: fieldErrors.map(e => ({ 
-          msg: e.message, 
-          param: e.field, 
-          type: e.type 
-        }))
-      });
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      console.error('Validation errors:', errors.array());
+      return res.status(400).json({ errors: errors.array() });
     }
+    
+    // Validação condicional de campos baseada no tipo
+    const { type } = req.body;
+    if (type) {
+      const fieldErrors = validatePropertyFields(type, req.body);
+      if (fieldErrors.length > 0) {
+        return res.status(400).json({ 
+          errors: fieldErrors.map(e => ({ 
+            msg: e.message, 
+            param: e.field, 
+            type: e.type 
+          }))
+        });
+      }
+    }
+    
+    // Adicionar userId do usuário autenticado
+    const data = {
+      ...req.body,
+      userId: req.user.id
+    };
+    
+    const item = await createProperty(data);
+    res.status(201).json(item);
+  } catch (error) {
+    console.error('Erro ao criar imóvel:', error);
+    res.status(500).json({ 
+      error: 'Erro ao criar imóvel',
+      message: error.message 
+    });
   }
-  
-  // Adicionar userId do usuário autenticado
-  const data = {
-    ...req.body,
-    userId: req.user.id
-  };
-  
-  const item = await createProperty(data);
-  res.status(201).json(item);
 });
 
 router.put('/:id', authMiddleware, requireAdmin, [param('id').isString(), ...propertyValidators], async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
-  
-  // Validação condicional de campos baseada no tipo
-  const { type } = req.body;
-  if (type) {
-    const fieldErrors = validatePropertyFields(type, req.body);
-    if (fieldErrors.length > 0) {
-      return res.status(400).json({ 
-        errors: fieldErrors.map(e => ({ 
-          msg: e.message, 
-          param: e.field, 
-          type: e.type 
-        }))
-      });
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      console.error('Validation errors:', errors.array());
+      return res.status(400).json({ errors: errors.array() });
     }
+    
+    // Validação condicional de campos baseada no tipo
+    const { type } = req.body;
+    if (type) {
+      const fieldErrors = validatePropertyFields(type, req.body);
+      if (fieldErrors.length > 0) {
+        return res.status(400).json({ 
+          errors: fieldErrors.map(e => ({ 
+            msg: e.message, 
+            param: e.field, 
+            type: e.type 
+          }))
+        });
+      }
+    }
+    
+    console.log(`🔄 Atualizando imóvel ${req.params.id}`);
+    const updated = await updateProperty(req.params.id, req.body);
+    if (!updated) {
+      console.error(`❌ Imóvel ${req.params.id} não encontrado`);
+      return res.status(404).json({ error: 'Imóvel não encontrado' });
+    }
+    
+    console.log(`✅ Imóvel ${req.params.id} atualizado com sucesso`);
+    res.json(updated);
+  } catch (error) {
+    console.error('❌ Erro ao atualizar imóvel:', error);
+    res.status(500).json({ 
+      error: 'Erro ao atualizar imóvel',
+      message: error.message,
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
-  
-  const updated = await updateProperty(req.params.id, req.body);
-  if (!updated) return res.status(404).json({ error: 'Not found' });
-  res.json(updated);
 });
 
 router.patch('/:id/publish', authMiddleware, requireAdmin, [param('id').isString(), body('published').isBoolean()], async (req, res) => {

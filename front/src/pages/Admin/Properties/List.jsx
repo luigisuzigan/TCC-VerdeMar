@@ -292,10 +292,20 @@ export default function AdminPropertiesList() {
                   <div className="relative h-48 bg-slate-200">
                     {(() => {
                       try {
+                        console.log('🖼️ Processando imagem para:', property.title);
+                        console.log('   - property.images tipo:', typeof property.images);
+                        console.log('   - property.images valor:', property.images);
+                        
                         const imgs = typeof property.images === 'string' 
                           ? JSON.parse(property.images) 
                           : property.images;
+                          
+                        console.log('   - imgs após parse:', imgs);
+                        console.log('   - É array?', Array.isArray(imgs));
+                        console.log('   - Length:', imgs?.length);
+                        
                         const firstImage = Array.isArray(imgs) && imgs.length > 0 ? imgs[0] : null;
+                        console.log('   - firstImage:', firstImage);
                         
                         return firstImage ? (
                           <img

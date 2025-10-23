@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Heart, MapPin, BedDouble, Bath, Maximize, ArrowLeft, Trash2, Search } from 'lucide-react';
+import { Heart, MapPin, BedDouble, Bath, Maximize, ArrowLeft, Search } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 export default function Favorites() {
@@ -10,10 +10,17 @@ export default function Favorites() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Buscar favoritos do localStorage (simulação)
+    // Verificar se está logado
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+
+    // Buscar favoritos do localStorage (específicos do usuário)
     const loadFavorites = () => {
       try {
-        const savedFavorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+        const favoritesKey = `favorites_user_${user.id}`;
+        const savedFavorites = JSON.parse(localStorage.getItem(favoritesKey) || '[]');
         setFavorites(savedFavorites);
       } catch (error) {
         console.error('Erro ao carregar favoritos:', error);
@@ -24,12 +31,13 @@ export default function Favorites() {
     };
 
     loadFavorites();
-  }, []);
+  }, [user, navigate]);
 
   const handleRemoveFavorite = (propertyId) => {
     const updatedFavorites = favorites.filter(fav => fav.id !== propertyId);
     setFavorites(updatedFavorites);
-    localStorage.setItem('favorites', JSON.stringify(updatedFavorites));
+    const favoritesKey = `favorites_user_${user.id}`;
+    localStorage.setItem(favoritesKey, JSON.stringify(updatedFavorites));
   };
 
   if (loading) {
@@ -100,17 +108,6 @@ export default function Favorites() {
                     alt={property.title}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   />
-                  
-                  {/* Badge de tipo */}
-                  <div className="absolute top-3 left-3">
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                      property.transactionType === 'SALE'
-                        ? 'bg-emerald-600 text-white'
-                        : 'bg-blue-600 text-white'
-                    }`}>
-                      {property.transactionType === 'SALE' ? 'Venda' : 'Aluguel'}
-                    </span>
-                  </div>
 
                   {/* Botão remover favorito */}
                   <button
@@ -161,31 +158,15 @@ export default function Favorites() {
                   </div>
 
                   {/* Preço */}
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-2xl font-bold text-emerald-600">
-                        {property.price?.toLocaleString('pt-BR', {
-                          style: 'currency',
-                          currency: 'BRL',
-                          minimumFractionDigits: 0,
-                          maximumFractionDigits: 0,
-                        })}
-                      </p>
-                      {property.transactionType === 'RENT' && (
-                        <p className="text-xs text-slate-500">por mês</p>
-                      )}
-                    </div>
-                    
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        handleRemoveFavorite(property.id);
-                      }}
-                      className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all"
-                      title="Remover"
-                    >
-                      <Trash2 size={18} />
-                    </button>
+                  <div>
+                    <p className="text-2xl font-bold text-emerald-600">
+                      {property.price?.toLocaleString('pt-BR', {
+                        style: 'currency',
+                        currency: 'BRL',
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 0,
+                      })}
+                    </p>
                   </div>
                 </div>
               </div>

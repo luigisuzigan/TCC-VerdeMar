@@ -199,6 +199,32 @@ router.get('/stats', async (req, res) => {
     }).catch(() => []); // Se a tabela não existir ainda
     
     // ========================================
+    // ❤️ ATIVIDADES RECENTES (FAVORITOS)
+    // ========================================
+    const recentFavorites = await prisma.favorite.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: 15,
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true
+          }
+        },
+        property: {
+          select: {
+            id: true,
+            title: true,
+            mainImage: true,
+            price: true,
+            city: true
+          }
+        }
+      }
+    }).catch(() => []); // Se a tabela não existir ainda
+    
+    // ========================================
     // 📅 VENDAS MENSAIS (últimos 6 meses)
     // ========================================
     const sixMonthsAgo = new Date();
@@ -287,6 +313,9 @@ router.get('/stats', async (req, res) => {
         
         // Mensagens
         messages: recentMessages,
+        
+        // Atividades recentes (favoritos)
+        recentActivity: recentFavorites,
         
         // Dados financeiros
         financial: {

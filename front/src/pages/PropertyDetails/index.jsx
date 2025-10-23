@@ -63,16 +63,8 @@ export default function PropertyDetails() {
   };
 
   const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: property.title,
-        text: property.description,
-        url: window.location.href,
-      });
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-      alert('Link copiado para a área de transferência!');
-    }
+    navigator.clipboard.writeText(window.location.href);
+    alert('Link copiado para a área de transferência!');
   };
 
   if (loading) {

@@ -11,7 +11,7 @@ export default function NearbyProperties() {
   useEffect(() => {
     async function fetchProperties() {
       try {
-        const response = await api.get('/properties?limit=10&published=true');
+        const response = await api.get(`/properties?limit=10&published=true&_t=${Date.now()}`);
         setProperties(response.data.items || []);
       } catch (error) {
         console.error('Erro ao carregar imóveis:', error);

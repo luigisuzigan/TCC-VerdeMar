@@ -6,6 +6,12 @@ function toRow(data) {
   // Converter images para JSON string se necessário
   if (data.images) {
     result.images = typeof data.images === 'string' ? data.images : JSON.stringify(data.images);
+    console.log('📸 [toRow] Processando images:', {
+      tipo: typeof data.images,
+      original: data.images,
+      resultado: result.images,
+      length: result.images.length
+    });
   } else {
     result.images = '[]';
   }
@@ -17,6 +23,11 @@ function toRow(data) {
     result.amenities = '[]';
   }
   
+  // Garantir que mainImage seja string ou null
+  if (data.mainImage !== undefined) {
+    result.mainImage = data.mainImage ? String(data.mainImage) : null;
+  }
+  
   return result;
 }
 
@@ -25,12 +36,26 @@ function fromRow(row) {
   
   const result = { ...row };
   
+  console.log('📦 [fromRow] Processando:', {
+    id: row.id?.substring(0, 8),
+    title: row.title,
+    imagesTipo: typeof row.images,
+    imagesValor: row.images,
+    imagesLength: row.images?.length
+  });
+  
   // Parse images
   try {
-    result.images = Array.isArray(row.images) 
-      ? row.images 
-      : JSON.parse(row.images || '[]');
-  } catch {
+    if (Array.isArray(row.images)) {
+      console.log('⚠️ [fromRow] images já é array!', row.images);
+      result.images = row.images;
+    } else {
+      console.log('🔄 [fromRow] Fazendo parse de images:', row.images);
+      result.images = JSON.parse(row.images || '[]');
+      console.log('✅ [fromRow] Parse OK:', result.images);
+    }
+  } catch (error) {
+    console.error('❌ [fromRow] Erro no parse de images:', error.message);
     result.images = [];
   }
   
@@ -69,6 +94,7 @@ export async function listProperties({
   amenities,
   condoAmenities,
   condition,
+  styles,
   sortBy = 'default',
   limit = 20, 
   offset = 0, 
@@ -90,6 +116,7 @@ export async function listProperties({
       country ? { country: { contains: String(country) } } : {},
       neighborhood ? { neighborhood: { contains: String(neighborhood) } } : {},
       category ? { category: String(category) } : {},
+      styles ? { style: { in: String(styles).split(',').map(s => s.trim()) } } : {},
       minPrice != null ? { price: { gte: Number(minPrice) } } : {},
       maxPrice != null ? { price: { lte: Number(maxPrice) } } : {},
       minArea != null ? { area: { gte: Number(minArea) } } : {},
@@ -141,13 +168,50 @@ export async function getProperty(id) {
 }
 
 export async function createProperty(data) {
-  const row = await prisma.property.create({ data: toRow(data) });
-  return fromRow(row);
+  try {
+    const processedData = toRow(data);
+    console.log('💾 Criando imóvel com dados:', { 
+      title: processedData.title, 
+      type: processedData.type,
+      hasImages: processedData.images !== '[]',
+      hasMainImage: !!processedData.mainImage
+    });
+    
+    const row = await prisma.property.create({ data: processedData });
+    console.log('✅ Imóvel criado com ID:', row.id);
+    return fromRow(row);
+  } catch (error) {
+    console.error('❌ Erro ao criar imóvel:', error.message);
+    throw error;
+  }
 }
 
 export async function updateProperty(id, data) {
-  const row = await prisma.property.update({ where: { id }, data: toRow(data) });
-  return fromRow(row);
+  try {
+    const processedData = toRow(data);
+    
+    // Remover campos que não existem no schema ou não podem ser alterados
+    const { userId, guests, reviewCount, ...updateData } = processedData;
+    
+    console.log('💾 Atualizando imóvel:', id, {
+      title: updateData.title,
+      hasImages: updateData.images !== '[]',
+      hasMainImage: !!updateData.mainImage
+    });
+    
+    const row = await prisma.property.update({ 
+      where: { id }, 
+      data: updateData 
+    });
+    console.log('✅ Imóvel atualizado:', id);
+    return fromRow(row);
+  } catch (error) {
+    console.error('❌ Erro ao atualizar imóvel:', id, error.message);
+    if (error.code === 'P2025') {
+      return null; // Imóvel não encontrado
+    }
+    throw error;
+  }
 }
 
 export async function deleteProperty(id) {

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext.jsx';
+import { useFavorites } from '../../../hooks/useFavorites.js';
 import {
   ChevronRight,
   User2,
@@ -39,6 +40,7 @@ function initials(name) {
 export default function UserMenu({ inverted = false, requireAuth = false }) {
   const navigate = useNavigate();
   const { user: authedUser, logout: ctxLogout, isAdmin, isSeller } = useAuth();
+  const { count: favCount } = useFavorites();
   const [open, setOpen] = useState(false);
   const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light');
 
@@ -48,16 +50,6 @@ export default function UserMenu({ inverted = false, requireAuth = false }) {
   const name = user?.name || 'Usuário';
   const email = user?.email || 'user@example.com';
   const avatarUrl = user?.avatar;
-
-  // Contadores mock
-  const counts = useMemo(() => {
-    try {
-      return JSON.parse(localStorage.getItem('vm_counts') || '{}');
-    } catch {
-      return {};
-    }
-  }, []);
-  const favCount = counts.favorites ?? 2;
 
   // Fechar ao clicar fora / ESC
   const panelRef = useRef(null);

@@ -1,13 +1,25 @@
 import { Heart } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useFavorites } from '../../hooks/useFavorites';
+import { useAuth } from '../../context/AuthContext';
 
 export default function FavoriteButton({ property, size = 'md', className = '' }) {
   const { isFavorite, toggleFavorite } = useFavorites();
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const isFav = isFavorite(property.id);
 
   const handleClick = (e) => {
     e.preventDefault();
     e.stopPropagation();
+    
+    // Verificar se o usuário está logado
+    if (!user) {
+      alert('Você precisa fazer login para salvar imóveis nos favoritos!');
+      navigate('/login');
+      return;
+    }
+    
     toggleFavorite(property);
   };
 

@@ -53,6 +53,7 @@ export function AuthProvider({ children }) {
     localStorage.removeItem(USER_KEY);
     sessionStorage.removeItem(TOKEN_KEY);
     sessionStorage.removeItem(USER_KEY);
+    // Favoritos não são mais limpos - são salvos por usuário
   }
 
   const updateUserData = useMemo(() => {
