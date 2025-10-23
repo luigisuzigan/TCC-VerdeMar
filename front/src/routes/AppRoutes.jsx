@@ -3,14 +3,12 @@ import MainLayout from '../layouts/MainLayout';
 import AdminLayout from '../layouts/AdminLayout';
 import Home from '../pages/Home';
 import Explorar from '../pages/Explorar';
-import Blog from '../pages/Blog';
-import BlogPost from '../pages/Blog/Post.jsx';
 import Sobre from '../pages/Sobre';
-import Novidades from '../pages/Novidades';
 import Login from '../pages/Login';
 import Register from '../pages/Register';
 import Account from '../pages/Account';
 import Settings from '../pages/Settings';
+import Favorites from '../pages/Favorites';
 import { useAuth } from '../context/AuthContext.jsx';
 import PropertyDetails from '../pages/PropertyDetails';
 import SellerDashboard from '../pages/Seller/Dashboard.jsx';
@@ -50,15 +48,13 @@ export default function AppRoutes() {
         <Route element={<MainLayout />}>
           <Route path="/" element={<Home />} />
           <Route path="/explorar" element={<Explorar />} />
-          <Route path="/blog" element={<Blog />} />
-          <Route path="/blog/:slug" element={<BlogPost />} />
-          <Route path="/novidades" element={<Novidades />} />
           <Route path="/sobre" element={<Sobre />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/property/:id" element={<PropertyDetails />} />
           <Route path="/account" element={<RequireAuth><Account /></RequireAuth>} />
           <Route path="/settings" element={<RequireAuth><Settings /></RequireAuth>} />
+          <Route path="/favorites" element={<RequireAuth><Favorites /></RequireAuth>} />
           <Route path="/seller" element={<RequireSeller><SellerDashboard /></RequireSeller>} />
           <Route path="/seller/properties" element={<RequireSeller><SellerPropertiesList /></RequireSeller>} />
           <Route path="/seller/properties/new" element={<RequireSeller><SellerPropertyForm /></RequireSeller>} />

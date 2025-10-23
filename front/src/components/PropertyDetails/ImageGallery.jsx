@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Camera, ChevronLeft, ChevronRight, X, Home, Share2, Heart } from 'lucide-react';
+import { Camera, ChevronLeft, ChevronRight, X, Home, Share2 } from 'lucide-react';
+import FavoriteButton from '../FavoriteButton';
 
-export default function ImageGallery({ images = [], title = '', onShare, isFavorite, onToggleFavorite }) {
+export default function ImageGallery({ images = [], title = '', onShare, property }) {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [showGallery, setShowGallery] = useState(false);
 
@@ -119,20 +120,12 @@ export default function ImageGallery({ images = [], title = '', onShare, isFavor
             </button>
 
             {/* Botão Salvar/Favoritar */}
-            <button
-              onClick={onToggleFavorite}
-              className={`flex items-center gap-2 px-4 py-2.5 border rounded-xl shadow-sm hover:shadow-md hover:scale-105 transition-all duration-300 font-semibold ${
-                isFavorite
-                  ? 'bg-red-500 border-red-500 text-white'
-                  : 'bg-white border-slate-300 text-slate-800'
-              }`}
-              title={isFavorite ? 'Remover dos favoritos' : 'Salvar nos favoritos'}
-            >
-              <Heart size={18} fill={isFavorite ? 'currentColor' : 'none'} />
-              <span className="hidden sm:inline">
-                {isFavorite ? 'Salvo' : 'Salvar'}
-              </span>
-            </button>
+            {property && (
+              <div className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-300 rounded-xl shadow-sm hover:shadow-md hover:scale-105 transition-all duration-300">
+                <FavoriteButton property={property} size="sm" className="p-0 bg-transparent shadow-none hover:scale-100" />
+                <span className="hidden sm:inline font-semibold text-slate-800">Salvar</span>
+              </div>
+            )}
 
             {/* Botão Ver Todas as Fotos */}
             {images.length > 1 && (

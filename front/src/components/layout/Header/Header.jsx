@@ -3,8 +3,6 @@ import { NavLink, useLocation, Link } from 'react-router-dom';
 import {
   Home as HomeIcon,
   Search,
-  BookOpenText,
-  Sparkles,
   Info,
 } from 'lucide-react';
 import UserMenu from './UserMenu';
@@ -36,8 +34,6 @@ export default function Header({ transparentOnTop = false }) {
   const nav = [
     { label: 'Home', to: '/', Icon: HomeIcon },
     { label: 'Explorar', to: '/explorar', Icon: Search },
-    { label: 'Blog', to: '/blog', Icon: BookOpenText },
-    { label: 'Novidades', to: '/novidades', Icon: Sparkles },
     { label: 'Sobre', to: '/sobre', Icon: Info },
   ];
 

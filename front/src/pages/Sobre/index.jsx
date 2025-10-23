@@ -7,24 +7,6 @@ export default function Sobre() {
     { value: '4.9', label: 'AVALIAÇÃO MÉDIA' },
   ];
 
-  const destinations = [
-    {
-      title: 'Florianópolis',
-      subtitle: 'Ilha da Magia',
-      image: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=800&q=80',
-    },
-    {
-      title: 'Balneário Camboriú',
-      subtitle: 'Arranha-céus e Praias',
-      image: 'https://images.unsplash.com/photo-1582719471137-c3967ffb1c42?w=800&q=80',
-    },
-    {
-      title: 'Bombinhas',
-      subtitle: 'Capital do Mergulho',
-      image: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=800&q=80',
-    },
-  ];
-
   return (
     <main className="min-h-screen">
       {/* Hero Section with Background Image */}
@@ -45,10 +27,10 @@ export default function Sobre() {
             IMÓVEIS & LIFESTYLE
           </div>
           <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
-            Realizando Sonhos à<br />Beira-Mar
+            Realizando Sonhos<br />Imobiliários
           </h1>
           <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
-            Encontre seu refúgio perfeito no litoral de Santa Catarina
+            Encontre seu refúgio perfeito em qualquer lugar do Brasil
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
             <Link
@@ -120,16 +102,15 @@ export default function Sobre() {
                 QUEM SOMOS
               </div>
               <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-6">
-                Sua Ponte para os Sonhos Litorâneos
+                Sua Ponte para os Sonhos Imobiliários
               </h2>
               <p className="text-lg text-slate-600 leading-relaxed mb-6">
-                A VerdeMar nasceu da paixão pelo mar e da vontade de conectar pessoas aos 
-                melhores imóveis costeiros de Santa Catarina. Combinamos tecnologia de ponta 
-                com atendimento humanizado para tornar sua jornada inesquecível.
+                A VerdeMar nasceu da paixão por conectar pessoas aos melhores imóveis em todo o Brasil. 
+                Combinamos tecnologia de ponta com atendimento humanizado para tornar sua jornada inesquecível.
               </p>
               <p className="text-lg text-slate-600 leading-relaxed mb-8">
                 Seja para investir, morar ou relaxar, nossa missão é transformar o sonho da 
-                casa na praia em realidade, com transparência, segurança e dedicação em cada detalhe.
+                casa ideal em realidade, com transparência, segurança e dedicação em cada detalhe.
               </p>
 
               {/* Stats */}
@@ -165,12 +146,12 @@ export default function Sobre() {
         {/* Content */}
         <div className="relative z-10 text-center max-w-4xl mx-auto">
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-            Encontre sua força, descubra<br />seu paraíso
+            Encontre sua força, descubra<br />seu lar ideal
           </h2>
           <p className="text-lg text-white/80 mb-8 max-w-2xl mx-auto leading-relaxed">
             Cada imóvel que apresentamos é cuidadosamente selecionado. Cada cliente, 
             atendido com dedicação exclusiva. Acreditamos que encontrar o lar perfeito 
-            à beira-mar é mais que uma transação – é realizar um sonho.
+            é mais que uma transação – é realizar um sonho.
           </p>
           <Link
             to="/explorar"
@@ -178,46 +159,6 @@ export default function Sobre() {
           >
             DESCUBRA MAIS
           </Link>
-        </div>
-      </section>
-
-      {/* Explore Destinations */}
-      <section className="py-20 px-4 bg-white">
-        <div className="container mx-auto max-w-7xl">
-          <h2 className="text-4xl md:text-5xl font-bold text-slate-900 text-center mb-4">
-            Explore sua jornada
-          </h2>
-          <p className="text-center text-slate-600 mb-12 max-w-2xl mx-auto">
-            Descubra as melhores regiões do litoral catarinense
-          </p>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            {destinations.map((dest, index) => (
-              <Link
-                key={index}
-                to="/explorar"
-                className="group relative h-96 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all"
-              >
-                {/* Background Image */}
-                <div 
-                  className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
-                  style={{ backgroundImage: `url(${dest.image})` }}
-                >
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/50 to-transparent" />
-                </div>
-
-                {/* Content */}
-                <div className="absolute bottom-0 left-0 right-0 p-6">
-                  <div className="text-sm text-teal-400 font-medium mb-2 uppercase tracking-wide">
-                    {dest.subtitle}
-                  </div>
-                  <h3 className="text-2xl font-bold text-white">
-                    {dest.title}
-                  </h3>
-                </div>
-              </Link>
-            ))}
-          </div>
         </div>
       </section>
     </main>

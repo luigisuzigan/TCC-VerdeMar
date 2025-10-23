@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { X } from 'lucide-react';
 import { api } from '../../api/client.js';
+import FavoriteButton from '../../components/FavoriteButton';
 import ImageGallery from '../../components/PropertyDetails/ImageGallery.jsx';
 import PriceAndStats from '../../components/PropertyDetails/PriceAndStats.jsx';
 import PropertyCharacteristics from '../../components/PropertyDetails/PropertyCharacteristics.jsx';
@@ -22,7 +23,6 @@ export default function PropertyDetails() {
   const [property, setProperty] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
-  const [isFavorite, setIsFavorite] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -117,8 +117,7 @@ export default function PropertyDetails() {
         images={images} 
         title={property.title}
         onShare={handleShare}
-        isFavorite={isFavorite}
-        onToggleFavorite={() => setIsFavorite(!isFavorite)}
+        property={property}
       />
 
       {/* Main Content Area */}

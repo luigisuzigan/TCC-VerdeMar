@@ -5,7 +5,6 @@ import {
   Mail,
   Database,
   Shield,
-  Bell,
   Palette,
   Map,
   DollarSign,
@@ -46,12 +45,6 @@ export default function AdminSettings() {
     smtpUser: '',
     smtpPassword: '',
     emailFrom: 'noreply@verdemar.com.br',
-    
-    // Notificações
-    notifyNewProperty: true,
-    notifyNewUser: true,
-    notifyNewReview: false,
-    emailNotifications: true,
     
     // Aparência
     primaryColor: '#10b981',
@@ -132,7 +125,6 @@ export default function AdminSettings() {
     { id: 'general', label: 'Geral', icon: Globe },
     { id: 'integrations', label: 'Integrações', icon: Map },
     { id: 'email', label: 'Email', icon: Mail },
-    { id: 'notifications', label: 'Notificações', icon: Bell },
     { id: 'appearance', label: 'Aparência', icon: Palette },
     { id: 'properties', label: 'Imóveis', icon: FileText },
     { id: 'security', label: 'Segurança', icon: Shield },
@@ -430,70 +422,6 @@ export default function AdminSettings() {
                     className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   />
                 </div>
-              </div>
-            </div>
-          )}
-
-          {/* Notifications Tab */}
-          {activeTab === 'notifications' && (
-            <div className="space-y-6">
-              <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-                <Bell size={24} className="text-emerald-600" />
-                Notificações
-              </h2>
-
-              <div className="space-y-4">
-                <label className="flex items-center justify-between p-4 bg-slate-50 rounded-xl cursor-pointer hover:bg-slate-100 transition-colors">
-                  <div>
-                    <p className="font-medium text-slate-900">Notificar Novo Imóvel</p>
-                    <p className="text-sm text-slate-600">Receber notificação quando um novo imóvel for cadastrado</p>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={settings.notifyNewProperty}
-                    onChange={(e) => handleChange('notifyNewProperty', e.target.checked)}
-                    className="w-5 h-5 text-emerald-600 rounded focus:ring-2 focus:ring-emerald-500"
-                  />
-                </label>
-
-                <label className="flex items-center justify-between p-4 bg-slate-50 rounded-xl cursor-pointer hover:bg-slate-100 transition-colors">
-                  <div>
-                    <p className="font-medium text-slate-900">Notificar Novo Usuário</p>
-                    <p className="text-sm text-slate-600">Receber notificação quando um novo usuário se cadastrar</p>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={settings.notifyNewUser}
-                    onChange={(e) => handleChange('notifyNewUser', e.target.checked)}
-                    className="w-5 h-5 text-emerald-600 rounded focus:ring-2 focus:ring-emerald-500"
-                  />
-                </label>
-
-                <label className="flex items-center justify-between p-4 bg-slate-50 rounded-xl cursor-pointer hover:bg-slate-100 transition-colors">
-                  <div>
-                    <p className="font-medium text-slate-900">Notificar Nova Avaliação</p>
-                    <p className="text-sm text-slate-600">Receber notificação quando um imóvel receber uma avaliação</p>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={settings.notifyNewReview}
-                    onChange={(e) => handleChange('notifyNewReview', e.target.checked)}
-                    className="w-5 h-5 text-emerald-600 rounded focus:ring-2 focus:ring-emerald-500"
-                  />
-                </label>
-
-                <label className="flex items-center justify-between p-4 bg-slate-50 rounded-xl cursor-pointer hover:bg-slate-100 transition-colors">
-                  <div>
-                    <p className="font-medium text-slate-900">Notificações por Email</p>
-                    <p className="text-sm text-slate-600">Receber notificações via email</p>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={settings.emailNotifications}
-                    onChange={(e) => handleChange('emailNotifications', e.target.checked)}
-                    className="w-5 h-5 text-emerald-600 rounded focus:ring-2 focus:ring-emerald-500"
-                  />
-                </label>
               </div>
             </div>
           )}

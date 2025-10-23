@@ -253,11 +253,10 @@ export default function Account() {
           <div className="flex items-center justify-between">
             <div className="text-[15px] font-semibold text-slate-900">Atalhos</div>
           </div>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             <ShortcutCard title="Minhas visitas" subtitle="3 agendadas" />
             <ShortcutCard title="Mensagens" subtitle="2 não lidas" />
             <ShortcutCard title="Buscas salvas" subtitle="4 filtros" />
-            <ShortcutCard title="Notificações" subtitle="Configurar alertas" />
           </div>
         </section>
 

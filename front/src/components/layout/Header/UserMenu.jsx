@@ -8,7 +8,6 @@ import {
   HelpCircle,
   LogOut,
   Heart,
-  Bell,
   Sparkles,
   Sun,
   Moon,
@@ -59,7 +58,6 @@ export default function UserMenu({ inverted = false, requireAuth = false }) {
     }
   }, []);
   const favCount = counts.favorites ?? 2;
-  const notifCount = counts.notifications ?? 3;
 
   // Fechar ao clicar fora / ESC
   const panelRef = useRef(null);
@@ -172,22 +170,21 @@ export default function UserMenu({ inverted = false, requireAuth = false }) {
             </span>
           </div>
 
-          {/* Ações principais: apenas Painel, Configurações, Notificações e Log out */}
+          {/* Ações principais: Favoritos e Configurações */}
           <div className="mt-3 space-y-1">
-            {/* Painel */}
-            {isAdmin ? (
-              <MenuItem to="/admin/properties" icon={<Settings size={16} />} label="Painel" onChoose={() => setOpen(false)} />
-            ) : isSeller ? (
-              <MenuItem to="/seller" icon={<Settings size={16} />} label="Painel" onChoose={() => setOpen(false)} />
-            ) : (
-              <MenuItem to="/account" icon={<User2 size={16} />} label="Painel" onChoose={() => setOpen(false)} />
+            {/* Favoritos */}
+            <MenuItem to="/favorites" icon={<Heart size={16} className="text-rose-500" />} label="Favoritos" badge={favCount} onChoose={() => setOpen(false)} />
+
+            {/* Painel Admin/Seller */}
+            {isAdmin && (
+              <MenuItem to="/admin/properties" icon={<Settings size={16} />} label="Painel Admin" onChoose={() => setOpen(false)} />
+            )}
+            {isSeller && !isAdmin && (
+              <MenuItem to="/seller" icon={<Settings size={16} />} label="Painel Vendedor" onChoose={() => setOpen(false)} />
             )}
 
             {/* Configurações */}
             <MenuItem to="/settings" icon={<Settings size={16} />} label="Configurações" onChoose={() => setOpen(false)} />
-
-            {/* Notificações */}
-            <MenuItem to="/notifications" icon={<Bell size={16} className="text-amber-500" />} label="Notificações" badge={notifCount} onChoose={() => setOpen(false)} />
           </div>
 
           <Divider />

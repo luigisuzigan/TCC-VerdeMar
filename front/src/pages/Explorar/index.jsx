@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { MapPin, DollarSign, Home, Maximize2, X, Star } from 'lucide-react';
 import { api } from '../../api/client.js';
 import { parseFiltersFromUrl, getFilterDescriptions, countActiveFilters, filtersToUrlParams } from '../../utils/filterHelpers.js';
+import FavoriteButton from '../../components/FavoriteButton';
 import ActiveFilters from '../../components/Explorar/ActiveFilters.jsx';
 import Pagination from '../../components/Explorar/Pagination.jsx';
 import TopFiltersBar from '../../components/Explorar/TopFiltersBar.jsx';
@@ -562,18 +563,10 @@ function PropertyCard({ property }) {
             {getPropertyTypeLabel(property.type)}
           </span>
         </div>
-        {/* Bookmark */}
-        <button 
-          onClick={(e) => {
-            e.preventDefault();
-            // TODO: Implementar favoritar
-          }}
-          className="absolute top-3 right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center hover:bg-slate-50 shadow-sm transition-colors"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-          </svg>
-        </button>
+        {/* Favorite Button */}
+        <div className="absolute top-3 right-3">
+          <FavoriteButton property={property} size="sm" />
+        </div>
       </div>
 
       {/* Content */}
