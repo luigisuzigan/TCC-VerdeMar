@@ -1,9 +1,7 @@
 import { useState } from 'react';
-import { MapPin, DollarSign, Home, Sliders, Search, Sparkles } from 'lucide-react';
+import { MapPin, DollarSign, Home, Sliders, Sparkles } from 'lucide-react';
 
-export default function TopFiltersBar({ filters, onFilterClick, onSearch }) {
-  const [searchText, setSearchText] = useState('');
-
+export default function TopFiltersBar({ filters, onFilterClick }) {
   const getLocationText = () => {
     if (filters.location) return filters.location;
     if (filters.city) return filters.city;
@@ -64,33 +62,10 @@ export default function TopFiltersBar({ filters, onFilterClick, onSearch }) {
     return value;
   };
 
-  const handleSearch = () => {
-    if (onSearch) onSearch(searchText);
-  };
-
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter') handleSearch();
-  };
-
   return (
     <div className="bg-white border border-slate-200 rounded-2xl shadow-lg p-4">
       <div className="flex flex-wrap items-center gap-3">
-        {/* Search Input */}
-        <div className="flex-1 min-w-[200px]">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-            <input
-              type="text"
-              placeholder="Buscar por endereço, bairro..."
-              value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
-              onKeyPress={handleKeyPress}
-              className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-        </div>
-
-        {/* Location Filter - NOVO */}
+        {/* Location Filter */}
         <button
           onClick={() => onFilterClick('location')}
           className={`flex items-center gap-2 px-4 py-3 border rounded-xl hover:bg-slate-50 transition-colors ${
@@ -165,8 +140,8 @@ export default function TopFiltersBar({ filters, onFilterClick, onSearch }) {
 
         {/* Search Button */}
         <button
-          onClick={handleSearch}
-          className="px-6 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors shadow-sm"
+          onClick={() => onFilterClick('search')}
+          className="px-6 py-3 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-700 transition-colors shadow-sm"
         >
           Buscar
         </button>

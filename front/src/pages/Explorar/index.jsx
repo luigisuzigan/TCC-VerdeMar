@@ -7,7 +7,6 @@ import FavoriteButton from '../../components/FavoriteButton';
 import ActiveFilters from '../../components/Explorar/ActiveFilters.jsx';
 import Pagination from '../../components/Explorar/Pagination.jsx';
 import TopFiltersBar from '../../components/Explorar/TopFiltersBar.jsx';
-import StickyFilterButton from '../../components/Explorar/StickyFilterButton.jsx';
 import FiltersModal from '../../components/Explorar/FiltersModal.jsx';
 import FloatingMapWindow from '../../components/Explorar/FloatingMapWindow.jsx';
 import PriceModal from '../../components/Explorar/Modals/PriceModal.jsx';
@@ -26,7 +25,6 @@ export default function Explorar() {
   const [sortBy, setSortBy] = useState('default');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
-  const [showStickyButton, setShowStickyButton] = useState(false);
   const [showFiltersModal, setShowFiltersModal] = useState(false);
   const [showPriceModal, setShowPriceModal] = useState(false);
   const [showPropertyTypeModal, setShowPropertyTypeModal] = useState(false);
@@ -85,21 +83,13 @@ export default function Explorar() {
     })();
   }, []);
 
-  // Detect scroll to show/hide sticky button
-  useEffect(() => {
-    const handleScroll = () => {
-      if (topFiltersRef.current) {
-        const rect = topFiltersRef.current.getBoundingClientRect();
-        setShowStickyButton(rect.bottom < 0);
-      }
-    };
+  // Manual search trigger
+  const [shouldSearch, setShouldSearch] = useState(false);
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  // Fetch properties when filters change
+  // Fetch properties only when shouldSearch is true
   useEffect(() => {
+    if (!shouldSearch) return; // Only fetch when explicitly triggered
+    
     let active = true;
     setLoading(true);
     
@@ -153,12 +143,20 @@ export default function Explorar() {
         setItems([]);
         setTotalItems(0);
       } finally {
-        if (active) setLoading(false);
+        if (active) {
+          setLoading(false);
+          setShouldSearch(false); // Reset search trigger
+        }
       }
     })();
     
     return () => { active = false; };
-  }, [filters, currentPage, filteredPropertyIds]);
+  }, [shouldSearch, filters, currentPage, filteredPropertyIds]); // Depend on shouldSearch instead of filters
+
+  // Trigger initial search on mount
+  useEffect(() => {
+    setShouldSearch(true);
+  }, []); // Only once on mount
 
   // Build API query from filters
   const buildApiQuery = (filters) => {
@@ -406,16 +404,6 @@ export default function Explorar() {
 
   return (
     <main className="mx-auto max-w-[1600px] px-4 py-8">
-      {/* Sticky Filter Button - Shows when scrolled */}
-      {showStickyButton && (
-        <StickyFilterButton
-          onClick={() => setShowFiltersModal(true)}
-          onClose={() => setShowFiltersModal(false)}
-          filterCount={activeFiltersCount}
-          isOpen={showFiltersModal}
-        />
-      )}
-
       {/* Top Filters Bar */}
       <div ref={topFiltersRef} className="mb-6">
         <TopFiltersBar
@@ -513,6 +501,7 @@ export default function Explorar() {
         allProperties={allProperties}
         isOpenExternal={showFloatingMap}
         onCloseExternal={() => setShowFloatingMap(false)}
+        hideButton={true}
       />
 
       <PriceModal

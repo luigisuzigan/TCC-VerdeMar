@@ -49,7 +49,7 @@ npx prisma generate
 npm run seed
 
 # 4. Iniciar servidor
-npm run dev
+npm run seed
 
 # 5. Frontend (novo terminal)
 cd front
