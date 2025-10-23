@@ -8,7 +8,7 @@ export default function Blog() {
   return (
     <main>
       <section className="mx-auto w-[min(96vw,1200px)] px-4 py-12">
-        <h1 className="text-3xl font-extrabold">Blog Verde Mar</h1>
+        <h1 className="text-3xl font-extrabold">Blog Blog Verde Mar</h1>
         <p className="mt-2 max-w-2xl text-slate-600">Roteiros, dicas e inspirações para você viajar melhor pelo litoral.</p>
 
         {/* Grid de cards */}
