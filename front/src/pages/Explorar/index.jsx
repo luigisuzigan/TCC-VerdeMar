@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { useSearchParams, useNavigate, Link } from 'react-router-dom';
+import { useSearchParams, useNavigate, useLocation, Link } from 'react-router-dom';
 import { MapPin, DollarSign, Home, Maximize2, X, Star } from 'lucide-react';
 import { api } from '../../api/client.js';
 import { parseFiltersFromUrl, getFilterDescriptions, countActiveFilters, filtersToUrlParams } from '../../utils/filterHelpers.js';
@@ -19,6 +19,7 @@ import LocationModal from '../../components/Search/Modals/LocationModal.jsx';
 export default function Explorar() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({});
@@ -39,6 +40,14 @@ export default function Explorar() {
   const [mapToastMessage, setMapToastMessage] = useState('');
   const itemsPerPage = 24;
   const topFiltersRef = useRef(null);
+
+  // Capturar filteredPropertyIds do state da navegação
+  useEffect(() => {
+    if (location.state?.filteredPropertyIds) {
+      console.log('🔍 Recebido filteredPropertyIds da navegação:', location.state.filteredPropertyIds.length);
+      setFilteredPropertyIds(location.state.filteredPropertyIds);
+    }
+  }, [location.state]);
 
   // Parse filters from URL on mount
   useEffect(() => {

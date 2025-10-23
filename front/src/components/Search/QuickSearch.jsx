@@ -49,8 +49,8 @@ export default function QuickSearch() {
     })();
   }, []);
 
-  const handleLocationApply = (boundary, propertyIds) => {
-    console.log('📍 [QuickSearch] Área selecionada:', { boundary, propertyIds });
+  const handleLocationApply = (searchText, propertyIds, boundary) => {
+    console.log('📍 [QuickSearch] Área selecionada:', { searchText, boundary, propertyIds });
     setShowFloatingMap(false);
     
     if (propertyIds && propertyIds.length > 0) {
