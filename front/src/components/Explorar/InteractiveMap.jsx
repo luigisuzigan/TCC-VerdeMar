@@ -36,6 +36,7 @@ export default function InteractiveMap({
   showLayers = true,
   onBoundaryChange,
   resetKey = 0,
+  onClose, // Callback para fechar o mapa
 }) {
   const navigate = useNavigate();
   
@@ -57,10 +58,16 @@ export default function InteractiveMap({
   const [isDrawingFreehand, setIsDrawingFreehand] = useState(false);
   const [freehandPath, setFreehandPath] = useState([]);
   const [googleMapsReady, setGoogleMapsReady] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [mapBounds, setMapBounds] = useState(null);
 
   const mapRef = useRef(null);
   const freehandPolygonRef = useRef(null);
   const markersRef = useRef([]);
+  const autocompleteService = useRef(null);
+  const boundsUpdateTimer = useRef(null);
 
   const onMapLoad = useCallback((map) => {
     mapRef.current = map;
@@ -76,6 +83,12 @@ export default function InteractiveMap({
     if (window.google && window.google.maps) {
       setGoogleMapsReady(true);
       console.log('✅ Google Maps marcado como PRONTO!');
+      
+      // Inicializar serviço de autocomplete
+      if (!autocompleteService.current) {
+        autocompleteService.current = new window.google.maps.places.AutocompleteService();
+        console.log('✅ AutocompleteService inicializado!');
+      }
     }
   }, [properties, isLoaded]);
 
@@ -213,6 +226,76 @@ export default function InteractiveMap({
     };
   }, []);
 
+  // Atualizar bounds quando o mapa se mover ou der zoom
+  useEffect(() => {
+    if (!mapRef.current) return;
+
+    const updateBounds = () => {
+      if (mapRef.current) {
+        const bounds = mapRef.current.getBounds();
+        if (bounds) {
+          // Debounce: só atualiza depois de parar de mover por 500ms
+          if (boundsUpdateTimer.current) {
+            clearTimeout(boundsUpdateTimer.current);
+          }
+
+          boundsUpdateTimer.current = setTimeout(() => {
+            setMapBounds(bounds);
+            console.log('🗺️ Bounds do mapa atualizados:', {
+              north: bounds.getNorthEast().lat(),
+              south: bounds.getSouthWest().lat(),
+              east: bounds.getNorthEast().lng(),
+              west: bounds.getSouthWest().lng()
+            });
+
+            // Se houver callback e NÃO houver desenho ativo, notificar mudança de área
+            if (onBoundaryChange && drawnShapes.length === 0) {
+              const visibleProperties = filterPropertiesByMapBounds(bounds, properties);
+              console.log('🔍 Imóveis visíveis na área:', visibleProperties.length);
+              onBoundaryChange(null, visibleProperties);
+            }
+          }, 500);
+        }
+      }
+    };
+
+    // Listeners para movimento e zoom
+    const dragEndListener = mapRef.current.addListener('dragend', updateBounds);
+    const zoomChangedListener = mapRef.current.addListener('zoom_changed', updateBounds);
+    const boundsChangedListener = mapRef.current.addListener('bounds_changed', updateBounds);
+
+    // Atualizar bounds inicial
+    updateBounds();
+
+    return () => {
+      if (window.google?.maps?.event) {
+        window.google.maps.event.removeListener(dragEndListener);
+        window.google.maps.event.removeListener(zoomChangedListener);
+        window.google.maps.event.removeListener(boundsChangedListener);
+      }
+      if (boundsUpdateTimer.current) {
+        clearTimeout(boundsUpdateTimer.current);
+      }
+    };
+  }, [properties, drawnShapes, onBoundaryChange]);
+
+  // Filtrar propriedades pela área visível do mapa
+  const filterPropertiesByMapBounds = (bounds, allProperties) => {
+    if (!bounds) return allProperties;
+
+    return allProperties.filter(property => {
+      if (!property.latitude || !property.longitude) return false;
+
+      const lat = parseFloat(property.latitude);
+      const lng = parseFloat(property.longitude);
+
+      const ne = bounds.getNorthEast();
+      const sw = bounds.getSouthWest();
+
+      return lat <= ne.lat() && lat >= sw.lat() && lng <= ne.lng() && lng >= sw.lng();
+    });
+  };
+
   // Zoom controls
   const handleZoomIn = () => {
     if (mapRef.current) {
@@ -262,9 +345,9 @@ export default function InteractiveMap({
     setDrawnShapes([newShape]); // Substitui, não adiciona
     setDrawingMode(null);
     
-    // Filtrar imóveis dentro da área desenhada
+    // Filtrar imóveis dentro da área desenhada (prioridade sobre bounds do mapa)
     const filteredProps = filterPropertiesByBoundary(overlay.overlay, properties);
-    console.log('🎯 Filtrados:', filteredProps.length, 'de', properties.length);
+    console.log('🎯 Desenho criado - Filtrados:', filteredProps.length, 'de', properties.length);
     
     // Notificar mudança de boundary se callback existir
     if (onBoundaryChange) {
@@ -323,10 +406,15 @@ export default function InteractiveMap({
     setFreehandPath([]);
     setIsDrawingFreehand(false);
     
-    if (onBoundaryChange) {
+    // Ao limpar desenho, voltar para filtro por área visível do mapa
+    if (onBoundaryChange && mapBounds) {
+      const visibleProperties = filterPropertiesByMapBounds(mapBounds, properties);
+      console.log('🧹 Desenho limpo - Voltando para área visível:', visibleProperties.length, 'imóveis');
+      onBoundaryChange(null, visibleProperties);
+    } else if (onBoundaryChange) {
       onBoundaryChange(null, properties); // Retorna todos os imóveis
     }
-  }, [drawnShapes, onBoundaryChange, properties]);
+  }, [drawnShapes, onBoundaryChange, properties, mapBounds]);
 
   // Handlers para desenho livre (freehand)
   const handleMapMouseDown = useCallback((e) => {
@@ -393,9 +481,9 @@ export default function InteractiveMap({
         setDrawnShapes([newShape]);
         setDrawingMode(null);
         
-        // Filtrar imóveis
+        // Filtrar imóveis (prioridade sobre bounds do mapa)
         const filteredProps = filterPropertiesByBoundary(freehandPolygonRef.current, properties);
-        console.log('🎯 Freehand - Filtrados:', filteredProps.length, 'de', properties.length);
+        console.log('🎯 Freehand criado - Filtrados:', filteredProps.length, 'de', properties.length);
         
         if (onBoundaryChange) {
           onBoundaryChange(freehandPolygonRef.current, filteredProps);
@@ -493,6 +581,75 @@ export default function InteractiveMap({
     }
   };
 
+  // Função para buscar sugestões de endereços
+  const handleSearchInputChange = (e) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+
+    if (!value.trim() || value.length < 3) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    // Buscar sugestões com o serviço de autocomplete
+    if (autocompleteService.current) {
+      autocompleteService.current.getPlacePredictions(
+        {
+          input: value,
+          componentRestrictions: { country: 'br' }, // Restringir ao Brasil
+        },
+        (predictions, status) => {
+          if (status === window.google.maps.places.PlacesServiceStatus.OK && predictions) {
+            setSuggestions(predictions);
+            setShowSuggestions(true);
+          } else {
+            setSuggestions([]);
+            setShowSuggestions(false);
+          }
+        }
+      );
+    }
+  };
+
+  // Função para selecionar uma sugestão
+  const handleSelectSuggestion = (suggestion) => {
+    setSearchQuery(suggestion.description);
+    setShowSuggestions(false);
+    setSuggestions([]);
+
+    // Geocodificar a sugestão selecionada
+    if (!mapRef.current || !window.google) return;
+
+    const geocoder = new window.google.maps.Geocoder();
+    geocoder.geocode({ placeId: suggestion.place_id }, (results, status) => {
+      if (status === 'OK' && results[0]) {
+        const location = results[0].geometry.location;
+        mapRef.current.panTo(location);
+        mapRef.current.setZoom(15);
+      }
+    });
+  };
+
+  // Função para buscar endereço ao submeter o form
+  const handleSearchAddress = (e) => {
+    e.preventDefault();
+    if (!searchQuery.trim() || !mapRef.current || !window.google) return;
+
+    setShowSuggestions(false);
+
+    const geocoder = new window.google.maps.Geocoder();
+    geocoder.geocode({ address: searchQuery }, (results, status) => {
+      if (status === 'OK' && results[0]) {
+        const location = results[0].geometry.location;
+        mapRef.current.panTo(location);
+        mapRef.current.setZoom(15);
+      } else {
+        alert('Endereço não encontrado. Tente novamente.');
+      }
+    });
+  };
+
   if (loadError) {
     return (
       <div className="h-full flex items-center justify-center bg-slate-100">
@@ -530,6 +687,9 @@ export default function InteractiveMap({
           mapTypeControl: false,
           streetViewControl: false,
           fullscreenControl: true,
+          fullscreenControlOptions: {
+            position: window.google?.maps?.ControlPosition?.TOP_RIGHT, // Posicionar fullscreen no canto direito
+          },
           gestureHandling: drawingMode === 'freehand' ? 'none' : 'greedy', // Bloquear drag quando desenhando
           draggableCursor: drawingMode === 'freehand' ? 'crosshair' : 'grab',
           draggingCursor: drawingMode === 'freehand' ? 'crosshair' : 'grabbing',
@@ -579,7 +739,7 @@ export default function InteractiveMap({
         )}
       </GoogleMap>
 
-      {/* Controles de Zoom Customizados */}
+      {/* Controles de Zoom Customizados e Botão Fechar abaixo do Fullscreen */}
       <div className="absolute bottom-24 right-4 flex flex-col gap-2">
         <button
           onClick={handleZoomIn}
@@ -603,6 +763,19 @@ export default function InteractiveMap({
           <MapPin size={20} />
         </button>
       </div>
+
+      {/* Botão Fechar - Abaixo do botão de Fullscreen (canto superior direito) */}
+      {onClose && (
+        <div className="absolute top-16 right-4">
+          <button
+            onClick={onClose}
+            className="w-10 h-10 bg-white rounded-xl shadow-lg border border-slate-200 flex items-center justify-center hover:bg-red-50 hover:border-red-300 transition-all text-slate-700 hover:text-red-600"
+            title="Fechar Mapa"
+          >
+            <X size={20} />
+          </button>
+        </div>
+      )}
 
       {/* Draw Button - Redesenhado */}
       {showDrawTools && (
@@ -711,9 +884,9 @@ export default function InteractiveMap({
         </>
       )}
 
-      {/* Layers Button - Redesenhado */}
+      {/* Layers Button - Redesenhado - Posicionado ao lado do fullscreen */}
       {showLayers && (
-        <div className="absolute top-4 right-4">
+        <div className="absolute top-4 right-16">
           <button
             onClick={() => setShowLayersPanel(!showLayersPanel)}
             className="flex items-center gap-2 px-4 py-2.5 bg-white rounded-xl shadow-lg border border-slate-200 font-semibold text-slate-700 hover:bg-slate-50 transition-all hover:scale-105"
@@ -724,9 +897,9 @@ export default function InteractiveMap({
         </div>
       )}
 
-      {/* Layers Panel - Simplificado */}
+      {/* Layers Panel - Simplificado - Posicionado abaixo do botão de fullscreen */}
       {showLayers && showLayersPanel && (
-        <div className="absolute top-20 right-4 w-72 bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
+        <div className="absolute top-16 right-4 w-72 bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
           <div className="p-5">
             <h3 className="text-lg font-bold text-slate-900 mb-5 flex items-center gap-2">
               <Layers size={20} className="text-blue-600" />
@@ -792,27 +965,87 @@ export default function InteractiveMap({
         </div>
       )}
 
-      {/* Drawing Hint - Melhorado */}
-      {drawingMode && (
-        <div className="absolute bottom-20 left-1/2 -translate-x-1/2 bg-blue-600 text-white px-6 py-3 rounded-full text-sm font-semibold shadow-2xl flex items-center gap-2 animate-pulse">
-          <Pencil size={16} />
-          <span>
-            {drawingMode === 'freehand' 
-              ? 'Clique e arraste o mouse para desenhar' 
-              : 'Clique no mapa para desenhar a área'}
-          </span>
-        </div>
-      )}
-
-      {/* Property Count Badge - Redesenhado */}
+      {/* Property Count Badge - Canto Inferior Esquerdo */}
       {properties.length > 0 && (
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-white rounded-full shadow-xl border border-slate-200 px-5 py-2.5">
+        <div className="absolute bottom-6 left-6 bg-white rounded-full shadow-xl border border-slate-200 px-5 py-2.5">
           <p className="text-sm font-bold text-blue-700 flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></span>
             {properties.length} {properties.length === 1 ? 'imóvel encontrado' : 'imóveis encontrados'}
           </p>
         </div>
       )}
+
+      {/* Barra de Pesquisa - Centro Inferior (onde estava o contador) */}
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2">
+        <div className="relative">
+          <form onSubmit={handleSearchAddress} className="flex items-center bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={handleSearchInputChange}
+              onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
+              placeholder="Buscar por endereço, cidade, CEP, bairro..."
+              className="px-4 py-2.5 text-sm font-medium text-slate-700 focus:outline-none w-80"
+              autoComplete="off"
+            />
+            <button
+              type="submit"
+              className="px-4 py-2.5 bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+              title="Buscar"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="11" cy="11" r="8"/>
+                <path d="m21 21-4.35-4.35"/>
+              </svg>
+            </button>
+          </form>
+
+          {/* Dropdown de Sugestões */}
+          {showSuggestions && suggestions.length > 0 && (
+            <div className="absolute bottom-full mb-2 w-full bg-white rounded-xl shadow-2xl border border-slate-200 overflow-hidden max-h-64 overflow-y-auto">
+              {suggestions.map((suggestion, index) => (
+                <button
+                  key={suggestion.place_id}
+                  onClick={() => handleSelectSuggestion(suggestion)}
+                  className="w-full px-4 py-3 text-left hover:bg-blue-50 transition-colors border-b border-slate-100 last:border-b-0 flex items-start gap-3"
+                >
+                  <svg 
+                    width="18" 
+                    height="18" 
+                    viewBox="0 0 24 24" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    strokeWidth="2"
+                    className="text-blue-600 flex-shrink-0 mt-0.5"
+                  >
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                    <circle cx="12" cy="10" r="3"/>
+                  </svg>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-slate-900 truncate">
+                      {suggestion.structured_formatting.main_text}
+                    </p>
+                    <p className="text-xs text-slate-500 truncate">
+                      {suggestion.structured_formatting.secondary_text}
+                    </p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Botão Fechar - Ao lado da busca */}
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="w-10 h-10 bg-white rounded-xl shadow-lg border border-slate-200 flex items-center justify-center hover:bg-red-50 hover:border-red-300 transition-all text-slate-700 hover:text-red-600"
+            title="Fechar Mapa"
+          >
+            <X size={20} />
+          </button>
+        )}
+      </div>
     </div>
   );
 }
