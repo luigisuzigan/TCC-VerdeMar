@@ -12,11 +12,11 @@ export default function FiltersModal({ isOpen, onClose, filters, onApplyFilters 
 
   const handleApply = () => {
     onApplyFilters(localFilters);
-    onClose();
   };
 
   const handleReset = () => {
     setLocalFilters({});
+    onApplyFilters({});
   };
 
   // Comodidades resumidas (apenas as mais populares)

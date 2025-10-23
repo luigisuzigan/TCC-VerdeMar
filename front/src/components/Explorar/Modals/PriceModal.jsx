@@ -1,27 +1,73 @@
 import { Dialog } from '@headlessui/react';
-import { X, DollarSign } from 'lucide-react';
-import { useState } from 'react';
+import { X } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import Slider from 'rc-slider';
+import 'rc-slider/assets/index.css';
+import './slider-custom.css';
+
+const QUICK_OPTIONS = [
+  { label: 'Até 500k', min: 0, max: 500000 },
+  { label: '500k - 1M', min: 500000, max: 1000000 },
+  { label: '1M - 2M', min: 1000000, max: 2000000 },
+  { label: 'Acima de 2M', min: 2000000, max: 10000000 },
+];
 
 export default function PriceModal({ isOpen, onClose, filters, onApply }) {
-  const [priceMin, setPriceMin] = useState(filters.priceMin || '');
-  const [priceMax, setPriceMax] = useState(filters.priceMax || '');
+  const [min, setMin] = useState(filters.priceMin || '');
+  const [max, setMax] = useState(filters.priceMax || '');
+  const [sliderValue, setSliderValue] = useState([
+    filters.priceMin || 0,
+    filters.priceMax || 5000000,
+  ]);
+
+  // Calcular o máximo do slider dinamicamente
+  const sliderMax = Math.max(
+    5000000, // mínimo de 5M
+    Number(max) || 5000000, // ou o valor máximo digitado
+    sliderValue[1] // ou o valor atual do slider
+  );
+
+  // Atualizar slider quando inputs mudarem
+  useEffect(() => {
+    const minNum = Number(min) || 0;
+    const maxNum = Number(max) || sliderMax;
+    setSliderValue([minNum, maxNum]);
+  }, [min, max]);
+
+  const handleSliderChange = (value) => {
+    setSliderValue(value);
+    setMin(value[0]);
+    setMax(value[1]);
+  };
+
+  const handleMinChange = (e) => {
+    const value = e.target.value.replace(/\D/g, '');
+    setMin(value);
+  };
+
+  const handleMaxChange = (e) => {
+    const value = e.target.value.replace(/\D/g, '');
+    setMax(value);
+  };
 
   const handleApply = () => {
     onApply({
-      priceMin,
-      priceMax,
+      priceMin: min,
+      priceMax: max,
     });
-    onClose();
-  };
-
-  const handleQuickSelect = (min, max) => {
-    setPriceMin(min || '');
-    setPriceMax(max || '');
   };
 
   const handleReset = () => {
-    setPriceMin('');
-    setPriceMax('');
+    setMin('');
+    setMax('');
+    setSliderValue([0, 5000000]);
+    onApply({ priceMin: '', priceMax: '' });
+  };
+
+  const selectQuickOption = (option) => {
+    setMin(option.min);
+    setMax(option.max);
+    setSliderValue([option.min, option.max]);
   };
 
   const formatCurrency = (value) => {
@@ -33,21 +79,28 @@ export default function PriceModal({ isOpen, onClose, filters, onApply }) {
     }).format(value);
   };
 
+  const formatShortValue = (value) => {
+    if (value >= 1000000) return `R$ ${(value / 1000000).toFixed(1)}M`;
+    if (value >= 1000) return `R$ ${(value / 1000).toFixed(0)}K`;
+    return `R$ ${value}`;
+  };
+
   return (
     <Dialog open={isOpen} onClose={onClose} className="relative z-50">
+      {/* Backdrop */}
       <div className="fixed inset-0 bg-black/30 backdrop-blur-sm" aria-hidden="true" />
 
+      {/* Container centralizado */}
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <Dialog.Panel className="w-full max-w-lg bg-white rounded-2xl shadow-2xl">
+        <Dialog.Panel className="mx-auto max-w-lg w-full bg-white rounded-2xl shadow-2xl">
           {/* Header */}
-          <div className="border-b border-slate-200 px-6 py-4 flex items-center justify-between">
-            <Dialog.Title className="text-xl font-bold text-slate-900 flex items-center gap-2">
-              <DollarSign size={24} className="text-blue-600" />
+          <div className="flex items-center justify-between p-6 border-b border-slate-200">
+            <Dialog.Title className="text-xl font-bold text-slate-900">
               Faixa de Preço
             </Dialog.Title>
             <button
               onClick={onClose}
-              className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+              className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
             >
               <X size={20} />
             </button>
@@ -55,101 +108,89 @@ export default function PriceModal({ isOpen, onClose, filters, onApply }) {
 
           {/* Content */}
           <div className="p-6">
-            {/* Custom Range Inputs */}
-            <div className="mb-6">
-              <label className="block text-sm font-semibold text-slate-700 mb-3">
-                Defina sua faixa de preço
-              </label>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs text-slate-600 mb-2">Preço mínimo</label>
-                  <input
-                    type="number"
-                    placeholder="R$ 0"
-                    value={priceMin}
-                    onChange={(e) => setPriceMin(e.target.value)}
-                    className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                  {priceMin && (
-                    <p className="text-xs text-slate-500 mt-1">{formatCurrency(priceMin)}</p>
-                  )}
-                </div>
-                <div>
-                  <label className="block text-xs text-slate-600 mb-2">Preço máximo</label>
-                  <input
-                    type="number"
-                    placeholder="R$ 10.000.000"
-                    value={priceMax}
-                    onChange={(e) => setPriceMax(e.target.value)}
-                    className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                  {priceMax && (
-                    <p className="text-xs text-slate-500 mt-1">{formatCurrency(priceMax)}</p>
-                  )}
-                </div>
+            {/* Inputs de preço */}
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Preço Mínimo
+                </label>
+                <input
+                  type="text"
+                  value={min ? formatCurrency(min) : ''}
+                  onChange={handleMinChange}
+                  placeholder="R$ 0"
+                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Preço Máximo
+                </label>
+                <input
+                  type="text"
+                  value={max ? formatCurrency(max) : ''}
+                  onChange={handleMaxChange}
+                  placeholder="Sem limite"
+                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
               </div>
             </div>
 
-            {/* Quick Select Options */}
+            {/* Slider dinâmico */}
+            <div className="mb-8 px-2">
+              <Slider
+                range
+                min={0}
+                max={sliderMax}
+                step={50000}
+                value={sliderValue}
+                onChange={handleSliderChange}
+                trackStyle={[{ backgroundColor: '#2563eb' }]}
+                handleStyle={[
+                  { borderColor: '#2563eb', backgroundColor: '#fff', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' },
+                  { borderColor: '#2563eb', backgroundColor: '#fff', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' },
+                ]}
+                railStyle={{ backgroundColor: '#e2e8f0' }}
+              />
+              <div className="flex justify-between text-xs text-slate-500 mt-2">
+                <span>R$ 0</span>
+                <span>{formatShortValue(sliderMax)}</span>
+              </div>
+            </div>
+
+            {/* Opções rápidas */}
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-3">
-                Ou escolha uma faixa rápida
-              </label>
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  onClick={() => handleQuickSelect(null, 500000)}
-                  className="px-4 py-3 border border-slate-300 rounded-xl hover:bg-slate-50 transition-colors text-left"
-                >
-                  <div className="font-medium text-slate-900">Até R$ 500 mil</div>
-                  <div className="text-xs text-slate-600">Entrada no mercado</div>
-                </button>
-                <button
-                  onClick={() => handleQuickSelect(500000, 1000000)}
-                  className="px-4 py-3 border border-slate-300 rounded-xl hover:bg-slate-50 transition-colors text-left"
-                >
-                  <div className="font-medium text-slate-900">R$ 500K - R$ 1M</div>
-                  <div className="text-xs text-slate-600">Padrão médio</div>
-                </button>
-                <button
-                  onClick={() => handleQuickSelect(1000000, 2000000)}
-                  className="px-4 py-3 border border-slate-300 rounded-xl hover:bg-slate-50 transition-colors text-left"
-                >
-                  <div className="font-medium text-slate-900">R$ 1M - R$ 2M</div>
-                  <div className="text-xs text-slate-600">Padrão alto</div>
-                </button>
-                <button
-                  onClick={() => handleQuickSelect(2000000, null)}
-                  className="px-4 py-3 border border-slate-300 rounded-xl hover:bg-slate-50 transition-colors text-left"
-                >
-                  <div className="font-medium text-slate-900">Acima de R$ 2M</div>
-                  <div className="text-xs text-slate-600">Alto padrão</div>
-                </button>
+              <h3 className="text-sm font-semibold text-slate-700 mb-3">
+                Opções Rápidas
+              </h3>
+              <div className="grid grid-cols-2 gap-2">
+                {QUICK_OPTIONS.map((option) => (
+                  <button
+                    key={option.label}
+                    onClick={() => selectQuickOption(option)}
+                    className="px-4 py-2.5 text-sm font-medium text-slate-700 border border-slate-200 hover:border-blue-500 hover:bg-blue-50 hover:text-blue-700 rounded-lg transition-all"
+                  >
+                    {option.label}
+                  </button>
+                ))}
               </div>
             </div>
           </div>
 
           {/* Footer */}
-          <div className="border-t border-slate-200 px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3 p-6 border-t border-slate-200">
             <button
               onClick={handleReset}
-              className="px-4 py-2 text-slate-700 font-semibold hover:bg-slate-100 rounded-lg transition-colors"
+              className="px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
             >
               Limpar
             </button>
-            <div className="flex gap-3">
-              <button
-                onClick={onClose}
-                className="px-6 py-2 border border-slate-300 text-slate-700 font-semibold rounded-lg hover:bg-slate-50 transition-colors"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={handleApply}
-                className="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
-              >
-                Aplicar
-              </button>
-            </div>
+            <button
+              onClick={handleApply}
+              className="flex-1 px-6 py-2.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+            >
+              Aplicar
+            </button>
           </div>
         </Dialog.Panel>
       </div>

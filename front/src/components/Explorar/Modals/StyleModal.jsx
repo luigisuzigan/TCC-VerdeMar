@@ -140,11 +140,11 @@ export default function StyleModal({ isOpen, onClose, filters, onApply }) {
 
   const handleApply = () => {
     onApply({ styles: selectedStyles });
-    onClose();
   };
 
   const handleReset = () => {
     setSelectedStyles([]);
+    onApply({ styles: [] });
   };
 
   return (

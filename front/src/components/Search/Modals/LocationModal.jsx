@@ -172,6 +172,7 @@ export default function LocationModal({ isOpen, onClose, location, onApply }) {
         location: searchText || 'Área selecionada no mapa',
       };
       onApply(searchText || 'Área selecionada no mapa', filteredProperties, boundaryData);
+      // NÃO FECHA O MODAL - mantém desenho visível
     } else if (searchText) {
       // Se só tem texto de busca, aplica a localização
       onApply(searchText, nearbyProperties);
@@ -196,7 +197,10 @@ export default function LocationModal({ isOpen, onClose, location, onApply }) {
     setDrawnBoundary(null);
     setFilteredProperties(nearbyProperties); // Restaura todas as propriedades
     setMapCenter(DEFAULT_CENTER);
+    setReloadKey(prev => prev + 1); // Força reload do mapa para limpar desenhos
     console.log('✅ Filtros limpos - propriedades restauradas:', nearbyProperties.length);
+    // Aplicar filtro vazio para remover da página Explorar
+    onApply('', []);
   };
   
   // Se não tiver API Key

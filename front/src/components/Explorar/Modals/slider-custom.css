@@ -1,0 +1,54 @@
+/* Estilos customizados para os sliders rc-slider - Explorar (azul) */
+
+/* Track (barra preenchida) */
+.rc-slider-track {
+  background: linear-gradient(90deg, #2563eb 0%, #1d4ed8 100%) !important;
+  height: 6px !important;
+}
+
+/* Rail (barra de fundo) */
+.rc-slider-rail {
+  background-color: #e2e8f0 !important;
+  height: 6px !important;
+}
+
+/* Handles (bolinhas) */
+.rc-slider-handle {
+  width: 20px !important;
+  height: 20px !important;
+  margin-top: -7px !important;
+  border: 3px solid #2563eb !important;
+  background-color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3) !important;
+  opacity: 1 !important;
+}
+
+.rc-slider-handle:hover {
+  border-color: #1d4ed8 !important;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4) !important;
+}
+
+.rc-slider-handle:active,
+.rc-slider-handle:focus {
+  border-color: #1e40af !important;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15), 0 2px 8px rgba(37, 99, 235, 0.3) !important;
+}
+
+/* Animações suaves */
+.rc-slider-handle,
+.rc-slider-track,
+.rc-slider-rail {
+  transition: all 0.2s ease !important;
+}
+
+/* Tooltip (se adicionar depois) */
+.rc-slider-tooltip {
+  background-color: #1f2937 !important;
+  border-radius: 6px !important;
+  font-size: 12px !important;
+  padding: 4px 8px !important;
+}
+
+.rc-slider-tooltip-arrow {
+  border-top-color: #1f2937 !important;
+}

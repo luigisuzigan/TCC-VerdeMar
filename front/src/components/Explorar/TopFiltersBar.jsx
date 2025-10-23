@@ -90,19 +90,6 @@ export default function TopFiltersBar({ filters, onFilterClick, onSearch }) {
           </div>
         </div>
 
-        {/* Location Filter */}
-        <button
-          onClick={() => onFilterClick('location')}
-          className={`flex items-center gap-2 px-4 py-3 border rounded-xl hover:bg-slate-50 transition-colors ${
-            filters.location || filters.city
-              ? 'border-blue-600 bg-blue-50 text-blue-700'
-              : 'border-slate-300 text-slate-700'
-          }`}
-        >
-          <MapPin size={18} />
-          <span className="font-medium whitespace-nowrap">{getLocationText()}</span>
-        </button>
-
         {/* Price Filter */}
         <button
           onClick={() => onFilterClick('price')}
@@ -129,22 +116,10 @@ export default function TopFiltersBar({ filters, onFilterClick, onSearch }) {
           <span className="font-medium whitespace-nowrap">{getPropertyTypeText()}</span>
         </button>
 
-        {/* Rooms Filter */}
-        <button
-          onClick={() => onFilterClick('rooms')}
-          className={`hidden lg:flex items-center gap-2 px-4 py-3 border rounded-xl hover:bg-slate-50 transition-colors ${
-            filters.bedrooms || filters.bathrooms
-              ? 'border-blue-600 bg-blue-50 text-blue-700'
-              : 'border-slate-300 text-slate-700'
-          }`}
-        >
-          <span className="font-medium whitespace-nowrap">{getRoomsText()}</span>
-        </button>
-
-        {/* Style Filter */}
+        {/* Style Filter - MOVIDO PARA DEPOIS DO TIPO */}
         <button
           onClick={() => onFilterClick('style')}
-          className={`hidden xl:flex items-center gap-2 px-4 py-3 border rounded-xl hover:bg-slate-50 transition-colors ${
+          className={`hidden lg:flex items-center gap-2 px-4 py-3 border rounded-xl hover:bg-slate-50 transition-colors ${
             filters.styles?.length > 0
               ? 'border-blue-600 bg-blue-50 text-blue-700'
               : 'border-slate-300 text-slate-700'
@@ -152,6 +127,18 @@ export default function TopFiltersBar({ filters, onFilterClick, onSearch }) {
         >
           <Sparkles size={18} />
           <span className="font-medium whitespace-nowrap">{getStyleText()}</span>
+        </button>
+
+        {/* Rooms Filter */}
+        <button
+          onClick={() => onFilterClick('rooms')}
+          className={`hidden xl:flex items-center gap-2 px-4 py-3 border rounded-xl hover:bg-slate-50 transition-colors ${
+            filters.bedrooms || filters.bathrooms
+              ? 'border-blue-600 bg-blue-50 text-blue-700'
+              : 'border-slate-300 text-slate-700'
+          }`}
+        >
+          <span className="font-medium whitespace-nowrap">{getRoomsText()}</span>
         </button>
 
         {/* More Filters Button */}

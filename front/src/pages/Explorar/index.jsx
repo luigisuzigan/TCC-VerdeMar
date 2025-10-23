@@ -8,7 +8,7 @@ import Pagination from '../../components/Explorar/Pagination.jsx';
 import TopFiltersBar from '../../components/Explorar/TopFiltersBar.jsx';
 import StickyFilterButton from '../../components/Explorar/StickyFilterButton.jsx';
 import FiltersModal from '../../components/Explorar/FiltersModal.jsx';
-import LocationModal from '../../components/Search/Modals/LocationModal.jsx';
+import FloatingMapWindow from '../../components/Explorar/FloatingMapWindow.jsx';
 import PriceModal from '../../components/Explorar/Modals/PriceModal.jsx';
 import PropertyTypeModal from '../../components/Explorar/Modals/PropertyTypeModal.jsx';
 import RoomsModal from '../../components/Explorar/Modals/RoomsModal.jsx';
@@ -25,12 +25,12 @@ export default function Explorar() {
   const [totalItems, setTotalItems] = useState(0);
   const [showStickyButton, setShowStickyButton] = useState(false);
   const [showFiltersModal, setShowFiltersModal] = useState(false);
-  const [showLocationModal, setShowLocationModal] = useState(false);
   const [showPriceModal, setShowPriceModal] = useState(false);
   const [showPropertyTypeModal, setShowPropertyTypeModal] = useState(false);
   const [showRoomsModal, setShowRoomsModal] = useState(false);
   const [showStyleModal, setShowStyleModal] = useState(false);
   const [filteredPropertyIds, setFilteredPropertyIds] = useState(null); // IDs das propriedades filtradas por área
+  const [allProperties, setAllProperties] = useState([]); // Todas as propriedades para o mapa
   const itemsPerPage = 24;
   const topFiltersRef = useRef(null);
 
@@ -39,6 +39,19 @@ export default function Explorar() {
     const parsed = parseFiltersFromUrl(searchParams);
     setFilters(parsed);
   }, [searchParams]);
+
+  // Fetch all properties for map (once on mount)
+  useEffect(() => {
+    (async () => {
+      try {
+        const { data } = await api.get('/properties?published=true&limit=1000');
+        const arr = Array.isArray(data?.items) ? data.items : Array.isArray(data) ? data : [];
+        setAllProperties(arr);
+      } catch (e) {
+        console.error('Erro ao buscar todas propriedades para o mapa:', e);
+      }
+    })();
+  }, []);
 
   // Detect scroll to show/hide sticky button
   useEffect(() => {
@@ -231,7 +244,7 @@ export default function Explorar() {
     // Open specific modal based on filter type
     switch (filterType) {
       case 'location':
-        setShowLocationModal(true);
+        // Não faz nada - agora é controlado pelo botão flutuante
         break;
       case 'price':
         setShowPriceModal(true);
@@ -253,40 +266,43 @@ export default function Explorar() {
     }
   };
 
-  const handleLocationApply = (locationText, properties, boundaryData) => {
+  const handleLocationApply = (locationText, propertyIds) => {
     try {
       console.log('=== handleLocationApply chamado ===');
       console.log('locationText:', locationText);
-      console.log('properties:', properties);
-      console.log('properties.length:', properties?.length);
-      console.log('boundaryData:', boundaryData);
-      console.log('currentFilters:', filters);
+      console.log('propertyIds:', propertyIds);
       
-      // Se tem área desenhada com propriedades filtradas, salvar os IDs
-      if (boundaryData && properties && properties.length > 0) {
-        const propertyIds = properties.map(p => p.id);
+      // Se tem IDs de propriedades (área desenhada)
+      if (propertyIds && propertyIds.length > 0) {
         console.log('✅ Filtro de área ATIVO - IDs:', propertyIds);
         setFilteredPropertyIds(propertyIds);
         
-        // NÃO aplicar filtro de texto, apenas IDs
-        // Limpar COMPLETAMENTE o filtro de localização de texto
+        // Limpar filtro de texto
         const newFilters = { ...filters };
         delete newFilters.location;
-        console.log('Filtros após remover location:', newFilters);
         setFilters(newFilters);
         setCurrentPage(1);
         
         const params = filtersToUrlParams(newFilters);
-        console.log('URL params:', params.toString());
         navigate(`/explorar?${params.toString()}`, { replace: true });
-      } else {
-        // Sem área desenhada, usar busca por texto
-        console.log('❌ SEM filtro de área - usando texto:', locationText);
+      } 
+      // Se só tem texto (busca por cidade)
+      else if (locationText) {
+        console.log('📍 Aplicando busca por texto:', locationText);
         setFilteredPropertyIds(null);
         updateFilter('location', locationText);
       }
-      
-      setShowLocationModal(false);
+      // Se limpar tudo
+      else {
+        console.log('❌ Limpando filtro de localização');
+        setFilteredPropertyIds(null);
+        const newFilters = { ...filters };
+        delete newFilters.location;
+        setFilters(newFilters);
+        setCurrentPage(1);
+        const params = filtersToUrlParams(newFilters);
+        navigate(`/explorar?${params.toString()}`, { replace: true });
+      }
     } catch (error) {
       console.error('Erro ao aplicar filtro de localização:', error);
     }
@@ -295,16 +311,19 @@ export default function Explorar() {
   const handlePriceApply = (priceFilters) => {
     const newFilters = { ...filters, ...priceFilters };
     applyFilters(newFilters);
+    setShowPriceModal(false);
   };
 
   const handlePropertyTypeApply = (typeFilters) => {
     const newFilters = { ...filters, ...typeFilters };
     applyFilters(newFilters);
+    setShowPropertyTypeModal(false);
   };
 
   const handleRoomsApply = (roomFilters) => {
     const newFilters = { ...filters, ...roomFilters };
     applyFilters(newFilters);
+    setShowRoomsModal(false);
   };
 
   const handleSearch = (searchText) => {
@@ -448,10 +467,11 @@ export default function Explorar() {
       </div>
 
       {/* Modals */}
-      <LocationModal
-        isOpen={showLocationModal}
-        onClose={() => setShowLocationModal(false)}
+      <FloatingMapWindow
         onApply={handleLocationApply}
+        initialSearchText={filters.location || ''}
+        initialBoundary={null}
+        allProperties={allProperties}
       />
 
       <PriceModal
@@ -481,6 +501,7 @@ export default function Explorar() {
         filters={filters}
         onApply={(newFilters) => {
           applyFilters({ ...filters, ...newFilters });
+          setShowStyleModal(false);
         }}
       />
 
@@ -489,7 +510,10 @@ export default function Explorar() {
         isOpen={showFiltersModal}
         onClose={() => setShowFiltersModal(false)}
         filters={filters}
-        onApplyFilters={applyFilters}
+        onApplyFilters={(newFilters) => {
+          applyFilters(newFilters);
+          setShowFiltersModal(false);
+        }}
       />
     </main>
   );

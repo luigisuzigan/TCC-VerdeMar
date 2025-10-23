@@ -102,11 +102,11 @@ export default function PropertyTypeModal({ isOpen, onClose, filters, onApply })
 
   const handleApply = () => {
     onApply({ propertyTypes: selectedTypes });
-    onClose();
   };
 
   const handleReset = () => {
     setSelectedTypes([]);
+    onApply({ propertyTypes: [] });
   };
 
   return (
