@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { X, Maximize2, Minimize2, Move, MapPin } from 'lucide-react';
+import { X, Move, MapPin } from 'lucide-react';
 import InteractiveMap from './InteractiveMap';
 
 export default function FloatingMapWindow({ 
@@ -9,32 +9,35 @@ export default function FloatingMapWindow({
   allProperties = []
 }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [isMaximized, setIsMaximized] = useState(false);
   const [position, setPosition] = useState({ x: 100, y: 100 });
+  const [size, setSize] = useState({ width: 800, height: 600 }); // Tamanho inicial maior
   const [isDragging, setIsDragging] = useState(false);
+  const [isResizing, setIsResizing] = useState(false);
+  const [resizeDirection, setResizeDirection] = useState(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [reloadKey, setReloadKey] = useState(0);
   
-  const [searchText, setSearchText] = useState(initialSearchText);
   const [drawnBoundary, setDrawnBoundary] = useState(initialBoundary);
   const [filteredProperties, setFilteredProperties] = useState([]);
 
   const windowRef = useRef(null);
   const headerRef = useRef(null);
 
-  // Tamanho da janela
-  const normalSize = { width: 600, height: 500 };
+  // Tamanho mínimo da janela
+  const minSize = { width: 400, height: 300 };
+
+  // Debug: Log das propriedades recebidas
+  useEffect(() => {
+    console.log('🗺️ FloatingMapWindow - Total de propriedades recebidas:', allProperties.length);
+  }, [allProperties]);
 
   // Atualizar estados iniciais quando props mudarem
   useEffect(() => {
-    setSearchText(initialSearchText);
     setDrawnBoundary(initialBoundary);
-  }, [initialSearchText, initialBoundary]);
+  }, [initialBoundary]);
 
-  // Handlers de arrasto
-  const handleMouseDown = (e) => {
-    if (isMaximized) return; // Não permite arrastar quando maximizado
-    
+  // === DRAG HANDLERS ===
+  const handleDragStart = (e) => {
     const rect = windowRef.current.getBoundingClientRect();
     setDragOffset({
       x: e.clientX - rect.left,
@@ -43,15 +46,15 @@ export default function FloatingMapWindow({
     setIsDragging(true);
   };
 
-  const handleMouseMove = (e) => {
-    if (!isDragging || isMaximized) return;
+  const handleDragMove = (e) => {
+    if (!isDragging) return;
 
     const newX = e.clientX - dragOffset.x;
     const newY = e.clientY - dragOffset.y;
 
     // Limitar para não sair da tela
-    const maxX = window.innerWidth - normalSize.width;
-    const maxY = window.innerHeight - normalSize.height;
+    const maxX = window.innerWidth - size.width;
+    const maxY = window.innerHeight - size.height;
 
     setPosition({
       x: Math.max(0, Math.min(newX, maxX)),
@@ -59,74 +62,153 @@ export default function FloatingMapWindow({
     });
   };
 
-  const handleMouseUp = () => {
+  const handleDragEnd = () => {
     setIsDragging(false);
   };
 
+  // === RESIZE HANDLERS ===
+  const handleResizeStart = (e, direction) => {
+    e.stopPropagation();
+    setIsResizing(true);
+    setResizeDirection(direction);
+    setDragOffset({ x: e.clientX, y: e.clientY });
+  };
+
+  const handleResizeMove = (e) => {
+    if (!isResizing || !resizeDirection) return;
+
+    const deltaX = e.clientX - dragOffset.x;
+    const deltaY = e.clientY - dragOffset.y;
+
+    setSize(prevSize => {
+      let newWidth = prevSize.width;
+      let newHeight = prevSize.height;
+      let newX = position.x;
+      let newY = position.y;
+
+      // Resize horizontal
+      if (resizeDirection.includes('e')) {
+        newWidth = Math.max(minSize.width, prevSize.width + deltaX);
+      }
+      if (resizeDirection.includes('w')) {
+        const widthChange = Math.max(minSize.width, prevSize.width - deltaX);
+        if (widthChange >= minSize.width) {
+          newWidth = widthChange;
+          newX = position.x + deltaX;
+        }
+      }
+
+      // Resize vertical
+      if (resizeDirection.includes('s')) {
+        newHeight = Math.max(minSize.height, prevSize.height + deltaY);
+      }
+      if (resizeDirection.includes('n')) {
+        const heightChange = Math.max(minSize.height, prevSize.height - deltaY);
+        if (heightChange >= minSize.height) {
+          newHeight = heightChange;
+          newY = position.y + deltaY;
+        }
+      }
+
+      // Atualizar posição se redimensionar pelos cantos/lados esquerdo ou superior
+      if (newX !== position.x || newY !== position.y) {
+        setPosition({ x: newX, y: newY });
+      }
+
+      return { width: newWidth, height: newHeight };
+    });
+
+    setDragOffset({ x: e.clientX, y: e.clientY });
+  };
+
+  const handleResizeEnd = () => {
+    setIsResizing(false);
+    setResizeDirection(null);
+  };
+
+  // === MOUSE EVENTS ===
   useEffect(() => {
     if (isDragging) {
-      window.addEventListener('mousemove', handleMouseMove);
-      window.addEventListener('mouseup', handleMouseUp);
+      window.addEventListener('mousemove', handleDragMove);
+      window.addEventListener('mouseup', handleDragEnd);
       return () => {
-        window.removeEventListener('mousemove', handleMouseMove);
-        window.removeEventListener('mouseup', handleMouseUp);
+        window.removeEventListener('mousemove', handleDragMove);
+        window.removeEventListener('mouseup', handleDragEnd);
       };
     }
-  }, [isDragging, dragOffset]);
+  }, [isDragging, dragOffset, size]);
+
+  useEffect(() => {
+    if (isResizing) {
+      window.addEventListener('mousemove', handleResizeMove);
+      window.addEventListener('mouseup', handleResizeEnd);
+      return () => {
+        window.removeEventListener('mousemove', handleResizeMove);
+        window.removeEventListener('mouseup', handleResizeEnd);
+      };
+    }
+  }, [isResizing, resizeDirection, dragOffset, position, size]);
 
   // Handlers do mapa
-  const handleBoundaryChange = (boundary, properties) => {
+  const handleBoundaryChange = (boundary, filteredProps) => {
+    console.log('=== handleBoundaryChange ===');
+    console.log('📍 Boundary:', boundary ? 'Área desenhada' : 'Limpo');
+    console.log('📊 Imóveis filtrados:', filteredProps?.length || 0);
+    console.log('📦 Total de propriedades disponíveis:', allProperties.length);
+    
+    if (filteredProps && filteredProps.length > 0) {
+      console.log('✅ IDs filtrados:', filteredProps.slice(0, 5).map(p => p.id));
+    }
+    
     setDrawnBoundary(boundary);
-    setFilteredProperties(properties);
+    setFilteredProperties(filteredProps || []);
   };
 
   const handleApply = () => {
-    const propertyIds = filteredProperties.map(p => p.id);
-    onApply(searchText, propertyIds);
+    console.log('=== handleApply CHAMADO ===');
+    console.log('📍 Boundary existe?', drawnBoundary ? 'SIM' : 'NÃO');
+    console.log('🏠 Propriedades filtradas:', filteredProperties.length);
     
-    // Se não tiver desenho, fecha a janela
-    if (!drawnBoundary) {
-      setIsOpen(false);
+    if (filteredProperties.length === 0) {
+      console.warn('⚠️ ATENÇÃO: Nenhum imóvel filtrado para aplicar!');
+      alert('Por favor, desenhe uma área no mapa para filtrar os imóveis.');
+      return;
     }
-  };
-
-  const handleClear = () => {
-    setSearchText('');
-    setDrawnBoundary(null);
-    setFilteredProperties([]);
-    setReloadKey(prev => prev + 1);
-    onApply('', []);
+    
+    // Passar IDs dos imóveis filtrados
+    const propertyIds = filteredProperties.map(p => p.id);
+    console.log('📤 Enviando IDs:', propertyIds.slice(0, 5), '... (total:', propertyIds.length, ')');
+    
+    onApply('', propertyIds, drawnBoundary);
+    
     setIsOpen(false);
   };
 
-  const toggleMaximize = () => {
-    setIsMaximized(!isMaximized);
+  const handleClear = () => {
+    console.log('🧹 Limpando área desenhada');
+    setDrawnBoundary(null);
+    setFilteredProperties([]);
+    setReloadKey(prev => prev + 1);
   };
 
   const handleClose = () => {
+    // Se tiver área desenhada, limpar ao fechar
+    if (drawnBoundary) {
+      onApply('', [], null);
+    }
     setIsOpen(false);
   };
 
   // Estilos da janela
-  const windowStyle = isMaximized 
-    ? {
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        width: '100vw',
-        height: '100vh',
-        zIndex: 9999
-      }
-    : {
-        position: 'fixed',
-        top: position.y,
-        left: position.x,
-        width: normalSize.width,
-        height: normalSize.height,
-        zIndex: 9999
-      };
+  const windowStyle = {
+    position: 'fixed',
+    top: position.y,
+    left: position.x,
+    width: size.width,
+    height: size.height,
+    zIndex: 9999,
+    cursor: isDragging ? 'grabbing' : 'default'
+  };
 
   return (
     <>
@@ -145,111 +227,104 @@ export default function FloatingMapWindow({
         </button>
       )}
 
-      {/* Janela flutuante */}
+      {/* Janela flutuante redimensionável */}
       {isOpen && (
         <div
           ref={windowRef}
           style={windowStyle}
-          className="bg-white rounded-lg shadow-2xl flex flex-col overflow-hidden"
+          className="bg-white rounded-xl shadow-2xl flex flex-col overflow-hidden border-2 border-slate-300"
         >
-          {/* Header arrastável */}
-          <div
-            ref={headerRef}
-            onMouseDown={handleMouseDown}
-            className={`bg-gradient-to-r from-blue-600 to-blue-500 text-white p-4 flex items-center justify-between ${
-              !isMaximized ? 'cursor-move' : ''
-            }`}
-          >
-            <div className="flex items-center gap-3">
-              {!isMaximized && <Move className="w-5 h-5 opacity-70" />}
-              <MapPin className="w-5 h-5" />
-              <h3 className="font-bold text-lg">Buscar no Mapa</h3>
-            </div>
-            
-            <div className="flex items-center gap-2">
-              {/* Botão Maximizar/Restaurar */}
-              <button
-                onClick={toggleMaximize}
-                className="p-2 hover:bg-white/20 rounded-lg transition-colors"
-                title={isMaximized ? "Restaurar" : "Maximizar"}
-              >
-                {isMaximized ? (
-                  <Minimize2 className="w-5 h-5" />
-                ) : (
-                  <Maximize2 className="w-5 h-5" />
-                )}
-              </button>
-
-              {/* Botão Fechar */}
-              <button
-                onClick={handleClose}
-                className="p-2 hover:bg-white/20 rounded-lg transition-colors"
-                title="Fechar"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
-
-          {/* Campo de busca */}
-          <div className="p-4 border-b">
-            <input
-              type="text"
-              value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
-              placeholder="Digite uma cidade, bairro ou endereço..."
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg 
-                       focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-            <p className="text-sm text-gray-600 mt-2">
-              💡 Use as ferramentas de desenho no mapa para delimitar uma área
-            </p>
-          </div>
-
-          {/* Mapa */}
+          {/* Mapa - Ocupa tudo */}
           <div className="flex-1 relative">
             <InteractiveMap
               key={reloadKey}
-              searchText={searchText}
               onBoundaryChange={handleBoundaryChange}
               initialBoundary={drawnBoundary}
               properties={allProperties}
             />
-          </div>
 
-          {/* Footer com botões de ação */}
-          <div className="p-4 border-t bg-gray-50 flex justify-between items-center gap-3">
+            {/* Botão Fechar (X) - Canto superior direito */}
             <button
-              onClick={handleClear}
-              className="px-6 py-2.5 border-2 border-gray-300 rounded-lg 
-                       hover:bg-gray-100 transition-colors font-medium"
+              onClick={handleClose}
+              className="absolute top-4 right-4 z-[1000] bg-white hover:bg-red-50 rounded-lg shadow-lg border border-slate-200 p-2.5 transition-all hover:scale-110 group"
+              title="Fechar Mapa"
             >
-              Limpar
+              <X className="w-5 h-5 text-slate-700 group-hover:text-red-600" />
             </button>
 
-            <div className="flex items-center gap-3">
-              {drawnBoundary && filteredProperties.length > 0 && (
-                <span className="text-sm text-gray-600">
-                  {filteredProperties.length} imóve{filteredProperties.length === 1 ? 'l' : 'is'} encontrado{filteredProperties.length === 1 ? '' : 's'}
-                </span>
-              )}
-              
-              <button
-                onClick={handleApply}
-                className="px-8 py-2.5 bg-blue-600 hover:bg-blue-700 text-white 
-                         rounded-lg font-semibold transition-colors shadow-md 
-                         hover:shadow-lg"
-              >
-                Aplicar Filtro
-              </button>
+            {/* Header arrastável - Barra sutil no topo */}
+            <div
+              onMouseDown={handleDragStart}
+              className="absolute top-4 left-1/2 -translate-x-1/2 z-[999] bg-white/95 backdrop-blur-sm rounded-full shadow-lg border border-slate-200 px-6 py-2.5 cursor-grab active:cursor-grabbing flex items-center gap-3 hover:bg-white transition-all"
+            >
+              <Move className="w-4 h-4 text-slate-500" />
+              <MapPin className="w-4 h-4 text-blue-600" />
+              <span className="font-semibold text-slate-700 text-sm">Mapa Interativo</span>
             </div>
-          </div>
-        </div>
-      )}
 
-      {/* Overlay quando maximizado */}
-      {isOpen && isMaximized && (
-        <div className="fixed inset-0 bg-black/50 z-[9998]" />
+            {/* Badge de Status - Inferior */}
+            {drawnBoundary && (
+              <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-[999] flex flex-col items-center gap-2">
+                <div className="bg-blue-600 text-white px-6 py-3 rounded-full shadow-xl border-2 border-blue-400 flex items-center gap-3">
+                  <span className="w-2.5 h-2.5 rounded-full bg-white animate-pulse"></span>
+                  <span className="font-bold text-sm">
+                    {filteredProperties.length} {filteredProperties.length === 1 ? 'imóvel' : 'imóveis'} encontrado{filteredProperties.length === 1 ? '' : 's'}
+                  </span>
+                </div>
+
+                {/* Botões de Ação */}
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleClear}
+                    className="bg-white hover:bg-slate-50 text-slate-700 px-4 py-2 rounded-lg shadow-lg border border-slate-200 font-medium text-sm transition-all hover:scale-105"
+                  >
+                    Limpar Área
+                  </button>
+                  <button
+                    onClick={handleApply}
+                    className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg shadow-lg font-bold text-sm transition-all hover:scale-105"
+                  >
+                    Aplicar Busca
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Resize Handles - 8 direções */}
+          <div
+            onMouseDown={(e) => handleResizeStart(e, 'n')}
+            className="absolute top-0 left-0 right-0 h-2 cursor-ns-resize hover:bg-blue-200/50 transition-colors"
+          />
+          <div
+            onMouseDown={(e) => handleResizeStart(e, 's')}
+            className="absolute bottom-0 left-0 right-0 h-2 cursor-ns-resize hover:bg-blue-200/50 transition-colors"
+          />
+          <div
+            onMouseDown={(e) => handleResizeStart(e, 'w')}
+            className="absolute top-0 bottom-0 left-0 w-2 cursor-ew-resize hover:bg-blue-200/50 transition-colors"
+          />
+          <div
+            onMouseDown={(e) => handleResizeStart(e, 'e')}
+            className="absolute top-0 bottom-0 right-0 w-2 cursor-ew-resize hover:bg-blue-200/50 transition-colors"
+          />
+          <div
+            onMouseDown={(e) => handleResizeStart(e, 'nw')}
+            className="absolute top-0 left-0 w-4 h-4 cursor-nwse-resize hover:bg-blue-300 rounded-tl-xl transition-colors"
+          />
+          <div
+            onMouseDown={(e) => handleResizeStart(e, 'ne')}
+            className="absolute top-0 right-0 w-4 h-4 cursor-nesw-resize hover:bg-blue-300 rounded-tr-xl transition-colors"
+          />
+          <div
+            onMouseDown={(e) => handleResizeStart(e, 'sw')}
+            className="absolute bottom-0 left-0 w-4 h-4 cursor-nesw-resize hover:bg-blue-300 rounded-bl-xl transition-colors"
+          />
+          <div
+            onMouseDown={(e) => handleResizeStart(e, 'se')}
+            className="absolute bottom-0 right-0 w-4 h-4 cursor-nwse-resize hover:bg-blue-300 rounded-br-xl transition-colors"
+          />
+        </div>
       )}
     </>
   );

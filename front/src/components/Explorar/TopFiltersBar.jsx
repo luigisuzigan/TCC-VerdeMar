@@ -90,6 +90,19 @@ export default function TopFiltersBar({ filters, onFilterClick, onSearch }) {
           </div>
         </div>
 
+        {/* Location Filter - NOVO */}
+        <button
+          onClick={() => onFilterClick('location')}
+          className={`flex items-center gap-2 px-4 py-3 border rounded-xl hover:bg-slate-50 transition-colors ${
+            filters.location || filters.city
+              ? 'border-blue-600 bg-blue-50 text-blue-700'
+              : 'border-slate-300 text-slate-700'
+          }`}
+        >
+          <MapPin size={18} />
+          <span className="font-medium whitespace-nowrap">{getLocationText()}</span>
+        </button>
+
         {/* Price Filter */}
         <button
           onClick={() => onFilterClick('price')}

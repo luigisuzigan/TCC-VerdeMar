@@ -14,6 +14,7 @@ import PriceModal from '../../components/Explorar/Modals/PriceModal.jsx';
 import PropertyTypeModal from '../../components/Explorar/Modals/PropertyTypeModal.jsx';
 import RoomsModal from '../../components/Explorar/Modals/RoomsModal.jsx';
 import StyleModal from '../../components/Explorar/Modals/StyleModal.jsx';
+import LocationModal from '../../components/Search/Modals/LocationModal.jsx';
 
 export default function Explorar() {
   const [searchParams] = useSearchParams();
@@ -30,8 +31,11 @@ export default function Explorar() {
   const [showPropertyTypeModal, setShowPropertyTypeModal] = useState(false);
   const [showRoomsModal, setShowRoomsModal] = useState(false);
   const [showStyleModal, setShowStyleModal] = useState(false);
+  const [showLocationModal, setShowLocationModal] = useState(false);
   const [filteredPropertyIds, setFilteredPropertyIds] = useState(null); // IDs das propriedades filtradas por área
   const [allProperties, setAllProperties] = useState([]); // Todas as propriedades para o mapa
+  const [showMapToast, setShowMapToast] = useState(false); // Toast de feedback do mapa
+  const [mapToastMessage, setMapToastMessage] = useState('');
   const itemsPerPage = 24;
   const topFiltersRef = useRef(null);
 
@@ -45,11 +49,28 @@ export default function Explorar() {
   useEffect(() => {
     (async () => {
       try {
+        console.log('🔄 Buscando propriedades para o mapa...');
         const { data } = await api.get('/properties?published=true&limit=1000');
         const arr = Array.isArray(data?.items) ? data.items : Array.isArray(data) ? data : [];
+        console.log('✅ Propriedades carregadas para o mapa:', arr.length);
+        
+        // Mostrar algumas propriedades no console para debug
+        if (arr.length > 0) {
+          console.log('📍 Primeiras 3 propriedades:', arr.slice(0, 3).map(p => ({
+            id: p.id,
+            title: p.title,
+            lat: p.latitude,
+            lng: p.longitude,
+            price: p.price
+          })));
+        }
+        
         setAllProperties(arr);
       } catch (e) {
-        console.error('Erro ao buscar todas propriedades para o mapa:', e);
+        console.error('❌ Erro ao buscar propriedades para o mapa:', e);
+        console.error('⚠️ Backend offline - aguarde reinício do servidor');
+        console.log('💡 Dica: Verifique se o backend está rodando na porta 4000');
+        setAllProperties([]);
       }
     })();
   }, []);
@@ -245,7 +266,7 @@ export default function Explorar() {
     // Open specific modal based on filter type
     switch (filterType) {
       case 'location':
-        // Não faz nada - agora é controlado pelo botão flutuante
+        setShowLocationModal(true);
         break;
       case 'price':
         setShowPriceModal(true);
@@ -267,18 +288,24 @@ export default function Explorar() {
     }
   };
 
-  const handleLocationApply = (locationText, propertyIds) => {
+  const handleLocationApply = (locationText, propertyIds, boundary) => {
     try {
       console.log('=== handleLocationApply chamado ===');
-      console.log('locationText:', locationText);
-      console.log('propertyIds:', propertyIds);
+      console.log('📝 locationText:', locationText);
+      console.log('🏠 propertyIds:', propertyIds?.length || 0);
+      console.log('📍 boundary:', boundary ? 'Sim' : 'Não');
       
-      // Se tem IDs de propriedades (área desenhada)
-      if (propertyIds && propertyIds.length > 0) {
-        console.log('✅ Filtro de área ATIVO - IDs:', propertyIds);
+      // Se tem área desenhada e IDs de propriedades
+      if (boundary && propertyIds && propertyIds.length > 0) {
+        console.log('✅ Filtro de ÁREA DESENHADA ativo - Mostrando', propertyIds.length, 'imóveis');
         setFilteredPropertyIds(propertyIds);
         
-        // Limpar filtro de texto
+        // Mostrar toast de feedback
+        setMapToastMessage(`🎯 ${propertyIds.length} ${propertyIds.length === 1 ? 'imóvel encontrado' : 'imóveis encontrados'} na área desenhada`);
+        setShowMapToast(true);
+        setTimeout(() => setShowMapToast(false), 4000);
+        
+        // Limpar filtro de texto se existir
         const newFilters = { ...filters };
         delete newFilters.location;
         setFilters(newFilters);
@@ -287,15 +314,15 @@ export default function Explorar() {
         const params = filtersToUrlParams(newFilters);
         navigate(`/explorar?${params.toString()}`, { replace: true });
       } 
-      // Se só tem texto (busca por cidade)
-      else if (locationText) {
-        console.log('📍 Aplicando busca por texto:', locationText);
+      // Se só tem texto de busca (cidade/bairro)
+      else if (locationText && !boundary) {
+        console.log('📍 Busca por texto:', locationText);
         setFilteredPropertyIds(null);
         updateFilter('location', locationText);
       }
-      // Se limpar tudo
+      // Limpar tudo
       else {
-        console.log('❌ Limpando filtro de localização');
+        console.log('🧹 Limpando todos os filtros de localização');
         setFilteredPropertyIds(null);
         const newFilters = { ...filters };
         delete newFilters.location;
@@ -506,6 +533,16 @@ export default function Explorar() {
         }}
       />
 
+      <LocationModal
+        isOpen={showLocationModal}
+        onClose={() => setShowLocationModal(false)}
+        location={filters.location || filters.city || ''}
+        onApply={(locationText, propertyIds, boundary) => {
+          handleLocationApply(locationText, propertyIds, boundary);
+          setShowLocationModal(false);
+        }}
+      />
+
       {/* Filters Modal */}
       <FiltersModal
         isOpen={showFiltersModal}
@@ -516,6 +553,16 @@ export default function Explorar() {
           setShowFiltersModal(false);
         }}
       />
+
+      {/* Toast de Feedback do Mapa */}
+      {showMapToast && (
+        <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[10000] animate-in slide-in-from-top duration-300">
+          <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border-2 border-blue-400">
+            <div className="w-3 h-3 rounded-full bg-white animate-pulse"></div>
+            <span className="font-semibold text-lg">{mapToastMessage}</span>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

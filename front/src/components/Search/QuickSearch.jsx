@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, SlidersHorizontal } from 'lucide-react';
-import PropertyTypeModal from './Modals/PropertyTypeModal';
+import PropertyTypeModal from '../Explorar/Modals/PropertyTypeModal';
 import LocationModal from './Modals/LocationModal';
-import PriceRangeModal from './Modals/PriceRangeModal';
-import AreaModal from './Modals/AreaModal';
-import AdvancedFiltersModal from './Modals/AdvancedFiltersModal';
+import PriceModal from '../Explorar/Modals/PriceModal';
+import FiltersModal from '../Explorar/FiltersModal';
+import StyleModal from '../Explorar/Modals/StyleModal';
+import RoomsModal from '../Explorar/Modals/RoomsModal';
 
 export default function QuickSearch() {
   const navigate = useNavigate();
@@ -16,6 +17,7 @@ export default function QuickSearch() {
     priceMax: '',
     areaMin: '',
     areaMax: '',
+    styles: [], // NOVO: Estilos
     // Filtros avançados
     bedrooms: null,
     bathrooms: null,
@@ -73,6 +75,9 @@ export default function QuickSearch() {
     if (filters.propertyCondition) {
       params.append('condition', filters.propertyCondition);
     }
+    if (filters.styles && filters.styles.length > 0) {
+      params.append('styles', filters.styles.join(','));
+    }
     
     // Navegar para página de explorar com filtros
     navigate(`/explorar?${params.toString()}`);
@@ -102,6 +107,20 @@ export default function QuickSearch() {
     return `Até ${filters.areaMax} m²`;
   };
 
+  const getStyleLabel = () => {
+    if (!filters.styles || filters.styles.length === 0) return 'Estilo';
+    if (filters.styles.length === 1) return filters.styles[0];
+    return `${filters.styles.length} estilos`;
+  };
+
+  const getRoomsLabel = () => {
+    const parts = [];
+    if (filters.bedrooms) parts.push(`${filters.bedrooms}+ quartos`);
+    if (filters.bathrooms) parts.push(`${filters.bathrooms}+ banheiros`);
+    if (parts.length > 0) return parts.join(', ');
+    return 'Quartos e banheiros';
+  };
+
   const formatPrice = (value) => {
     return new Intl.NumberFormat('pt-BR').format(value);
   };
@@ -111,7 +130,7 @@ export default function QuickSearch() {
       {/* Container da busca */}
       <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-4 md:p-6">
         {/* Grid dos campos de busca */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-3 mb-4">
           {/* Tipo do Imóvel */}
           <SearchField
             label="Tipo do Imóvel"
@@ -136,12 +155,20 @@ export default function QuickSearch() {
             icon="💰"
           />
 
-          {/* Área */}
+          {/* Estilo - NOVO */}
           <SearchField
-            label="Área"
-            value={getAreaLabel()}
-            onClick={() => setActiveModal('area')}
-            icon="📐"
+            label="Estilo"
+            value={getStyleLabel()}
+            onClick={() => setActiveModal('style')}
+            icon="✨"
+          />
+
+          {/* Quartos - NOVO */}
+          <SearchField
+            label="Quartos e Banheiros"
+            value={getRoomsLabel()}
+            onClick={() => setActiveModal('rooms')}
+            icon="�️"
           />
         </div>
 
@@ -169,9 +196,9 @@ export default function QuickSearch() {
       <PropertyTypeModal
         isOpen={activeModal === 'propertyType'}
         onClose={() => setActiveModal(null)}
-        selectedTypes={filters.propertyTypes}
-        onApply={(types) => {
-          setFilters({ ...filters, propertyTypes: types });
+        filters={filters}
+        onApply={(newFilters) => {
+          setFilters({ ...filters, ...newFilters });
           setActiveModal(null);
         }}
       />
@@ -186,30 +213,38 @@ export default function QuickSearch() {
         }}
       />
 
-      <PriceRangeModal
+      <PriceModal
         isOpen={activeModal === 'price'}
         onClose={() => setActiveModal(null)}
-        priceMin={filters.priceMin}
-        priceMax={filters.priceMax}
-        onApply={(priceMin, priceMax) => {
-          setFilters({ ...filters, priceMin, priceMax });
+        filters={filters}
+        onApply={(newFilters) => {
+          setFilters({ ...filters, ...newFilters });
           setActiveModal(null);
         }}
       />
 
-      <AreaModal
-        isOpen={activeModal === 'area'}
-        onClose={() => setActiveModal(null)}
-        areaMin={filters.areaMin}
-        areaMax={filters.areaMax}
-        onApply={(areaMin, areaMax) => {
-          setFilters({ ...filters, areaMin, areaMax });
-          setActiveModal(null);
-        }}
-      />
-
-      <AdvancedFiltersModal
+      <FiltersModal
         isOpen={activeModal === 'advanced'}
+        onClose={() => setActiveModal(null)}
+        filters={filters}
+        onApplyFilters={(newFilters) => {
+          setFilters(newFilters);
+          setActiveModal(null);
+        }}
+      />
+
+      <StyleModal
+        isOpen={activeModal === 'style'}
+        onClose={() => setActiveModal(null)}
+        filters={filters}
+        onApply={(newFilters) => {
+          setFilters({ ...filters, ...newFilters });
+          setActiveModal(null);
+        }}
+      />
+
+      <RoomsModal
+        isOpen={activeModal === 'rooms'}
         onClose={() => setActiveModal(null)}
         filters={filters}
         onApply={(newFilters) => {

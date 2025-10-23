@@ -5,17 +5,45 @@ import { useState } from 'react';
 export default function FiltersModal({ isOpen, onClose, filters, onApplyFilters }) {
   const [localFilters, setLocalFilters] = useState(filters);
   const [showAllAmenities, setShowAllAmenities] = useState(false);
+  
+  // Estados para vagas de garagem (mesmo sistema do RoomsModal)
+  const [parkingMode, setParkingMode] = useState('min');
+  const [parkingMin, setParkingMin] = useState('');
+  const [parkingMax, setParkingMax] = useState('');
+  const [parkingExact, setParkingExact] = useState('');
 
   const updateLocalFilter = (key, value) => {
     setLocalFilters(prev => ({ ...prev, [key]: value }));
   };
 
+  // Verificar se o tipo selecionado precisa de andar
+  const needsFloorFilter = () => {
+    const types = localFilters.propertyTypes || filters.propertyTypes || [];
+    return types.includes('apartamento') || types.includes('cobertura');
+  };
+
   const handleApply = () => {
-    onApplyFilters(localFilters);
+    const result = { ...localFilters };
+    
+    // Adicionar vagas baseado no modo selecionado
+    if (parkingMode === 'min' && parkingMin) {
+      result.parkingSpaces = parseInt(parkingMin);
+    } else if (parkingMode === 'exact' && parkingExact) {
+      result.parkingExact = parseInt(parkingExact);
+    } else if (parkingMode === 'range' && parkingMin && parkingMax) {
+      result.parkingMin = parseInt(parkingMin);
+      result.parkingMax = parseInt(parkingMax);
+    }
+    
+    onApplyFilters(result);
   };
 
   const handleReset = () => {
     setLocalFilters({});
+    setParkingMode('min');
+    setParkingMin('');
+    setParkingMax('');
+    setParkingExact('');
     onApplyFilters({});
   };
 
@@ -150,7 +178,7 @@ export default function FiltersModal({ isOpen, onClose, filters, onApplyFilters 
                   <Home size={20} className="text-blue-600" />
                   Características do Imóvel
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="space-y-6">
 
                   {/* Area */}
                   <div>
@@ -160,7 +188,7 @@ export default function FiltersModal({ isOpen, onClose, filters, onApplyFilters 
                         Área (m²)
                       </div>
                     </label>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-2 gap-3 max-w-md">
                       <input
                         type="number"
                         placeholder="Mínimo"
@@ -178,88 +206,163 @@ export default function FiltersModal({ isOpen, onClose, filters, onApplyFilters 
                     </div>
                   </div>
 
-                  {/* Tamanho do Terreno/Lote */}
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-900 mb-3">
-                      Tamanho do Terreno (m²)
+                  {/* Vagas de Garagem - NOVO SISTEMA */}
+                  <div className="pb-6 border-b border-slate-200">
+                    <label className="flex items-center gap-2 text-base font-bold text-slate-900 mb-4">
+                      <Car size={22} className="text-blue-600" />
+                      Vagas de Garagem
                     </label>
-                    <div className="grid grid-cols-2 gap-3">
-                      <input
-                        type="number"
-                        placeholder="Mínimo"
-                        value={localFilters.lotSizeMin || ''}
-                        onChange={(e) => updateLocalFilter('lotSizeMin', e.target.value)}
-                        className="px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                      <input
-                        type="number"
-                        placeholder="Máximo"
-                        value={localFilters.lotSizeMax || ''}
-                        onChange={(e) => updateLocalFilter('lotSizeMax', e.target.value)}
-                        className="px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
+
+                    {/* Modo de filtro */}
+                    <div className="flex gap-2 mb-4 max-w-md">
+                      <button
+                        type="button"
+                        onClick={() => setParkingMode('min')}
+                        className={`flex-1 px-3 py-2 text-sm font-medium rounded-lg transition-all ${
+                          parkingMode === 'min'
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                        }`}
+                      >
+                        Mínimo
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setParkingMode('exact')}
+                        className={`flex-1 px-3 py-2 text-sm font-medium rounded-lg transition-all ${
+                          parkingMode === 'exact'
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                        }`}
+                      >
+                        Exato
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setParkingMode('range')}
+                        className={`flex-1 px-3 py-2 text-sm font-medium rounded-lg transition-all ${
+                          parkingMode === 'range'
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                        }`}
+                      >
+                        Entre
+                      </button>
                     </div>
-                  </div>
 
-                  {/* Suítes */}
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-900 mb-3">
-                      Suítes Mínimas
-                    </label>
-                    <input
-                      type="number"
-                      placeholder="Ex: 1"
-                      min="0"
-                      value={localFilters.suites || ''}
-                      onChange={(e) => updateLocalFilter('suites', e.target.value)}
-                      className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                  </div>
-
-                  {/* Vagas de Garagem - SEM LIMITE */}
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-900 mb-3">
-                      <div className="flex items-center gap-2">
-                        <Car size={18} />
-                        Vagas de Garagem Mínimas
+                    {/* Inputs baseados no modo */}
+                    {parkingMode === 'min' && (
+                      <div className="max-w-md">
+                        <div className="grid grid-cols-5 gap-2 mb-3">
+                          {[1, 2, 3, 4, 5].map((num) => (
+                            <button
+                              type="button"
+                              key={num}
+                              onClick={() => setParkingMin(num.toString())}
+                              className={`px-3 py-2.5 border-2 rounded-lg font-bold text-sm transition-all ${
+                                parkingMin === num.toString()
+                                  ? 'border-blue-600 bg-blue-50 text-blue-700'
+                                  : 'border-slate-200 hover:border-blue-300'
+                              }`}
+                            >
+                              {num}+
+                            </button>
+                          ))}
+                        </div>
+                        <input
+                          type="number"
+                          placeholder="Ou digite..."
+                          value={parkingMin}
+                          onChange={(e) => setParkingMin(e.target.value)}
+                          className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        />
                       </div>
-                    </label>
-                    <input
-                      type="number"
-                      placeholder="Ex: 2"
-                      min="0"
-                      value={localFilters.parkingSpaces || ''}
-                      onChange={(e) => updateLocalFilter('parkingSpaces', e.target.value)}
-                      className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
-                    <p className="text-xs text-slate-500 mt-1">Digite o número mínimo de vagas</p>
+                    )}
+
+                    {parkingMode === 'exact' && (
+                      <div className="max-w-md">
+                        <div className="grid grid-cols-5 gap-2 mb-3">
+                          {[1, 2, 3, 4, 5].map((num) => (
+                            <button
+                              type="button"
+                              key={num}
+                              onClick={() => setParkingExact(num.toString())}
+                              className={`px-3 py-2.5 border-2 rounded-lg font-bold text-sm transition-all ${
+                                parkingExact === num.toString()
+                                  ? 'border-blue-600 bg-blue-50 text-blue-700'
+                                  : 'border-slate-200 hover:border-blue-300'
+                              }`}
+                            >
+                              {num}
+                            </button>
+                          ))}
+                        </div>
+                        <input
+                          type="number"
+                          placeholder="Exatamente..."
+                          value={parkingExact}
+                          onChange={(e) => setParkingExact(e.target.value)}
+                          className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                    )}
+
+                    {parkingMode === 'range' && (
+                      <div className="grid grid-cols-2 gap-3 max-w-md">
+                        <div>
+                          <label className="block text-xs text-slate-600 mb-2">De</label>
+                          <input
+                            type="number"
+                            placeholder="Min"
+                            value={parkingMin}
+                            onChange={(e) => setParkingMin(e.target.value)}
+                            className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-slate-600 mb-2">Até</label>
+                          <input
+                            type="number"
+                            placeholder="Max"
+                            value={parkingMax}
+                            onChange={(e) => setParkingMax(e.target.value)}
+                            className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
 
-                  {/* Andar */}
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-900 mb-3">
-                      <div className="flex items-center gap-2">
-                        <Building2 size={18} />
-                        Andar
+                  {/* Andar - CONDICIONAL */}
+                  {needsFloorFilter() && (
+                    <div className="pb-6 border-b border-slate-200">
+                      <label className="block text-sm font-semibold text-slate-900 mb-3">
+                        <div className="flex items-center gap-2">
+                          <Building2 size={18} />
+                          Andar
+                        </div>
+                      </label>
+                      <div className="grid grid-cols-2 gap-3 max-w-md">
+                        <input
+                          type="number"
+                          placeholder="Mínimo"
+                          value={localFilters.floorMin || ''}
+                          onChange={(e) => updateLocalFilter('floorMin', e.target.value)}
+                          className="px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                        <input
+                          type="number"
+                          placeholder="Máximo"
+                          value={localFilters.floorMax || ''}
+                          onChange={(e) => updateLocalFilter('floorMax', e.target.value)}
+                          className="px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
                       </div>
-                    </label>
-                    <div className="grid grid-cols-2 gap-3">
-                      <input
-                        type="number"
-                        placeholder="Mínimo"
-                        value={localFilters.floorMin || ''}
-                        onChange={(e) => updateLocalFilter('floorMin', e.target.value)}
-                        className="px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                      <input
-                        type="number"
-                        placeholder="Máximo"
-                        value={localFilters.floorMax || ''}
-                        onChange={(e) => updateLocalFilter('floorMax', e.target.value)}
-                        className="px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
+                      <p className="text-xs text-slate-500 mt-2">
+                        💡 Este filtro aparece porque você selecionou Apartamento ou Cobertura
+                      </p>
                     </div>
-                  </div>
+                  )}
 
                   {/* Ano de Construção */}
                   <div>
@@ -276,87 +379,8 @@ export default function FiltersModal({ isOpen, onClose, filters, onApplyFilters 
                       max={new Date().getFullYear()}
                       value={localFilters.yearBuilt || ''}
                       onChange={(e) => updateLocalFilter('yearBuilt', e.target.value)}
-                      className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full max-w-xs px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
-                  </div>
-                </div>
-              </div>
-
-              {/* === SEÇÃO: CUSTOS MENSAIS === */}
-              <div className="border-t border-slate-200 pt-8">
-                <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-                  <DollarSign size={20} className="text-emerald-600" />
-                  Custos Mensais
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  
-                  {/* Condomínio */}
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-900 mb-3">
-                      Condomínio (R$)
-                    </label>
-                    <div className="grid grid-cols-2 gap-3">
-                      <input
-                        type="number"
-                        placeholder="Mínimo"
-                        value={localFilters.condoFeeMin || ''}
-                        onChange={(e) => updateLocalFilter('condoFeeMin', e.target.value)}
-                        className="px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                      <input
-                        type="number"
-                        placeholder="Máximo"
-                        value={localFilters.condoFeeMax || ''}
-                        onChange={(e) => updateLocalFilter('condoFeeMax', e.target.value)}
-                        className="px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                    </div>
-                  </div>
-
-                  {/* IPTU */}
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-900 mb-3">
-                      IPTU Anual (R$)
-                    </label>
-                    <div className="grid grid-cols-2 gap-3">
-                      <input
-                        type="number"
-                        placeholder="Mínimo"
-                        value={localFilters.iptuMin || ''}
-                        onChange={(e) => updateLocalFilter('iptuMin', e.target.value)}
-                        className="px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                      <input
-                        type="number"
-                        placeholder="Máximo"
-                        value={localFilters.iptuMax || ''}
-                        onChange={(e) => updateLocalFilter('iptuMax', e.target.value)}
-                        className="px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Seguro Residencial */}
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-900 mb-3">
-                      Seguro Residencial (R$)
-                    </label>
-                    <div className="grid grid-cols-2 gap-3">
-                      <input
-                        type="number"
-                        placeholder="Mínimo"
-                        value={localFilters.homeInsuranceMin || ''}
-                        onChange={(e) => updateLocalFilter('homeInsuranceMin', e.target.value)}
-                        className="px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                      <input
-                        type="number"
-                        placeholder="Máximo"
-                        value={localFilters.homeInsuranceMax || ''}
-                        onChange={(e) => updateLocalFilter('homeInsuranceMax', e.target.value)}
-                        className="px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                    </div>
                   </div>
                 </div>
               </div>
