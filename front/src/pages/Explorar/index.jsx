@@ -258,22 +258,30 @@ export default function Explorar() {
     setFilters(newFilters);
     setCurrentPage(1); // Reset to first page on filter change
     
-    // Update URL
+    // Update URL but DON'T trigger search
     const params = filtersToUrlParams(newFilters);
     navigate(`/explorar?${params.toString()}`, { replace: true });
+    // Note: No setShouldSearch(true) here - only when clicking "Buscar" button
   };
 
   const applyFilters = (newFilters) => {
     setFilters(newFilters);
     setCurrentPage(1);
     
+    // Update URL but DON'T trigger search
     const params = filtersToUrlParams(newFilters);
     navigate(`/explorar?${params.toString()}`, { replace: true });
+    // Note: No setShouldSearch(true) here - only when clicking "Buscar" button
   };
 
   const handleFilterClick = (filterType) => {
     // Open specific modal based on filter type
     switch (filterType) {
+      case 'search':
+        // Trigger search when clicking "Buscar" button
+        console.log('🔍 Botão Buscar clicado - disparando busca');
+        setShouldSearch(true);
+        break;
       case 'location':
         setShowFloatingMap(true);
         break;
@@ -363,12 +371,6 @@ export default function Explorar() {
     setShowRoomsModal(false);
   };
 
-  const handleSearch = (searchText) => {
-    if (searchText) {
-      updateFilter('search', searchText);
-    }
-  };
-
   const removeFilter = (key, value) => {
     updateFilter(key, value);
   };
@@ -390,8 +392,10 @@ export default function Explorar() {
 
   const clearAllFilters = () => {
     setFilters({});
+    setFilteredPropertyIds(null); // Clear area filter too
     setCurrentPage(1);
     navigate('/explorar', { replace: true });
+    // Note: No setShouldSearch(true) - user needs to click "Buscar" to search again
   };
 
   const handlePageChange = (newPage) => {
@@ -409,7 +413,6 @@ export default function Explorar() {
         <TopFiltersBar
           filters={filters}
           onFilterClick={handleFilterClick}
-          onSearch={handleSearch}
         />
       </div>
 
