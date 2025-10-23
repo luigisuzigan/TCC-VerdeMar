@@ -48,7 +48,7 @@ export default function UserMenu({ inverted = false, requireAuth = false }) {
 
   const name = user?.name || 'Usuário';
   const email = user?.email || 'user@example.com';
-  const avatarUrl = user?.avatarUrl;
+  const avatarUrl = user?.avatar;
 
   // Contadores mock
   const counts = useMemo(() => {
@@ -123,10 +123,17 @@ export default function UserMenu({ inverted = false, requireAuth = false }) {
       >
         <div className="relative grid size-8 place-items-center overflow-hidden rounded-full bg-gradient-to-br from-emerald-400 to-sky-500 text-white text-xs font-bold">
           {avatarUrl && isAuthed ? (
-            <img src={avatarUrl} alt="" className="h-full w-full object-cover" />
-          ) : (
-            <span>{initials(name)}</span>
-          )}
+            <img 
+              src={avatarUrl} 
+              alt="" 
+              className="h-full w-full object-cover"
+              onError={(e) => {
+                e.target.style.display = 'none';
+                e.target.nextSibling.style.display = 'flex';
+              }}
+            />
+          ) : null}
+          <span style={{ display: avatarUrl && isAuthed ? 'none' : 'flex' }}>{initials(name)}</span>
         </div>
         <span className={['hidden text-sm font-semibold sm:inline', inverted ? 'text-white' : 'text-slate-800'].join(' ')}>
           {name.split(' ')[0]}
@@ -144,10 +151,17 @@ export default function UserMenu({ inverted = false, requireAuth = false }) {
           <div className="flex items-center gap-3 rounded-xl bg-slate-50 p-3 ring-1 ring-slate-200">
             <div className="relative grid size-10 place-items-center overflow-hidden rounded-full bg-gradient-to-br from-emerald-400 to-sky-500 text-white text-sm font-bold">
               {avatarUrl ? (
-                <img src={avatarUrl} alt="" className="h-full w-full object-cover" />
-              ) : (
-                <span>{initials(name)}</span>
-              )}
+                <img 
+                  src={avatarUrl} 
+                  alt="" 
+                  className="h-full w-full object-cover"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    e.target.nextSibling.style.display = 'flex';
+                  }}
+                />
+              ) : null}
+              <span style={{ display: avatarUrl ? 'none' : 'flex' }}>{initials(name)}</span>
             </div>
             <div className="min-w-0 flex-1">
               <div className="truncate text-[15px] font-semibold text-slate-900">{name}</div>

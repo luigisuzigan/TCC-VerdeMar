@@ -23,7 +23,18 @@ router.post('/register', validators, async (req, res) => {
   const safeRole = [Roles.USER, Roles.SELLER, Roles.ADMIN].includes(role) ? role : Roles.USER;
   const user = await createUser({ name: name || email.split('@')[0], email, passwordHash, role: safeRole });
   const token = jwt.sign({ sub: user.id, role: user.role }, process.env.JWT_SECRET || 'dev', { expiresIn: '7d' });
-  return res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role } });
+  return res.json({ 
+    token, 
+    user: { 
+      id: user.id, 
+      name: user.name, 
+      email: user.email, 
+      role: user.role,
+      avatar: user.avatar,
+      phone: user.phone,
+      bio: user.bio
+    } 
+  });
 });
 
 router.post('/login', [body('email').isEmail(), body('password').isString()], async (req, res) => {
@@ -34,8 +45,27 @@ router.post('/login', [body('email').isEmail(), body('password').isString()], as
   if (!user) return res.status(401).json({ error: 'Credenciais inválidas' });
   const ok = await bcrypt.compare(password, user.passwordHash);
   if (!ok) return res.status(401).json({ error: 'Credenciais inválidas' });
+  
+  console.log('Login - User from DB:', { 
+    id: user.id, 
+    name: user.name, 
+    hasAvatar: !!user.avatar,
+    avatarLength: user.avatar?.length || 0
+  });
+  
   const token = jwt.sign({ sub: user.id, role: user.role }, process.env.JWT_SECRET || 'dev', { expiresIn: '7d' });
-  return res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role } });
+  return res.json({ 
+    token, 
+    user: { 
+      id: user.id, 
+      name: user.name, 
+      email: user.email, 
+      role: user.role,
+      avatar: user.avatar,
+      phone: user.phone,
+      bio: user.bio
+    } 
+  });
 });
 
 router.get('/me', authMiddleware, (req, res) => {

@@ -35,7 +35,7 @@ export default function Account() {
   const user = useMemo(() => getStoredUser(), []);
   const name = user?.name || 'Usuário VerdeMar';
   const email = user?.email || 'user@verdemar.com';
-  const avatarUrl = user?.avatarUrl;
+  const avatarUrl = user?.avatar;
 
   // MOCKS simples
   const favoritos = [
@@ -149,12 +149,19 @@ export default function Account() {
             {/* Cartão do usuário fixo à direita (avatar + nome + email) */}
             <div className="absolute right-4 bottom-4 md:right-6 md:bottom-6">
               <div className="flex items-center gap-3 rounded-2xl bg-white/95 p-3 ring-1 ring-slate-200 shadow">
-                <div className="grid size-12 place-items-center overflow-hidden rounded-full bg-gradient-to-br from-emerald-400 to-sky-500 text-white text-sm font-bold">
+                <div className="relative h-16 w-16 overflow-hidden rounded-full bg-gradient-to-br from-emerald-400 to-sky-500 text-white font-bold text-xl flex items-center justify-center">
                   {avatarUrl ? (
-                    <img src={avatarUrl} alt="" className="h-full w-full object-cover" />
-                  ) : (
-                    <span>{initials(name)}</span>
-                  )}
+                    <img 
+                      src={avatarUrl} 
+                      alt="" 
+                      className="h-full w-full object-cover"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        e.target.nextSibling.style.display = 'flex';
+                      }}
+                    />
+                  ) : null}
+                  <span style={{ display: avatarUrl ? 'none' : 'flex' }}>{initials(name)}</span>
                 </div>
                 <div className="min-w-0">
                   <div className="truncate text-[15px] font-semibold text-slate-900">{name}</div>

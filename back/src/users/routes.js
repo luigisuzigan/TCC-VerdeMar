@@ -110,19 +110,28 @@ router.put(
   "/:id",
   authMiddleware,
   [
-    param("id").isString(),
-    body("name").optional().isString().isLength({ min: 1, max: 120 }),
-    body("phone").optional().isString().isLength({ max: 20 }),
-    body("avatar").optional().isURL(),
-    body("bio").optional().isString().isLength({ max: 500 })
+    param("id").notEmpty().withMessage("ID é obrigatório"),
+    body("name").optional().isString().isLength({ min: 1, max: 120 }).withMessage("Nome inválido"),
+    body("phone").optional().isString().isLength({ max: 20 }).withMessage("Telefone inválido"),
+    body("avatar").optional(),
+    body("bio").optional().isString().isLength({ max: 500 }).withMessage("Bio muito longa")
   ],
   async (req, res) => {
     const errors = validationResult(req);
-    if (!errors.isEmpty())
+    if (!errors.isEmpty()) {
+      console.log("Erros de validação:", JSON.stringify(errors.array(), null, 2));
       return res.status(400).json({ errors: errors.array() });
+    }
 
     try {
       const { id } = req.params;
+      console.log("Atualizando usuário:", id);
+      console.log("Body recebido:", { 
+        name: req.body.name, 
+        phone: req.body.phone,
+        avatarLength: req.body.avatar?.length || 0,
+        bio: req.body.bio 
+      });
 
       // Apenas admin ou o próprio usuário pode atualizar
       if (req.user.role !== "ADMIN" && req.user.id !== id) {
@@ -132,6 +141,12 @@ router.put(
       const { name, phone, avatar, bio } = req.body;
       const updated = await updateUser(id, { name, phone, avatar, bio });
 
+      console.log("Usuário atualizado com sucesso:", updated.id);
+      console.log("Avatar no response:", {
+        hasAvatar: !!updated.avatar,
+        avatarLength: updated.avatar?.length || 0
+      });
+      
       res.json(updated);
     } catch (error) {
       console.error("Error updating user:", error);

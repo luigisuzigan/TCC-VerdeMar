@@ -36,7 +36,7 @@ model User {
   email        String     @unique
   passwordHash String
   phone        String?
-  avatar       String?
+  avatar       String?    @db.LongText
   bio          String?
   role         String     @default("USER") // USER, SELLER, ADMIN
   isActive     Boolean    @default(true)

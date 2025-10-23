@@ -21,6 +21,12 @@ export function AuthProvider({ children }) {
 
   async function login({ email, password, remember = true }) {
     const { data } = await api.post('/auth/login', { email, password });
+    console.log('Login response:', { 
+      hasUser: !!data.user, 
+      userName: data.user?.name,
+      hasAvatar: !!data.user?.avatar,
+      avatarLength: data.user?.avatar?.length || 0
+    });
     setUser(data.user);
     setToken(data.token);
     const storage = remember ? localStorage : sessionStorage;
@@ -49,7 +55,25 @@ export function AuthProvider({ children }) {
     sessionStorage.removeItem(USER_KEY);
   }
 
-  const value = useMemo(() => ({ user, token, isAdmin, isSeller, login, register, logout }), [user, token, isAdmin, isSeller]);
+  const updateUserData = useMemo(() => {
+    return (newUserData) => {
+      const storage = localStorage.getItem(USER_KEY) ? localStorage : sessionStorage;
+      const updatedUser = { ...user, ...newUserData };
+      setUser(updatedUser);
+      storage.setItem(USER_KEY, JSON.stringify(updatedUser));
+    };
+  }, [user]);
+
+  const value = useMemo(() => ({ 
+    user, 
+    token, 
+    isAdmin, 
+    isSeller, 
+    login, 
+    register, 
+    logout, 
+    updateUserData 
+  }), [user, token, isAdmin, isSeller, updateUserData]);
   return <AuthCtx.Provider value={value}>{children}</AuthCtx.Provider>;
 }
 

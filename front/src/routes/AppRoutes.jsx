@@ -10,6 +10,7 @@ import Novidades from '../pages/Novidades';
 import Login from '../pages/Login';
 import Register from '../pages/Register';
 import Account from '../pages/Account';
+import Settings from '../pages/Settings';
 import { useAuth } from '../context/AuthContext.jsx';
 import PropertyDetails from '../pages/PropertyDetails';
 import SellerDashboard from '../pages/Seller/Dashboard.jsx';
@@ -57,6 +58,7 @@ export default function AppRoutes() {
           <Route path="/register" element={<Register />} />
           <Route path="/property/:id" element={<PropertyDetails />} />
           <Route path="/account" element={<RequireAuth><Account /></RequireAuth>} />
+          <Route path="/settings" element={<RequireAuth><Settings /></RequireAuth>} />
           <Route path="/seller" element={<RequireSeller><SellerDashboard /></RequireSeller>} />
           <Route path="/seller/properties" element={<RequireSeller><SellerPropertiesList /></RequireSeller>} />
           <Route path="/seller/properties/new" element={<RequireSeller><SellerPropertyForm /></RequireSeller>} />
