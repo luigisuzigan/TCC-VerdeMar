@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import Header from '../components/layout/header/Header';
+import Header from '../components/layout/Header/Header';
 
 const menuItems = [
   { path: '/admin', icon: Home, label: 'Dashboard', exact: true },
