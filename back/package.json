@@ -11,8 +11,7 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev --name init",
     "prisma:studio": "prisma studio",
-    "postinstall": "prisma generate",
-    "vercel-build": "prisma generate && prisma migrate deploy"
+    "postinstall": "prisma generate"
   },
   "prisma": {
     "seed": "node quick-seed.js"
