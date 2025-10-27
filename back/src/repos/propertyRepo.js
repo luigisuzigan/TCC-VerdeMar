@@ -23,9 +23,21 @@ function toRow(data) {
     result.amenities = '[]';
   }
   
+  // Converter naturalConditions para JSON string se necessário
+  if (data.naturalConditions) {
+    result.naturalConditions = typeof data.naturalConditions === 'string' ? data.naturalConditions : JSON.stringify(data.naturalConditions);
+  } else {
+    result.naturalConditions = '[]';
+  }
+  
   // Garantir que mainImage seja string ou null
   if (data.mainImage !== undefined) {
     result.mainImage = data.mainImage ? String(data.mainImage) : null;
+  }
+  
+  // Converter propertyCondition vazio para null
+  if (data.propertyCondition === '') {
+    result.propertyCondition = null;
   }
   
   return result;
@@ -66,6 +78,15 @@ function fromRow(row) {
       : JSON.parse(row.amenities || '[]');
   } catch {
     result.amenities = [];
+  }
+  
+  // Parse naturalConditions
+  try {
+    result.naturalConditions = Array.isArray(row.naturalConditions)
+      ? row.naturalConditions
+      : JSON.parse(row.naturalConditions || '[]');
+  } catch {
+    result.naturalConditions = [];
   }
   
   return result;
@@ -191,7 +212,7 @@ export async function updateProperty(id, data) {
     const processedData = toRow(data);
     
     // Remover campos que não existem no schema ou não podem ser alterados
-    const { userId, guests, reviewCount, ...updateData } = processedData;
+    const { userId, reviewCount, ...updateData } = processedData;
     
     console.log('💾 Atualizando imóvel:', id, {
       title: updateData.title,
