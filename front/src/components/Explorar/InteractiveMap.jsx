@@ -781,7 +781,7 @@ export default function InteractiveMap({
       {showDrawTools && (
         <>
           <div className="absolute top-4 left-4 flex gap-2">
-            {!drawingMode ? (
+            {!drawingMode && drawnShapes.length === 0 ? (
               <button
                 onClick={() => setDrawingMode('polygon')}
                 className="flex items-center gap-2 px-4 py-2.5 bg-white rounded-xl shadow-lg border border-slate-200 font-semibold text-slate-700 hover:bg-slate-50 transition-all hover:scale-105"
@@ -789,7 +789,7 @@ export default function InteractiveMap({
                 <Pencil size={18} />
                 <span>Desenhar Área</span>
               </button>
-            ) : (
+            ) : drawingMode ? (
               <>
                 {/* Drawing Tools - Mais compactos */}
                 <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-1.5 flex items-center gap-1.5">
@@ -845,18 +845,7 @@ export default function InteractiveMap({
                   {/* Divider */}
                   <div className="w-px h-6 bg-slate-200"></div>
                   
-                  {/* Botão Limpar */}
-                  {drawnShapes.length > 0 && (
-                    <button
-                      onClick={clearDrawing}
-                      className="p-2 rounded-lg hover:bg-red-50 text-red-600 transition-all hover:scale-110"
-                      title="Limpar Desenhos"
-                    >
-                      <Trash2 size={18} />
-                    </button>
-                  )}
-                  
-                  {/* Botão Cancelar */}
+                  {/* Botão Cancelar Desenho */}
                   <button
                     onClick={() => setDrawingMode(null)}
                     className="p-2 rounded-lg hover:bg-slate-100 text-slate-600 transition-all"
@@ -866,21 +855,8 @@ export default function InteractiveMap({
                   </button>
                 </div>
               </>
-            )}
+            ) : null}
           </div>
-
-          {/* Clear Boundary Button */}
-          {drawnShapes.length > 0 && !drawingMode && (
-            <div className="absolute top-4 left-4">
-              <button
-                onClick={clearDrawing}
-                className="flex items-center gap-2 px-4 py-2.5 bg-white rounded-xl shadow-lg border border-slate-200 font-medium text-slate-700 hover:bg-slate-50 transition-colors"
-              >
-                <X size={18} />
-                <span>Clear Boundary</span>
-              </button>
-            </div>
-          )}
         </>
       )}
 

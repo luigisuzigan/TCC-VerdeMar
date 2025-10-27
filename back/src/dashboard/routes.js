@@ -137,11 +137,6 @@ router.get('/stats', async (req, res) => {
     // Imóveis com mais favoritos
     const topFavoriteProperties = await prisma.property.findMany({
       where: { published: true },
-      include: {
-        _count: {
-          select: { favorites: true }
-        }
-      },
       orderBy: {
         favorites: { _count: 'desc' }
       },
@@ -162,21 +157,23 @@ router.get('/stats', async (req, res) => {
     const topRatedProperties = await prisma.property.findMany({
       where: { 
         published: true,
-        reviewCount: { gt: 0 }
+        rating: { gt: 0 }
       },
       orderBy: [
         { rating: 'desc' },
-        { reviewCount: 'desc' }
+        { viewCount: 'desc' }
       ],
       take: 5,
       select: {
         id: true,
         title: true,
         rating: true,
-        reviewCount: true,
         mainImage: true,
         price: true,
-        city: true
+        city: true,
+        _count: {
+          select: { reviews: true }
+        }
       }
     });
     
@@ -308,7 +305,15 @@ router.get('/stats', async (req, res) => {
             ...p,
             favoritesCount: p._count.favorites
           })),
-          topRated: topRatedProperties
+          topRated: topRatedProperties.map(p => ({
+            id: p.id,
+            title: p.title,
+            rating: p.rating,
+            reviewCount: p._count.reviews,
+            mainImage: p.mainImage,
+            price: p.price,
+            city: p.city
+          }))
         },
         
         // Mensagens

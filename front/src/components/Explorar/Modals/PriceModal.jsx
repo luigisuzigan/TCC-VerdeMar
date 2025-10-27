@@ -24,19 +24,23 @@ export default function PriceModal({ isOpen, onClose, filters, onApply }) {
   }, [isOpen, filters]);
 
   const handleApply = () => {
-    // Só aplica se tiver pelo menos um valor
-    if (minPrice || maxPrice) {
-      onApply({
-        priceMin: minPrice,
-        priceMax: maxPrice,
-      });
-    }
+    // Aplica mesmo que não tenha valores (limpa filtro)
+    const priceFilter = {
+      priceMin: minPrice || '',
+      priceMax: maxPrice || '',
+    };
+    console.log('💰 PriceModal - handleApply chamado');
+    console.log('💰 minPrice (raw):', minPrice);
+    console.log('💰 maxPrice (raw):', maxPrice);
+    console.log('💰 Enviando filtro:', priceFilter);
+    
+    onApply(priceFilter);
+    onClose();
   };
 
   const handleClear = () => {
     setMinPrice('');
     setMaxPrice('');
-    onApply({ priceMin: '', priceMax: '' });
   };
 
   const selectQuickOption = (option) => {
@@ -157,18 +161,13 @@ export default function PriceModal({ isOpen, onClose, filters, onApply }) {
           <div className="flex items-center gap-3 p-6 border-t border-slate-200 bg-slate-50">
             <button
               onClick={handleClear}
-              className="px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-200 rounded-xl transition-colors"
+              className="px-5 py-2.5 text-sm font-semibold text-slate-600 hover:text-slate-800 hover:bg-slate-200 rounded-xl transition-colors"
             >
               Limpar
             </button>
             <button
               onClick={handleApply}
-              disabled={!minPrice && !maxPrice}
-              className={`flex-1 px-6 py-2.5 text-sm font-semibold text-white rounded-xl transition-all ${
-                minPrice || maxPrice
-                  ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 shadow-lg'
-                  : 'bg-slate-300 cursor-not-allowed'
-              }`}
+              className="flex-1 px-6 py-2.5 text-sm font-semibold text-white rounded-xl transition-all bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 shadow-lg hover:shadow-xl"
             >
               Aplicar Filtro
             </button>

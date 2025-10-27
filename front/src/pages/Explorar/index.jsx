@@ -36,8 +36,7 @@ export default function Explorar() {
   const [showFloatingMap, setShowFloatingMap] = useState(false);
   const [filteredPropertyIds, setFilteredPropertyIds] = useState(null); // IDs das propriedades filtradas por área
   const [allProperties, setAllProperties] = useState([]); // Todas as propriedades para o mapa
-  const [showMapToast, setShowMapToast] = useState(false); // Toast de feedback do mapa
-  const [mapToastMessage, setMapToastMessage] = useState('');
+  const [savedBoundary, setSavedBoundary] = useState(null); // Salvar área desenhada
   const itemsPerPage = 24;
   const topFiltersRef = useRef(null);
 
@@ -98,36 +97,45 @@ export default function Explorar() {
     (async () => {
       try {
         console.log('=== useEffect FETCH iniciado ===');
-        console.log('filteredPropertyIds:', filteredPropertyIds);
-        console.log('filters:', filters);
+        console.log('📊 filteredPropertyIds:', filteredPropertyIds);
+        console.log('📊 filters completo:', JSON.stringify(filters, null, 2));
         
         // Se tem filtro de área desenhada, NÃO usar filtro de location
         const filtersToUse = filteredPropertyIds 
           ? { ...filters, location: undefined } // Remove location quando tem IDs filtrados
           : filters;
         
+        console.log('📊 Filtros que serão usados na query:', JSON.stringify(filtersToUse, null, 2));
+        
         const query = buildApiQuery(filtersToUse);
         const offset = filteredPropertyIds ? 0 : (currentPage - 1) * itemsPerPage;
         const limit = filteredPropertyIds ? 1000 : itemsPerPage; // Buscar mais se tem filtro de área
         
-        console.log('Query final:', query);
-        console.log('Offset:', offset, 'Limit:', limit);
-        console.log('URL completa:', `/properties?${query}&offset=${offset}&limit=${limit}`);
+        console.log('🔗 Query construída:', query);
+        console.log('📄 Offset:', offset, 'Limit:', limit);
+        console.log('🌐 URL completa:', `/properties?${query}&offset=${offset}&limit=${limit}`);
         
         const { data } = await api.get(`/properties?${query}&offset=${offset}&limit=${limit}`);
         if (!active) return;
         
         let arr = Array.isArray(data?.items) ? data.items : Array.isArray(data) ? data : [];
         console.log('✅ Propriedades recebidas da API:', arr.length);
-        console.log('Primeiros 3 IDs da API:', arr.slice(0, 3).map(p => p.id));
+        if (arr.length > 0) {
+          console.log('📦 Primeiros 3 imóveis:', arr.slice(0, 3).map(p => ({
+            id: p.id,
+            title: p.title,
+            price: p.price,
+            beds: p.beds,
+            baths: p.baths
+          })));
+        }
         
         // Se tem filtro de área desenhada, filtrar apenas os IDs selecionados
         if (filteredPropertyIds && filteredPropertyIds.length > 0) {
-          console.log('🔍 Filtrando por IDs:', filteredPropertyIds);
+          console.log('🔍 Filtrando por IDs da área desenhada:', filteredPropertyIds.length, 'IDs');
           const before = arr.length;
           arr = arr.filter(item => filteredPropertyIds.includes(item.id));
-          console.log(`Filtrou ${before} → ${arr.length} imóveis`);
-          console.log('IDs encontrados:', arr.map(p => p.id));
+          console.log(`📊 Filtrou ${before} → ${arr.length} imóveis`);
           
           // Aplicar paginação local
           const startIndex = (currentPage - 1) * itemsPerPage;
@@ -162,6 +170,8 @@ export default function Explorar() {
 
   // Build API query from filters
   const buildApiQuery = (filters) => {
+    console.log('🔧 buildApiQuery recebeu filters:', filters);
+    
     const params = new URLSearchParams();
     params.set('published', 'true');
     params.set('limit', '24');
@@ -175,42 +185,51 @@ export default function Explorar() {
     
     // Price Range
     if (filters.priceMin) {
+      console.log('💰 Adicionando minPrice:', filters.priceMin);
       params.set('minPrice', filters.priceMin);
     }
     if (filters.priceMax) {
+      console.log('💰 Adicionando maxPrice:', filters.priceMax);
       params.set('maxPrice', filters.priceMax);
     }
     
     // Area
     if (filters.areaMin) {
+      console.log('📏 Adicionando minArea:', filters.areaMin);
       params.set('minArea', filters.areaMin);
     }
     if (filters.areaMax) {
+      console.log('📏 Adicionando maxArea:', filters.areaMax);
       params.set('maxArea', filters.areaMax);
     }
     
     // Property Types
     if (filters.propertyTypes?.length > 0) {
+      console.log('🏠 Adicionando types:', filters.propertyTypes);
       params.set('types', filters.propertyTypes.join(','));
     }
     
     // Bedrooms
     if (filters.bedrooms) {
+      console.log('🛏️ Adicionando minBedrooms:', filters.bedrooms);
       params.set('minBedrooms', filters.bedrooms);
     }
     
     // Bathrooms
     if (filters.bathrooms) {
+      console.log('🚿 Adicionando minBathrooms:', filters.bathrooms);
       params.set('minBathrooms', filters.bathrooms);
     }
     
     // Parking
     if (filters.parkingSpaces !== null && filters.parkingSpaces !== undefined) {
+      console.log('🚗 Adicionando minParkingSpaces:', filters.parkingSpaces);
       params.set('minParkingSpaces', filters.parkingSpaces);
     }
     
     // Suites
     if (filters.suites !== null && filters.suites !== undefined) {
+      console.log('🛁 Adicionando minSuites:', filters.suites);
       params.set('minSuites', filters.suites);
     }
     
@@ -234,7 +253,11 @@ export default function Explorar() {
       params.set('sortBy', sortBy);
     }
     
-    return params.toString();
+    const queryString = params.toString();
+    console.log('🔧 Query final construída:', queryString);
+    console.log('🔧 Parâmetros individuais:', Object.fromEntries(params.entries()));
+    
+    return queryString;
   };
 
   // Sort items locally (fallback if backend doesn't support sorting)
@@ -267,12 +290,16 @@ export default function Explorar() {
   };
 
   const applyFilters = (newFilters) => {
+    console.log('⚙️ applyFilters chamado com:', newFilters);
+    console.log('⚙️ Filters atuais ANTES do set:', filters);
     setFilters(newFilters);
     setCurrentPage(1);
     
     // Update URL but DON'T trigger search
     const params = filtersToUrlParams(newFilters);
+    console.log('⚙️ URL params gerados:', params.toString());
     navigate(`/explorar?${params.toString()}`, { replace: true });
+    console.log('⚙️ Filters salvos no estado - aguardando clique em Buscar');
     // Note: No setShouldSearch(true) here - only when clicking "Buscar" button
   };
 
@@ -282,10 +309,17 @@ export default function Explorar() {
       case 'search':
         // Trigger search when clicking "Buscar" button
         console.log('🔍 Botão Buscar clicado - disparando busca');
+        console.log('📊 Filtros atuais:', filters);
+        console.log('📍 Área desenhada:', filteredPropertyIds?.length || 0, 'imóveis');
         setShouldSearch(true);
         break;
       case 'location':
-        setShowFloatingMap(true);
+        console.log('📍 Abrindo mapa de localização');
+        // Forçar fechamento primeiro, depois abrir (reset completo)
+        setShowFloatingMap(false);
+        setTimeout(() => {
+          setShowFloatingMap(true);
+        }, 10);
         break;
       case 'price':
         setShowPriceModal(true);
@@ -321,11 +355,7 @@ export default function Explorar() {
       if (boundary && propertyIds && propertyIds.length > 0) {
         console.log('✅ Filtro de ÁREA DESENHADA ativo - Mostrando', propertyIds.length, 'imóveis');
         setFilteredPropertyIds(propertyIds);
-        
-        // Mostrar toast de feedback
-        setMapToastMessage(`🎯 ${propertyIds.length} ${propertyIds.length === 1 ? 'imóvel encontrado' : 'imóveis encontrados'} na área desenhada`);
-        setShowMapToast(true);
-        setTimeout(() => setShowMapToast(false), 4000);
+        setSavedBoundary(boundary); // Salvar boundary para reabrir o mapa
         
         // Limpar filtro de texto se existir
         const newFilters = { ...filters };
@@ -335,17 +365,21 @@ export default function Explorar() {
         
         const params = filtersToUrlParams(newFilters);
         navigate(`/explorar?${params.toString()}`, { replace: true });
+        
+        // NÃO disparar busca aqui - só quando clicar em "Buscar"
       } 
       // Se só tem texto de busca (cidade/bairro)
       else if (locationText && !boundary) {
         console.log('📍 Busca por texto:', locationText);
         setFilteredPropertyIds(null);
+        setSavedBoundary(null);
         updateFilter('location', locationText);
       }
       // Limpar tudo
       else {
         console.log('🧹 Limpando todos os filtros de localização');
         setFilteredPropertyIds(null);
+        setSavedBoundary(null);
         const newFilters = { ...filters };
         delete newFilters.location;
         setFilters(newFilters);
@@ -353,31 +387,46 @@ export default function Explorar() {
         const params = filtersToUrlParams(newFilters);
         navigate(`/explorar?${params.toString()}`, { replace: true });
       }
+      
+      // Fechar o mapa após aplicar
+      setShowFloatingMap(false);
     } catch (error) {
       console.error('Erro ao aplicar filtro de localização:', error);
     }
   };
 
   const handlePriceApply = (priceFilters) => {
+    console.log('💰 handlePriceApply recebeu:', priceFilters);
+    console.log('💰 Filters atuais ANTES:', filters);
     const newFilters = { ...filters, ...priceFilters };
+    console.log('💰 Filters novos DEPOIS:', newFilters);
     applyFilters(newFilters);
     setShowPriceModal(false);
   };
 
   const handlePropertyTypeApply = (typeFilters) => {
+    console.log('🏠 handlePropertyTypeApply recebeu:', typeFilters);
+    console.log('🏠 Filters atuais ANTES:', filters);
     const newFilters = { ...filters, ...typeFilters };
+    console.log('🏠 Filters novos DEPOIS:', newFilters);
     applyFilters(newFilters);
     setShowPropertyTypeModal(false);
   };
 
   const handleRoomsApply = (roomFilters) => {
+    console.log('🛏️ handleRoomsApply recebeu:', roomFilters);
+    console.log('🛏️ Filters atuais ANTES:', filters);
     const newFilters = { ...filters, ...roomFilters };
+    console.log('🛏️ Filters novos DEPOIS:', newFilters);
     applyFilters(newFilters);
     setShowRoomsModal(false);
   };
 
   const handleAreaApply = (areaFilters) => {
+    console.log('📏 handleAreaApply recebeu:', areaFilters);
+    console.log('📏 Filters atuais ANTES:', filters);
     const newFilters = { ...filters, ...areaFilters };
+    console.log('📏 Filters novos DEPOIS:', newFilters);
     applyFilters(newFilters);
     setShowAreaModal(false);
   };
@@ -386,6 +435,7 @@ export default function Explorar() {
     // Se estiver removendo a área desenhada no mapa
     if (key === 'mapArea') {
       setFilteredPropertyIds(null);
+      setSavedBoundary(null); // Limpar boundary salvo
       setCurrentPage(1);
       setShouldSearch(true); // Buscar novamente sem o filtro de área
       return;
@@ -412,6 +462,7 @@ export default function Explorar() {
   const clearAllFilters = () => {
     setFilters({});
     setFilteredPropertyIds(null); // Clear area filter too
+    setSavedBoundary(null); // Clear saved boundary
     setCurrentPage(1);
     navigate('/explorar', { replace: true });
     // Note: No setShouldSearch(true) - user needs to click "Buscar" to search again
@@ -545,7 +596,7 @@ export default function Explorar() {
       <FloatingMapWindow
         onApply={handleLocationApply}
         initialSearchText={filters.location || ''}
-        initialBoundary={null}
+        initialBoundary={savedBoundary}
         allProperties={allProperties}
         isOpenExternal={showFloatingMap}
         onCloseExternal={() => setShowFloatingMap(false)}
@@ -611,15 +662,6 @@ export default function Explorar() {
         }}
       />
 
-      {/* Toast de Feedback do Mapa */}
-      {showMapToast && (
-        <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[10000] animate-in slide-in-from-top duration-300">
-          <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-8 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border-2 border-blue-400">
-            <div className="w-3 h-3 rounded-full bg-white animate-pulse"></div>
-            <span className="font-semibold text-lg">{mapToastMessage}</span>
-          </div>
-        </div>
-      )}
     </main>
   );
 }

@@ -31,8 +31,8 @@ export default function FloatingMapWindow({
 
   // Sincronizar com prop externa
   useEffect(() => {
-    if (isOpenExternal) {
-      setIsOpen(true);
+    if (isOpenExternal !== undefined) {
+      setIsOpen(isOpenExternal);
     }
   }, [isOpenExternal]);
 
@@ -195,12 +195,13 @@ export default function FloatingMapWindow({
       return;
     }
     
-    // Passar IDs dos imóveis filtrados
+    // Passar IDs dos imóveis filtrados E manter boundary
     const propertyIds = filteredProperties.map(p => p.id);
     console.log('📤 Enviando IDs:', propertyIds.slice(0, 5), '... (total:', propertyIds.length, ')');
     
     onApply('', propertyIds, drawnBoundary);
     
+    // NÃO fechar o mapa - apenas minimizar/ocultar
     setIsOpen(false);
   };
 
@@ -212,14 +213,11 @@ export default function FloatingMapWindow({
   };
 
   const handleClose = () => {
-    // Se tiver área desenhada, limpar ao fechar
-    if (drawnBoundary) {
-      onApply('', [], null);
-    }
     setIsOpen(false);
     if (onCloseExternal) {
       onCloseExternal();
     }
+    // Não limpar a área ao fechar - mantém o filtro ativo
   };
 
   // Estilos da janela
@@ -285,31 +283,21 @@ export default function FloatingMapWindow({
               <span className="font-semibold text-slate-700 text-sm">Mapa Interativo</span>
             </div>
 
-            {/* Badge de Status - Inferior */}
+            {/* Botões de Ação - Mostrar sempre quando tiver área desenhada */}
             {drawnBoundary && (
-              <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-[999] flex flex-col items-center gap-2">
-                <div className="bg-blue-600 text-white px-6 py-3 rounded-full shadow-xl border-2 border-blue-400 flex items-center gap-3">
-                  <span className="w-2.5 h-2.5 rounded-full bg-white animate-pulse"></span>
-                  <span className="font-bold text-sm">
-                    {filteredProperties.length} {filteredProperties.length === 1 ? 'imóvel' : 'imóveis'} encontrado{filteredProperties.length === 1 ? '' : 's'}
-                  </span>
-                </div>
-
-                {/* Botões de Ação */}
-                <div className="flex gap-2">
-                  <button
-                    onClick={handleClear}
-                    className="bg-white hover:bg-slate-50 text-slate-700 px-4 py-2 rounded-lg shadow-lg border border-slate-200 font-medium text-sm transition-all hover:scale-105"
-                  >
-                    Limpar Área
-                  </button>
-                  <button
-                    onClick={handleApply}
-                    className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg shadow-lg font-bold text-sm transition-all hover:scale-105"
-                  >
-                    Aplicar Busca
-                  </button>
-                </div>
+              <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-[999] flex gap-3">
+                <button
+                  onClick={handleClear}
+                  className="bg-white hover:bg-red-50 text-slate-700 hover:text-red-600 px-5 py-2.5 rounded-lg shadow-lg border-2 border-slate-200 hover:border-red-300 font-semibold text-sm transition-all hover:scale-105"
+                >
+                  Cancelar Desenho
+                </button>
+                <button
+                  onClick={handleApply}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-lg shadow-lg border-2 border-emerald-500 font-bold text-sm transition-all hover:scale-105"
+                >
+                  Aplicar Área
+                </button>
               </div>
             )}
           </div>

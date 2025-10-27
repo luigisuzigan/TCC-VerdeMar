@@ -29,12 +29,16 @@ export default function TopFiltersBar({ filters, onFilterClick }) {
           cobertura: 'Cobertura',
           terreno: 'Terreno',
           kitnet: 'Kitnet',
+          sobrado: 'Sobrado',
+          chacara: 'Chácara',
+          comercial: 'Comercial',
+          loft: 'Loft',
         };
         return labels[filters.propertyTypes[0]] || filters.propertyTypes[0];
       }
       return `${filters.propertyTypes.length} tipos`;
     }
-    return 'Selecione';
+    return 'Tipo de imóvel';
   };
 
   const getAreaText = () => {

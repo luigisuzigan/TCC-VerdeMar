@@ -29,12 +29,12 @@ export default function AreaModal({ isOpen, onClose, filters, onApply }) {
     if (minArea) result.areaMin = parseInt(minArea);
     if (maxArea) result.areaMax = parseInt(maxArea);
     onApply(result);
+    onClose();
   };
 
   const handleReset = () => {
     setMinArea('');
     setMaxArea('');
-    onApply({});
   };
 
   const formatArea = (value) => {
@@ -148,12 +148,7 @@ export default function AreaModal({ isOpen, onClose, filters, onApply }) {
               </button>
               <button
                 onClick={handleApply}
-                disabled={!hasFilters}
-                className={`px-6 py-2 font-semibold rounded-lg transition-all shadow-md ${
-                  hasFilters
-                    ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white hover:from-emerald-700 hover:to-teal-700 hover:shadow-lg hover:scale-105'
-                    : 'bg-slate-200 text-slate-400 cursor-not-allowed'
-                }`}
+                className="px-6 py-2 font-semibold rounded-lg transition-all shadow-md bg-gradient-to-r from-emerald-600 to-teal-600 text-white hover:from-emerald-700 hover:to-teal-700 hover:shadow-lg hover:scale-105"
               >
                 Aplicar
               </button>
