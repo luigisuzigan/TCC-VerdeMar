@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import MainLayout from '../layouts/MainLayout';
 import AdminLayout from '../layouts/AdminLayout';
+import ScrollToTop from '../components/ScrollToTop';
 import Home from '../pages/Home';
 import Explorar from '../pages/Explorar';
 import Sobre from '../pages/Sobre';
@@ -44,6 +45,7 @@ function RequireSeller({ children }) {
 export default function AppRoutes() {
   return (
     <Router>
+      <ScrollToTop />
       <Routes>
         <Route element={<MainLayout />}>
           <Route path="/" element={<Home />} />

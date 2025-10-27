@@ -12,6 +12,7 @@ import FloatingMapWindow from '../../components/Explorar/FloatingMapWindow.jsx';
 import PriceModal from '../../components/Explorar/Modals/PriceModal.jsx';
 import PropertyTypeModal from '../../components/Explorar/Modals/PropertyTypeModal.jsx';
 import RoomsModal from '../../components/Explorar/Modals/RoomsModal.jsx';
+import AreaModal from '../../components/Explorar/Modals/AreaModal.jsx';
 import StyleModal from '../../components/Explorar/Modals/StyleModal.jsx';
 import LocationModal from '../../components/Search/Modals/LocationModal.jsx';
 
@@ -29,6 +30,7 @@ export default function Explorar() {
   const [showPriceModal, setShowPriceModal] = useState(false);
   const [showPropertyTypeModal, setShowPropertyTypeModal] = useState(false);
   const [showRoomsModal, setShowRoomsModal] = useState(false);
+  const [showAreaModal, setShowAreaModal] = useState(false);
   const [showStyleModal, setShowStyleModal] = useState(false);
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [showFloatingMap, setShowFloatingMap] = useState(false);
@@ -291,6 +293,9 @@ export default function Explorar() {
       case 'propertyType':
         setShowPropertyTypeModal(true);
         break;
+      case 'area':
+        setShowAreaModal(true);
+        break;
       case 'rooms':
         setShowRoomsModal(true);
         break;
@@ -371,7 +376,21 @@ export default function Explorar() {
     setShowRoomsModal(false);
   };
 
+  const handleAreaApply = (areaFilters) => {
+    const newFilters = { ...filters, ...areaFilters };
+    applyFilters(newFilters);
+    setShowAreaModal(false);
+  };
+
   const removeFilter = (key, value) => {
+    // Se estiver removendo a área desenhada no mapa
+    if (key === 'mapArea') {
+      setFilteredPropertyIds(null);
+      setCurrentPage(1);
+      setShouldSearch(true); // Buscar novamente sem o filtro de área
+      return;
+    }
+    
     updateFilter(key, value);
   };
 
@@ -419,6 +438,7 @@ export default function Explorar() {
       {/* Active Filters Pills */}
       <ActiveFilters
         filters={filters}
+        filteredPropertyIds={filteredPropertyIds}
         onRemove={removeFilter}
         onClearAll={clearAllFilters}
       />
@@ -426,33 +446,58 @@ export default function Explorar() {
       {/* Main Content */}
       <div className="mt-6">
         {/* Header */}
-        <div className="mb-6 flex items-end justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900 mb-2">
-              Explorar Imóveis
-            </h1>
-            <p className="text-slate-600">
-              {loading ? 'Carregando...' : `${items?.length || 0} imóveis encontrados`}
-            </p>
-          </div>
+        <div className="mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            {/* Title Section */}
+            <div>
+              <h1 className="text-3xl font-bold text-slate-900 mb-1">
+                Explorar Imóveis
+              </h1>
+              <div className="flex items-center gap-2">
+                <p className="text-slate-600">
+                  {loading ? (
+                    <span className="inline-flex items-center gap-2">
+                      <svg className="animate-spin h-4 w-4 text-emerald-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Carregando...
+                    </span>
+                  ) : (
+                    <>
+                      <span className="font-semibold text-slate-900">{totalItems || 0}</span> {totalItems === 1 ? 'imóvel encontrado' : 'imóveis encontrados'}
+                    </>
+                  )}
+                </p>
+              </div>
+            </div>
 
-          {/* Sort Dropdown */}
-          <div className="flex items-center gap-2">
-            <label className="text-sm font-medium text-slate-600">
-              Ordenar por:
-            </label>
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="px-4 py-2 border border-slate-300 rounded-lg text-sm font-medium text-slate-700 bg-white hover:border-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-            >
-              <option value="default">Padrão</option>
-              <option value="price-asc">Menor preço</option>
-              <option value="price-desc">Maior preço</option>
-              <option value="area-desc">Maior área</option>
-              <option value="area-asc">Menor área</option>
-              <option value="newest">Mais recentes</option>
-            </select>
+            {/* Sort Dropdown */}
+            <div className="flex items-center gap-3">
+              <label className="text-sm font-medium text-slate-700 whitespace-nowrap">
+                Ordenar por:
+              </label>
+              <div className="relative">
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="appearance-none pl-4 pr-10 py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-medium text-slate-700 hover:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all cursor-pointer shadow-sm hover:shadow-md"
+                >
+                  <option value="default">Padrão</option>
+                  <option value="price-asc">Menor preço</option>
+                  <option value="price-desc">Maior preço</option>
+                  <option value="area-desc">Maior área</option>
+                  <option value="area-asc">Menor área</option>
+                  <option value="newest">Mais recentes</option>
+                </select>
+                {/* Custom arrow */}
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -526,6 +571,13 @@ export default function Explorar() {
         onClose={() => setShowRoomsModal(false)}
         filters={filters}
         onApply={handleRoomsApply}
+      />
+
+      <AreaModal
+        isOpen={showAreaModal}
+        onClose={() => setShowAreaModal(false)}
+        filters={filters}
+        onApply={handleAreaApply}
       />
 
       <StyleModal

@@ -171,11 +171,13 @@ export default function LocationModal({ isOpen, onClose, location, onApply }) {
         properties: filteredProperties,
         location: searchText || 'Área selecionada no mapa',
       };
-      onApply(searchText || 'Área selecionada no mapa', filteredProperties, boundaryData);
-      // NÃO FECHA O MODAL - mantém desenho visível
+      onApply(searchText || 'Área selecionada no mapa', filteredProperties.map(p => p.id), boundaryData);
+      // Fecha o modal após aplicar
+      onClose();
     } else if (searchText) {
       // Se só tem texto de busca, aplica a localização
-      onApply(searchText, nearbyProperties);
+      onApply(searchText, null, null);
+      onClose();
     } else {
       // Se não tem nada, fecha o modal
       onClose();
@@ -368,16 +370,17 @@ export default function LocationModal({ isOpen, onClose, location, onApply }) {
                     </button>
                   )}
                 </div>
-              </div>
 
-              {/* Estatísticas em linha quando tem filtro */}
+              {/* Estatísticas discretas quando tem filtro */}
               {drawnBoundary && (
-                <div className="px-6 py-3 bg-emerald-50 border-b border-emerald-200 flex-shrink-0">
-                  <p className="text-sm text-emerald-900">
-                    <span className="font-semibold">{filteredProperties.length}</span> {filteredProperties.length === 1 ? 'imóvel encontrado' : 'imóveis encontrados'} na área desenhada
-                  </p>
+                <div className="mt-3 flex items-center gap-2 text-sm">
+                  <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+                  <span className="text-slate-600">
+                    <span className="font-semibold text-emerald-600">{filteredProperties.length}</span> {filteredProperties.length === 1 ? 'imóvel' : 'imóveis'} na área
+                  </span>
                 </div>
               )}
+            </div>
 
             {/* Seção do Mapa - ABAIXO da busca */}
             <div className={`relative bg-slate-100 flex-shrink-0 ${
@@ -402,20 +405,20 @@ export default function LocationModal({ isOpen, onClose, location, onApply }) {
           <div className="flex justify-end gap-3 p-6 border-t border-slate-200 bg-slate-50 flex-shrink-0">
             <button
               onClick={onClose}
-              className="px-6 py-2 text-slate-600 hover:bg-slate-200 rounded-lg transition-colors font-medium"
+              className="px-6 py-2.5 text-slate-600 hover:bg-slate-200 rounded-xl transition-colors font-medium"
             >
               Cancelar
             </button>
             <button
               onClick={handleApply}
-              className="px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium flex items-center gap-2"
+              className="px-6 py-2.5 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-xl hover:from-emerald-600 hover:to-emerald-700 transition-all font-semibold flex items-center gap-2 shadow-lg"
             >
               {drawnBoundary && (
-                <span className="px-2 py-0.5 bg-emerald-700 rounded text-xs">
+                <span className="px-2 py-0.5 bg-white/20 rounded-md text-xs font-bold">
                   {filteredProperties.length}
                 </span>
               )}
-              Aplicar Localização
+              {drawnBoundary ? 'Aplicar Área' : 'Aplicar Localização'}
             </button>
           </div>
         </Dialog.Panel>

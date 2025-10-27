@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { MapPin, DollarSign, Home, Sliders, Sparkles } from 'lucide-react';
+import { MapPin, DollarSign, Home, Sliders, Bed, Search, Maximize2 } from 'lucide-react';
 
 export default function TopFiltersBar({ filters, onFilterClick }) {
   const getLocationText = () => {
@@ -35,7 +34,20 @@ export default function TopFiltersBar({ filters, onFilterClick }) {
       }
       return `${filters.propertyTypes.length} tipos`;
     }
-    return 'Tipo de imóvel';
+    return 'Selecione';
+  };
+
+  const getAreaText = () => {
+    if (filters.areaMin && filters.areaMax) {
+      return `${filters.areaMin} - ${filters.areaMax}m²`;
+    }
+    if (filters.areaMin) {
+      return `A partir de ${filters.areaMin}m²`;
+    }
+    if (filters.areaMax) {
+      return `Até ${filters.areaMax}m²`;
+    }
+    return 'Área';
   };
 
   const getRoomsText = () => {
@@ -46,104 +58,162 @@ export default function TopFiltersBar({ filters, onFilterClick }) {
     return 'Quartos e banheiros';
   };
 
-  const getStyleText = () => {
-    if (filters.styles?.length > 0) {
-      if (filters.styles.length === 1) {
-        return filters.styles[0];
-      }
-      return `${filters.styles.length} estilos`;
-    }
-    return 'Estilo';
-  };
-
   const formatPrice = (value) => {
     if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
-    if (value >= 1000) return `${(value / 1000).toFixed(0)}K`;
+    if (value >= 1000) return `${(value / 1000).toFixed(0)}k`;
     return value;
   };
 
+  const hasActiveFilter = (type) => {
+    switch(type) {
+      case 'location':
+        return filters.location || filters.city;
+      case 'price':
+        return filters.priceMin || filters.priceMax;
+      case 'propertyType':
+        return filters.propertyTypes?.length > 0;
+      case 'area':
+        return filters.areaMin || filters.areaMax;
+      case 'rooms':
+        return filters.bedrooms || filters.bathrooms;
+      default:
+        return false;
+    }
+  };
+
   return (
-    <div className="bg-white border border-slate-200 rounded-2xl shadow-lg p-4">
-      <div className="flex flex-wrap items-center gap-3">
+    <div className="bg-white rounded-full shadow-lg border border-slate-200/80 p-1.5 hover:shadow-xl transition-shadow duration-300">
+      <div className="flex items-center gap-0">
         {/* Location Filter */}
         <button
           onClick={() => onFilterClick('location')}
-          className={`flex items-center gap-2 px-4 py-3 border rounded-xl hover:bg-slate-50 transition-colors ${
-            filters.location || filters.city
-              ? 'border-blue-600 bg-blue-50 text-blue-700'
-              : 'border-slate-300 text-slate-700'
+          className={`group relative flex-1 px-6 py-3.5 rounded-full transition-all duration-300 hover:bg-slate-50 ${
+            hasActiveFilter('location') ? 'bg-slate-50' : ''
           }`}
         >
-          <MapPin size={18} />
-          <span className="font-medium whitespace-nowrap">{getLocationText()}</span>
+          <div className="flex items-center gap-3">
+            <MapPin className={`w-5 h-5 transition-colors ${
+              hasActiveFilter('location') ? 'text-emerald-600' : 'text-slate-400'
+            }`} />
+            <div className="text-left">
+              <div className="text-xs font-semibold text-slate-900">Localização</div>
+              <div className={`text-sm transition-colors ${
+                hasActiveFilter('location') ? 'text-emerald-600 font-medium' : 'text-slate-500'
+              }`}>
+                {getLocationText()}
+              </div>
+            </div>
+          </div>
+          <div className="absolute right-0 top-1/2 -translate-y-1/2 w-px h-8 bg-slate-200"></div>
         </button>
 
         {/* Price Filter */}
         <button
           onClick={() => onFilterClick('price')}
-          className={`flex items-center gap-2 px-4 py-3 border rounded-xl hover:bg-slate-50 transition-colors ${
-            filters.priceMin || filters.priceMax
-              ? 'border-blue-600 bg-blue-50 text-blue-700'
-              : 'border-slate-300 text-slate-700'
+          className={`group relative flex-1 px-6 py-3.5 rounded-full transition-all duration-300 hover:bg-slate-50 ${
+            hasActiveFilter('price') ? 'bg-slate-50' : ''
           }`}
         >
-          <DollarSign size={18} />
-          <span className="font-medium whitespace-nowrap">{getPriceText()}</span>
+          <div className="flex items-center gap-3">
+            <DollarSign className={`w-5 h-5 transition-colors ${
+              hasActiveFilter('price') ? 'text-emerald-600' : 'text-slate-400'
+            }`} />
+            <div className="text-left">
+              <div className="text-xs font-semibold text-slate-900">Preço</div>
+              <div className={`text-sm transition-colors ${
+                hasActiveFilter('price') ? 'text-emerald-600 font-medium' : 'text-slate-500'
+              }`}>
+                {getPriceText()}
+              </div>
+            </div>
+          </div>
+          <div className="absolute right-0 top-1/2 -translate-y-1/2 w-px h-8 bg-slate-200"></div>
         </button>
 
         {/* Property Type Filter */}
         <button
           onClick={() => onFilterClick('propertyType')}
-          className={`flex items-center gap-2 px-4 py-3 border rounded-xl hover:bg-slate-50 transition-colors ${
-            filters.propertyTypes?.length > 0
-              ? 'border-blue-600 bg-blue-50 text-blue-700'
-              : 'border-slate-300 text-slate-700'
+          className={`group relative flex-1 px-6 py-3.5 rounded-full transition-all duration-300 hover:bg-slate-50 ${
+            hasActiveFilter('propertyType') ? 'bg-slate-50' : ''
           }`}
         >
-          <Home size={18} />
-          <span className="font-medium whitespace-nowrap">{getPropertyTypeText()}</span>
+          <div className="flex items-center gap-3">
+            <Home className={`w-5 h-5 transition-colors ${
+              hasActiveFilter('propertyType') ? 'text-emerald-600' : 'text-slate-400'
+            }`} />
+            <div className="text-left">
+              <div className="text-xs font-semibold text-slate-900">Tipo</div>
+              <div className={`text-sm transition-colors ${
+                hasActiveFilter('propertyType') ? 'text-emerald-600 font-medium' : 'text-slate-500'
+              }`}>
+                {getPropertyTypeText()}
+              </div>
+            </div>
+          </div>
+          <div className="absolute right-0 top-1/2 -translate-y-1/2 w-px h-8 bg-slate-200"></div>
         </button>
 
-        {/* Style Filter - MOVIDO PARA DEPOIS DO TIPO */}
+        {/* Area Filter */}
         <button
-          onClick={() => onFilterClick('style')}
-          className={`hidden lg:flex items-center gap-2 px-4 py-3 border rounded-xl hover:bg-slate-50 transition-colors ${
-            filters.styles?.length > 0
-              ? 'border-blue-600 bg-blue-50 text-blue-700'
-              : 'border-slate-300 text-slate-700'
+          onClick={() => onFilterClick('area')}
+          className={`group relative flex-1 px-6 py-3.5 rounded-full transition-all duration-300 hover:bg-slate-50 ${
+            hasActiveFilter('area') ? 'bg-slate-50' : ''
           }`}
         >
-          <Sparkles size={18} />
-          <span className="font-medium whitespace-nowrap">{getStyleText()}</span>
+          <div className="flex items-center gap-3">
+            <Maximize2 className={`w-5 h-5 transition-colors ${
+              hasActiveFilter('area') ? 'text-emerald-600' : 'text-slate-400'
+            }`} />
+            <div className="text-left">
+              <div className="text-xs font-semibold text-slate-900">Área</div>
+              <div className={`text-sm transition-colors ${
+                hasActiveFilter('area') ? 'text-emerald-600 font-medium' : 'text-slate-500'
+              }`}>
+                {getAreaText()}
+              </div>
+            </div>
+          </div>
+          <div className="absolute right-0 top-1/2 -translate-y-1/2 w-px h-8 bg-slate-200 hidden lg:block"></div>
         </button>
 
-        {/* Rooms Filter */}
+        {/* Rooms Filter - Hidden on mobile */}
         <button
           onClick={() => onFilterClick('rooms')}
-          className={`hidden xl:flex items-center gap-2 px-4 py-3 border rounded-xl hover:bg-slate-50 transition-colors ${
-            filters.bedrooms || filters.bathrooms
-              ? 'border-blue-600 bg-blue-50 text-blue-700'
-              : 'border-slate-300 text-slate-700'
+          className={`group relative hidden lg:flex flex-1 px-6 py-3.5 rounded-full transition-all duration-300 hover:bg-slate-50 ${
+            hasActiveFilter('rooms') ? 'bg-slate-50' : ''
           }`}
         >
-          <span className="font-medium whitespace-nowrap">{getRoomsText()}</span>
+          <div className="flex items-center gap-3">
+            <Bed className={`w-5 h-5 transition-colors ${
+              hasActiveFilter('rooms') ? 'text-emerald-600' : 'text-slate-400'
+            }`} />
+            <div className="text-left">
+              <div className="text-xs font-semibold text-slate-900">Quartos</div>
+              <div className={`text-sm transition-colors ${
+                hasActiveFilter('rooms') ? 'text-emerald-600 font-medium' : 'text-slate-500'
+              }`}>
+                {getRoomsText()}
+              </div>
+            </div>
+          </div>
+          <div className="absolute right-0 top-1/2 -translate-y-1/2 w-px h-8 bg-slate-200"></div>
         </button>
 
         {/* More Filters Button */}
         <button
           onClick={() => onFilterClick('more')}
-          className="flex items-center gap-2 px-4 py-3 border border-slate-300 rounded-xl hover:bg-slate-50 transition-colors text-slate-700"
+          className="group px-5 py-3.5 rounded-full transition-all duration-300 hover:bg-slate-50"
         >
-          <Sliders size={18} />
-          <span className="font-medium">Mais filtros</span>
+          <Sliders className="w-5 h-5 text-slate-400 group-hover:text-emerald-600 transition-colors" />
         </button>
 
         {/* Search Button */}
         <button
           onClick={() => onFilterClick('search')}
-          className="px-6 py-3 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-700 transition-colors shadow-sm"
+          className="flex items-center gap-2 px-8 py-3.5 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-full font-semibold hover:from-emerald-600 hover:to-emerald-700 transition-all duration-300 shadow-lg shadow-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/40 hover:scale-105 active:scale-95"
         >
-          Buscar
+          <Search className="w-5 h-5" />
+          <span className="hidden sm:inline">Buscar</span>
         </button>
       </div>
     </div>
