@@ -92,7 +92,7 @@ export default function Section7() {
           </div>
           
           <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-4">
-            Estilos em Destaque
+            Estilos de Casas
           </h2>
           
           <p className="text-lg text-slate-600 max-w-2xl mx-auto">

@@ -121,6 +121,23 @@ export async function listProperties({
   offset = 0, 
   published = true 
 }) {
+  console.log('🔍 [listProperties] Filtros recebidos:', {
+    city,
+    minPrice,
+    maxPrice,
+    minArea,
+    maxArea,
+    types,
+    minBedrooms,
+    minBathrooms,
+    minParkingSpaces,
+    minSuites,
+    amenities,
+    condoAmenities,
+    condition,
+    styles
+  });
+
   const where = {
     AND: [
       published !== undefined && published !== null ? { published: published === true || published === 'true' } : {},
@@ -129,7 +146,7 @@ export async function listProperties({
             { title: { contains: String(search) } },
             { description: { contains: String(search) } },
             { city: { contains: String(search) } },
-            { country: { contains: String(search) } },
+            { country: { contains: String(country) } },
             { neighborhood: { contains: String(search) } },
           ] }
         : {},
@@ -138,6 +155,7 @@ export async function listProperties({
       neighborhood ? { neighborhood: { contains: String(neighborhood) } } : {},
       category ? { category: String(category) } : {},
       styles ? { style: { in: String(styles).split(',').map(s => s.trim()) } } : {},
+      condition ? { propertyCondition: String(condition) } : {},
       minPrice != null ? { price: { gte: Number(minPrice) } } : {},
       maxPrice != null ? { price: { lte: Number(maxPrice) } } : {},
       minArea != null ? { area: { gte: Number(minArea) } } : {},
@@ -154,6 +172,11 @@ export async function listProperties({
       minYearBuilt != null ? { yearBuilt: { gte: Number(minYearBuilt) } } : {},
     ].filter(Boolean),
   };
+
+  // Filtro de amenities (comodidades do imóvel)
+  // O campo amenities é um JSON string, então precisamos fazer a filtragem no código
+  // Não podemos usar queries SQL diretas para filtrar dentro do JSON
+  console.log('🔧 [listProperties] WHERE query montada:', JSON.stringify(where, null, 2));
 
   // Ordenação
   let orderBy = { createdAt: 'desc' };
@@ -175,10 +198,116 @@ export async function listProperties({
       break;
   }
 
-  const [total, rows] = await Promise.all([
-    prisma.property.count({ where }),
-    prisma.property.findMany({ where, skip: Number(offset), take: Number(limit), orderBy }),
-  ]);
+  // Buscar dados do banco
+  let rows = await prisma.property.findMany({ 
+    where, 
+    skip: Number(offset), 
+    take: Number(limit) * 10, // Buscar mais para compensar filtro de amenities
+    orderBy 
+  });
+
+  // Aplicar filtro de amenities e condoAmenities no código
+  // (campos JSON não podem ser filtrados diretamente no Prisma)
+  if (amenities || condoAmenities) {
+    const amenitiesArr = amenities ? String(amenities).split(',').map(a => a.trim()) : [];
+    const condoAmenitiesArr = condoAmenities ? String(condoAmenities).split(',').map(a => a.trim()) : [];
+    
+    console.log('🔍 [FILTRO] Filtrando amenities requisitadas:', amenitiesArr);
+    console.log('🔍 [FILTRO] Filtrando condoAmenities requisitadas:', condoAmenitiesArr);
+    console.log('🔍 [FILTRO] Total de imóveis ANTES do filtro:', rows.length);
+
+    rows = rows.filter(row => {
+      let matches = true;
+
+      // Filtrar por amenities do imóvel
+      if (amenitiesArr.length > 0) {
+        try {
+          // Parse do JSON que está no banco de dados
+          let propertyAmenities = [];
+          
+          if (typeof row.amenities === 'string') {
+            propertyAmenities = JSON.parse(row.amenities || '[]');
+          } else if (Array.isArray(row.amenities)) {
+            propertyAmenities = row.amenities;
+          }
+          
+          console.log(`  📋 [${row.title?.substring(0, 30)}] Amenities no banco:`, propertyAmenities.slice(0, 3));
+          
+          // Verificar se tem TODAS as amenities solicitadas
+          const hasAllAmenities = amenitiesArr.every(requiredAmenity => {
+            const found = propertyAmenities.some(propertyAmenity => {
+              // Suportar tanto objetos {name: "..."} quanto strings diretas
+              const amenityName = typeof propertyAmenity === 'string' 
+                ? propertyAmenity 
+                : propertyAmenity.name;
+              
+              return amenityName === requiredAmenity;
+            });
+            
+            if (!found) {
+              console.log(`    ❌ Não tem "${requiredAmenity}"`);
+            }
+            
+            return found;
+          });
+          
+          if (!hasAllAmenities) {
+            matches = false;
+            console.log(`  ❌ [${row.title?.substring(0, 30)}] REJEITADO - não tem todas as amenities`);
+          } else {
+            console.log(`  ✅ [${row.title?.substring(0, 30)}] APROVADO - tem todas as amenities`);
+          }
+        } catch (e) {
+          console.error(`  ⚠️ Erro ao fazer parse das amenities:`, e.message);
+          matches = false; // Se erro no parse, não inclui
+        }
+      }
+
+      // Filtrar por amenities do condomínio
+      if (condoAmenitiesArr.length > 0) {
+        try {
+          let propertyCondoAmenities = [];
+          
+          if (typeof row.naturalConditions === 'string') {
+            propertyCondoAmenities = JSON.parse(row.naturalConditions || '[]');
+          } else if (Array.isArray(row.naturalConditions)) {
+            propertyCondoAmenities = row.naturalConditions;
+          }
+          
+          const hasAllCondoAmenities = condoAmenitiesArr.every(requiredAmenity => {
+            return propertyCondoAmenities.some(propertyAmenity => {
+              const amenityName = typeof propertyAmenity === 'string' 
+                ? propertyAmenity 
+                : propertyAmenity.name;
+              
+              return amenityName === requiredAmenity;
+            });
+          });
+          
+          if (!hasAllCondoAmenities) matches = false;
+        } catch (e) {
+          console.error('  ⚠️ Erro ao fazer parse das condoAmenities:', e.message);
+          matches = false; // Se erro no parse, não inclui
+        }
+      }
+
+      return matches;
+    });
+
+    // Aplicar paginação após filtro
+    const totalFiltered = rows.length;
+    console.log(`✅ [FILTRO] Total de imóveis DEPOIS do filtro: ${totalFiltered}`);
+    
+    rows = rows.slice(0, Number(limit));
+    console.log(`✅ [FILTRO] Mostrando ${rows.length} imóveis (limit: ${limit})`);
+    
+    const items = rows.map(fromRow);
+    return { total: totalFiltered, items };
+  }
+
+  // Sem filtro de amenities, fazer count normal
+  const total = await prisma.property.count({ where });
+  rows = rows.slice(0, Number(limit));
   const items = rows.map(fromRow);
   return { total, items };
 }

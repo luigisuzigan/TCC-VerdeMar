@@ -69,84 +69,127 @@ export default function PriceModal({ isOpen, onClose, filters, onApply }) {
       <div className="fixed inset-0 bg-black/30 backdrop-blur-sm" aria-hidden="true" />
 
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <Dialog.Panel className="mx-auto max-w-lg w-full bg-white rounded-2xl shadow-2xl">
-          {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-slate-200">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center">
-                <DollarSign className="w-5 h-5 text-white" />
+        <Dialog.Panel className="mx-auto max-w-lg w-full bg-white rounded-3xl shadow-2xl overflow-hidden">
+          {/* Header com ondas decorativas */}
+          <div className="relative bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500 p-6 pb-12 overflow-hidden">
+            {/* Ondas decorativas SVG */}
+            <svg className="absolute bottom-0 left-0 w-full opacity-20" viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M0,32L48,37.3C96,43,192,53,288,58.7C384,64,480,64,576,56C672,48,768,32,864,32C960,32,1056,48,1152,53.3C1248,59,1344,53,1392,50.7L1440,48L1440,80L1392,80C1344,80,1248,80,1152,80C1056,80,960,80,864,80C768,80,672,80,576,80C480,80,384,80,288,80C192,80,96,80,48,80L0,80Z" fill="white"/>
+            </svg>
+            <svg className="absolute bottom-0 left-0 w-full opacity-10" viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" style={{transform: 'translateY(5px)'}}>
+              <path d="M0,48L48,42.7C96,37,192,27,288,32C384,37,480,59,576,64C672,69,768,59,864,48C960,37,1056,27,1152,26.7C1248,27,1344,37,1392,42.7L1440,48L1440,80L1392,80C1344,80,1248,80,1152,80C1056,80,960,80,864,80C768,80,672,80,576,80C480,80,384,80,288,80C192,80,96,80,48,80L0,80Z" fill="white"/>
+            </svg>
+
+            {/* Conteúdo do header */}
+            <div className="relative flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center border-2 border-white/30">
+                  <DollarSign className="w-5 h-5 text-white" strokeWidth={2.5} />
+                </div>
+                <div>
+                  <Dialog.Title className="text-xl font-bold text-white drop-shadow-md">
+                    Faixa de Preço
+                  </Dialog.Title>
+                  <p className="text-emerald-50 text-xs mt-0.5">Defina seu orçamento ideal</p>
+                </div>
               </div>
-              <Dialog.Title className="text-xl font-bold text-slate-900">
-                Faixa de Preço
-              </Dialog.Title>
+              <button
+                onClick={onClose}
+                className="p-2 text-white/80 hover:text-white hover:bg-white/20 rounded-lg transition-all"
+              >
+                <X size={20} strokeWidth={2.5} />
+              </button>
             </div>
-            <button
-              onClick={onClose}
-              className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
-            >
-              <X size={20} />
-            </button>
           </div>
 
           {/* Content */}
-          <div className="p-6 space-y-6">
-            {/* Inputs de preço */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">
-                  Preço Mínimo
-                </label>
-                <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">
-                    R$
-                  </span>
-                  <input
-                    type="text"
-                    value={formatInput(minPrice)}
-                    onChange={handleMinChange}
-                    placeholder="0"
-                    className="w-full pl-12 pr-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
-                  />
+          <div className="p-6 -mt-6 relative z-10">
+            {/* Inputs de preço com design premium */}
+            <div className="bg-white rounded-2xl shadow-lg border border-slate-100 p-5 mb-5">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                    Preço Mínimo
+                  </label>
+                  <div className="relative group">
+                    <div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-emerald-50 to-transparent rounded-l-xl flex items-center justify-center">
+                      <span className="text-emerald-600 font-bold">R$</span>
+                    </div>
+                    <input
+                      type="text"
+                      value={formatInput(minPrice)}
+                      onChange={handleMinChange}
+                      placeholder="0"
+                      className="w-full pl-14 pr-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-xl focus:outline-none focus:bg-white focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100 transition-all font-semibold text-slate-700"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+                    Preço Máximo
+                  </label>
+                  <div className="relative group">
+                    <div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-emerald-50 to-transparent rounded-l-xl flex items-center justify-center">
+                      <span className="text-emerald-600 font-bold">R$</span>
+                    </div>
+                    <input
+                      type="text"
+                      value={formatInput(maxPrice)}
+                      onChange={handleMaxChange}
+                      placeholder="Sem limite"
+                      className="w-full pl-14 pr-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-xl focus:outline-none focus:bg-white focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100 transition-all font-semibold text-slate-700"
+                    />
+                  </div>
                 </div>
               </div>
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">
-                  Preço Máximo
-                </label>
-                <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">
-                    R$
-                  </span>
-                  <input
-                    type="text"
-                    value={formatInput(maxPrice)}
-                    onChange={handleMaxChange}
-                    placeholder="Sem limite"
-                    className="w-full pl-12 pr-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
-                  />
+
+              {/* Indicador visual de range */}
+              {(minPrice || maxPrice) && (
+                <div className="mt-5 pt-5 border-t border-slate-100">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-slate-600 font-medium">
+                      {minPrice ? `R$ ${formatInput(minPrice)}` : 'Mínimo'}
+                    </span>
+                    <div className="flex-1 mx-4 h-2 bg-gradient-to-r from-emerald-200 via-teal-200 to-cyan-200 rounded-full relative overflow-hidden">
+                      <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 animate-pulse opacity-50"></div>
+                    </div>
+                    <span className="text-slate-600 font-medium">
+                      {maxPrice ? `R$ ${formatInput(maxPrice)}` : 'Máximo'}
+                    </span>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
 
             {/* Opções rápidas */}
             <div>
-              <h3 className="text-sm font-semibold text-slate-700 mb-3">
+              <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+                <div className="w-1 h-4 bg-gradient-to-b from-emerald-500 to-teal-500 rounded-full"></div>
                 Opções Rápidas
               </h3>
-              <div className="grid grid-cols-2 gap-2">
-                {QUICK_OPTIONS.map((option) => {
+              <div className="grid grid-cols-2 gap-3">
+                {QUICK_OPTIONS.map((option, index) => {
                   const isSelected = 
                     (option.min === null || option.min.toString() === minPrice) &&
                     (option.max === null || option.max.toString() === maxPrice);
                   
+                  const gradients = [
+                    'from-emerald-400 to-teal-500',
+                    'from-teal-400 to-cyan-500',
+                    'from-cyan-400 to-blue-500',
+                    'from-blue-400 to-indigo-500',
+                    'from-indigo-400 to-purple-500',
+                    'from-purple-400 to-pink-500',
+                  ];
+
                   return (
                     <button
                       key={option.label}
                       onClick={() => selectQuickOption(option)}
-                      className={`px-4 py-2.5 text-sm font-medium rounded-xl transition-all ${
+                      className={`relative px-4 py-3 text-sm font-bold rounded-xl transition-all transform hover:scale-105 ${
                         isSelected
-                          ? 'bg-emerald-500 text-white border-2 border-emerald-600'
-                          : 'text-slate-700 border border-slate-300 hover:border-emerald-400 hover:bg-emerald-50'
+                          ? `bg-gradient-to-r ${gradients[index % gradients.length]} text-white shadow-lg`
+                          : 'text-slate-700 bg-white border-2 border-slate-200 hover:border-slate-300 hover:shadow-md'
                       }`}
                     >
                       {option.label}
@@ -158,19 +201,23 @@ export default function PriceModal({ isOpen, onClose, filters, onApply }) {
           </div>
 
           {/* Footer */}
-          <div className="flex items-center gap-3 p-6 border-t border-slate-200 bg-slate-50">
-            <button
-              onClick={handleClear}
-              className="px-5 py-2.5 text-sm font-semibold text-slate-600 hover:text-slate-800 hover:bg-slate-200 rounded-xl transition-colors"
-            >
-              Limpar
-            </button>
-            <button
-              onClick={handleApply}
-              className="flex-1 px-6 py-2.5 text-sm font-semibold text-white rounded-xl transition-all bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 shadow-lg hover:shadow-xl"
-            >
-              Aplicar Filtro
-            </button>
+          <div className="relative px-6 pb-6 pt-3">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handleClear}
+                className="px-5 py-2.5 text-sm font-bold text-slate-600 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all"
+              >
+                Limpar
+              </button>
+              <button
+                onClick={handleApply}
+                className="relative flex-1 px-5 py-2.5 text-sm font-bold text-white rounded-xl transition-all overflow-hidden group"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <span className="relative z-10">Aplicar Filtro</span>
+              </button>
+            </div>
           </div>
         </Dialog.Panel>
       </div>

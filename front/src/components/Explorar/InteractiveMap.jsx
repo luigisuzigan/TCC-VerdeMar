@@ -805,21 +805,6 @@ export default function InteractiveMap({
                     <Pencil size={18} />
                   </button>
                   <button
-                    onClick={() => setDrawingMode('polygon')}
-                    className={`p-2 rounded-lg transition-all ${
-                      drawingMode === 'polygon'
-                        ? 'bg-blue-600 text-white shadow-md'
-                        : 'hover:bg-slate-100 text-slate-600'
-                    }`}
-                    title="Polígono (Cliques)"
-                  >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-                      <path d="M2 17l10 5 10-5"/>
-                      <path d="M2 12l10 5 10-5"/>
-                    </svg>
-                  </button>
-                  <button
                     onClick={() => setDrawingMode('rectangle')}
                     className={`p-2 rounded-lg transition-all ${
                       drawingMode === 'rectangle'

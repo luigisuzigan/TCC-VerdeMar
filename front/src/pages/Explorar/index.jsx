@@ -97,19 +97,24 @@ export default function Explorar() {
     (async () => {
       try {
         console.log('=== useEffect FETCH iniciado ===');
-        console.log('📊 filteredPropertyIds:', filteredPropertyIds);
+        console.log('📊 filteredPropertyIds:', filteredPropertyIds?.length || 0);
         console.log('📊 filters completo:', JSON.stringify(filters, null, 2));
         
-        // Se tem filtro de área desenhada, NÃO usar filtro de location
+        // IMPORTANTE: Quando tem área desenhada no mapa (filteredPropertyIds)
+        // Precisamos buscar TODOS os imóveis que atendem aos filtros normais
+        // E depois filtrar pelos IDs que estão dentro da área
         const filtersToUse = filteredPropertyIds 
-          ? { ...filters, location: undefined } // Remove location quando tem IDs filtrados
+          ? { ...filters, location: undefined } // Remove location text quando tem área desenhada
           : filters;
         
         console.log('📊 Filtros que serão usados na query:', JSON.stringify(filtersToUse, null, 2));
         
         const query = buildApiQuery(filtersToUse);
+        
+        // Se tem filtro de área, buscar muitos resultados e filtrar no cliente
+        // Isso é necessário porque o backend não sabe quais IDs estão na área
         const offset = filteredPropertyIds ? 0 : (currentPage - 1) * itemsPerPage;
-        const limit = filteredPropertyIds ? 1000 : itemsPerPage; // Buscar mais se tem filtro de área
+        const limit = filteredPropertyIds ? 1000 : itemsPerPage;
         
         console.log('🔗 Query construída:', query);
         console.log('📄 Offset:', offset, 'Limit:', limit);
@@ -119,34 +124,49 @@ export default function Explorar() {
         if (!active) return;
         
         let arr = Array.isArray(data?.items) ? data.items : Array.isArray(data) ? data : [];
-        console.log('✅ Propriedades recebidas da API:', arr.length);
+        console.log('✅ Propriedades recebidas da API (com filtros aplicados):', arr.length);
+        
         if (arr.length > 0) {
-          console.log('📦 Primeiros 3 imóveis:', arr.slice(0, 3).map(p => ({
+          console.log('📦 Primeiros 3 imóveis (com filtros):', arr.slice(0, 3).map(p => ({
             id: p.id,
             title: p.title,
             price: p.price,
             beds: p.beds,
-            baths: p.baths
+            baths: p.baths,
+            amenities: p.amenities?.slice(0, 2)
           })));
         }
         
-        // Se tem filtro de área desenhada, filtrar apenas os IDs selecionados
+        // NOVO: Se tem filtro de área desenhada, filtrar apenas os IDs dentro da área
+        // Isso combina os filtros do backend com o filtro de localização do mapa
         if (filteredPropertyIds && filteredPropertyIds.length > 0) {
-          console.log('🔍 Filtrando por IDs da área desenhada:', filteredPropertyIds.length, 'IDs');
-          const before = arr.length;
+          console.log('�️ Aplicando filtro de área: mostrando apenas imóveis dentro da área desenhada');
+          console.log('🔍 IDs permitidos pela área:', filteredPropertyIds.length);
+          
+          const beforeFilter = arr.length;
           arr = arr.filter(item => filteredPropertyIds.includes(item.id));
-          console.log(`📊 Filtrou ${before} → ${arr.length} imóveis`);
+          
+          console.log(`✅ Filtro de área aplicado: ${beforeFilter} imóveis (com filtros) → ${arr.length} imóveis (com filtros + dentro da área)`);
+          
+          // Total é baseado nos IDs filtrados que passaram pelos filtros
+          const totalInArea = arr.length;
           
           // Aplicar paginação local
           const startIndex = (currentPage - 1) * itemsPerPage;
           const endIndex = startIndex + itemsPerPage;
-          arr = arr.slice(startIndex, endIndex);
-          console.log(`📄 Página ${currentPage}: mostrando ${arr.length} imóveis`);
+          const paginatedArr = arr.slice(startIndex, endIndex);
+          
+          console.log(`📄 Paginação: mostrando ${paginatedArr.length} de ${totalInArea} imóveis (página ${currentPage})`);
+          
+          setItems(paginatedArr);
+          setTotalItems(totalInArea);
+        } else {
+          // Sem filtro de área, usar resultado direto do backend
+          console.log('✅ Sem filtro de área - usando resultado direto do backend');
+          setItems(arr);
+          setTotalItems(data?.total || arr.length);
         }
         
-        console.log('✅ setItems com', arr.length, 'imóveis');
-        setItems(arr);
-        setTotalItems(filteredPropertyIds ? filteredPropertyIds.length : (data?.total || arr.length));
       } catch (e) {
         if (!active) return;
         console.error('❌ Erro no fetch de propriedades:', e);
@@ -235,17 +255,26 @@ export default function Explorar() {
     
     // Amenities
     if (filters.amenities?.length > 0) {
+      console.log('✨ Adicionando amenities:', filters.amenities);
       params.set('amenities', filters.amenities.join(','));
     }
     
     // Condo Amenities
     if (filters.condoAmenities?.length > 0) {
+      console.log('🏢 Adicionando condoAmenities:', filters.condoAmenities);
       params.set('condoAmenities', filters.condoAmenities.join(','));
     }
     
     // Property Condition
     if (filters.propertyCondition) {
+      console.log('🔨 Adicionando condition:', filters.propertyCondition);
       params.set('condition', filters.propertyCondition);
+    }
+
+    // Styles
+    if (filters.styles?.length > 0) {
+      console.log('🎨 Adicionando styles:', filters.styles);
+      params.set('styles', filters.styles.join(','));
     }
     
     // Sorting

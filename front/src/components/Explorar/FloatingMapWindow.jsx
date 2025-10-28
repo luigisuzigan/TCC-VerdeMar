@@ -285,7 +285,7 @@ export default function FloatingMapWindow({
 
             {/* Botões de Ação - Mostrar sempre quando tiver área desenhada */}
             {drawnBoundary && (
-              <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-[999] flex gap-3">
+              <div className="absolute top-16 right-4 z-[999] flex gap-3">
                 <button
                   onClick={handleClear}
                   className="bg-white hover:bg-red-50 text-slate-700 hover:text-red-600 px-5 py-2.5 rounded-lg shadow-lg border-2 border-slate-200 hover:border-red-300 font-semibold text-sm transition-all hover:scale-105"

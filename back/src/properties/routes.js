@@ -28,6 +28,10 @@ const listValidators = [
   query('maxFloor').optional().isInt({ min: 0 }),
   query('minYearBuilt').optional().isInt({ min: 1900 }),
   query('category').optional().isString(),
+  query('amenities').optional().isString(),
+  query('condoAmenities').optional().isString(),
+  query('condition').optional().isString(),
+  query('styles').optional().isString(),
   query('sortBy').optional().isString(),
   query('published').optional().isBoolean().toBoolean(),
 ];
@@ -59,6 +63,9 @@ router.get('/', listValidators, async (req, res) => {
     maxFloor,
     minYearBuilt,
     category,
+    amenities,
+    condoAmenities,
+    condition,
     styles,
     sortBy,
     limit = 20, 
@@ -66,7 +73,10 @@ router.get('/', listValidators, async (req, res) => {
     published = true 
   } = req.query;
   
-  console.log('List properties request:', { limit, offset, published, city, search, category, neighborhood, styles });
+  console.log('📋 List properties request:', { 
+    limit, offset, published, city, search, category, neighborhood, styles,
+    amenities, condoAmenities, condition
+  });
   
   const result = await listProperties({ 
     search, 
@@ -88,6 +98,9 @@ router.get('/', listValidators, async (req, res) => {
     maxFloor,
     minYearBuilt,
     category,
+    amenities,
+    condoAmenities,
+    condition,
     styles,
     sortBy,
     limit: Number(limit) || 20, 
