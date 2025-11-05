@@ -40,6 +40,7 @@ router.get('/stats', async (req, res) => {
     
     // Total de favoritos
     const totalFavorites = await prisma.favorite.count();
+    console.log('📊 Total de favoritos contados:', totalFavorites);
     
     // Total de avaliações
     const totalReviews = await prisma.review.count();

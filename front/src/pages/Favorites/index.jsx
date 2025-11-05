@@ -1,43 +1,23 @@
-import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Heart, MapPin, BedDouble, Bath, Maximize, ArrowLeft, Search } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useFavorites } from '../../hooks/useFavorites';
+import { getPropertyMainImage } from '../../utils/imageHelpers';
 
 export default function Favorites() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [favorites, setFavorites] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { favorites, removeFavorite, loading } = useFavorites();
 
-  useEffect(() => {
-    // Verificar se está logado
-    if (!user) {
-      navigate('/login');
-      return;
-    }
-
-    // Buscar favoritos do localStorage (específicos do usuário)
-    const loadFavorites = () => {
-      try {
-        const favoritesKey = `favorites_user_${user.id}`;
-        const savedFavorites = JSON.parse(localStorage.getItem(favoritesKey) || '[]');
-        setFavorites(savedFavorites);
-      } catch (error) {
-        console.error('Erro ao carregar favoritos:', error);
-        setFavorites([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadFavorites();
-  }, [user, navigate]);
+  // Verificar se está logado
+  if (!user) {
+    navigate('/login');
+    return null;
+  }
 
   const handleRemoveFavorite = (propertyId) => {
-    const updatedFavorites = favorites.filter(fav => fav.id !== propertyId);
-    setFavorites(updatedFavorites);
-    const favoritesKey = `favorites_user_${user.id}`;
-    localStorage.setItem(favoritesKey, JSON.stringify(updatedFavorites));
+    removeFavorite(propertyId);
   };
 
   if (loading) {
@@ -104,7 +84,7 @@ export default function Favorites() {
                 {/* Imagem */}
                 <Link to={`/property/${property.id}`} className="block relative h-56 overflow-hidden">
                   <img
-                    src={property.images?.[0] || 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&q=80'}
+                    src={getPropertyMainImage(property, 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&q=80')}
                     alt={property.title}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   />
@@ -132,24 +112,24 @@ export default function Favorites() {
                   
                   <div className="flex items-center gap-1 text-sm text-slate-600 mb-3">
                     <MapPin size={14} />
-                    <span className="line-clamp-1">{property.address}</span>
+                    <span className="line-clamp-1">{property.city}, {property.state}</span>
                   </div>
 
                   {/* Especificações */}
                   <div className="flex items-center gap-4 text-sm text-slate-600 mb-4">
-                    {property.bedrooms && (
+                    {property.beds > 0 && (
                       <div className="flex items-center gap-1">
                         <BedDouble size={16} />
-                        <span>{property.bedrooms}</span>
+                        <span>{property.beds}</span>
                       </div>
                     )}
-                    {property.bathrooms && (
+                    {property.baths > 0 && (
                       <div className="flex items-center gap-1">
                         <Bath size={16} />
-                        <span>{property.bathrooms}</span>
+                        <span>{property.baths}</span>
                       </div>
                     )}
-                    {property.area && (
+                    {property.area > 0 && (
                       <div className="flex items-center gap-1">
                         <Maximize size={16} />
                         <span>{property.area}m²</span>

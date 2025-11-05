@@ -8,6 +8,7 @@ import authRoutes from "./auth/routes.js";
 import propertyRoutes from "./properties/routes.js";
 import userRoutes from "./users/routes.js";
 import dashboardRoutes from "./dashboard/routes.js";
+import favoritesRoutes from "./favorites/routes.js";
 import { ensureAdmin } from "./repos/userRepo.js";
 
 const app = express();
@@ -113,6 +114,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/properties", propertyRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/favorites", favoritesRoutes);
 
 // Global error fallback
 // eslint-disable-next-line no-unused-vars

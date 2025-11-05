@@ -39,12 +39,6 @@ export default function Sobre() {
             >
               EXPLORAR IMÓVEIS
             </Link>
-            <Link
-              to="/contato"
-              className="px-8 py-4 bg-white/10 backdrop-blur-sm text-white rounded-full font-semibold border border-white/30 hover:bg-white/20 transition-all"
-            >
-              FALE CONOSCO
-            </Link>
           </div>
         </div>
       </section>
@@ -131,36 +125,6 @@ export default function Sobre() {
         </div>
       </section>
 
-      {/* Mission Section with Background */}
-      <section className="relative py-32 px-4 overflow-hidden">
-        {/* Background Image */}
-        <div 
-          className="absolute inset-0 bg-cover bg-center bg-fixed"
-          style={{
-            backgroundImage: 'url(https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1600&q=80)',
-          }}
-        >
-          <div className="absolute inset-0 bg-slate-900/75" />
-        </div>
-
-        {/* Content */}
-        <div className="relative z-10 text-center max-w-4xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-            Encontre sua força, descubra<br />seu lar ideal
-          </h2>
-          <p className="text-lg text-white/80 mb-8 max-w-2xl mx-auto leading-relaxed">
-            Cada imóvel que apresentamos é cuidadosamente selecionado. Cada cliente, 
-            atendido com dedicação exclusiva. Acreditamos que encontrar o lar perfeito 
-            é mais que uma transação – é realizar um sonho.
-          </p>
-          <Link
-            to="/explorar"
-            className="inline-block px-8 py-4 bg-gradient-to-r from-amber-600 to-orange-600 text-white rounded-full font-semibold hover:shadow-2xl transition-all hover:scale-105"
-          >
-            DESCUBRA MAIS
-          </Link>
-        </div>
-      </section>
     </main>
   );
 }

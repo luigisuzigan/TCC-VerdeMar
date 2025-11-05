@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate, useLocation, Link } from 'react-router-do
 import { MapPin, DollarSign, Home, Maximize2, X, Star } from 'lucide-react';
 import { api } from '../../api/client.js';
 import { parseFiltersFromUrl, getFilterDescriptions, countActiveFilters, filtersToUrlParams } from '../../utils/filterHelpers.js';
+import { getPropertyMainImage } from '../../utils/imageHelpers.js';
 import FavoriteButton from '../../components/FavoriteButton';
 import ActiveFilters from '../../components/Explorar/ActiveFilters.jsx';
 import Pagination from '../../components/Explorar/Pagination.jsx';
@@ -785,11 +786,11 @@ function PropertyCard({ property }) {
       {/* Image */}
       <div className="relative h-[220px] overflow-hidden bg-slate-100">
         <img
-          src={property.images?.[0] || '/placeholder.svg'}
+          src={getPropertyMainImage(property, '/placeholder.svg')}
           alt={property.title}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           onError={(e) => {
-            console.error('❌ Erro ao carregar imagem:', property.images?.[0]);
+            console.error('❌ Erro ao carregar imagem:', getPropertyMainImage(property));
             e.target.src = '/placeholder.svg';
           }}
         />

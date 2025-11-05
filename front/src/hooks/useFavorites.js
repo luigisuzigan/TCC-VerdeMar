@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
+import { api } from '../api/client';
 
 const FAVORITES_KEY_PREFIX = 'favorites_user_';
 
-// Função para obter a chave de favoritos do usuário atual
+// Função para obter a chave de favoritos do usuário atual (fallback para localStorage)
 function getFavoritesKey() {
   const userData = localStorage.getItem('user') || sessionStorage.getItem('user');
   if (!userData) return null;
@@ -15,31 +16,61 @@ function getFavoritesKey() {
   }
 }
 
+// Função para verificar se o usuário está logado
+function isUserLoggedIn() {
+  const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+  return !!token;
+}
+
 export function useFavorites() {
   const [favorites, setFavorites] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  // Carregar favoritos do localStorage apenas se o usuário estiver logado
+  // Carregar favoritos da API ou localStorage
   useEffect(() => {
-    try {
-      // Verificar se o usuário está logado (localStorage tem token)
-      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-      const favoritesKey = getFavoritesKey();
-      
-      if (!token || !favoritesKey) {
-        // Se não estiver logado, limpar favoritos
+    const loadFavorites = async () => {
+      if (!isUserLoggedIn()) {
         setFavorites([]);
         return;
       }
-      
-      // Se estiver logado, carregar favoritos específicos do usuário
-      const stored = localStorage.getItem(favoritesKey);
-      if (stored) {
-        setFavorites(JSON.parse(stored));
+
+      setLoading(true);
+      try {
+        // Tentar carregar da API primeiro
+        const { data } = await api.get('/favorites');
+        if (data.success) {
+          // Extrair apenas as propriedades dos favoritos
+          const properties = data.data.map(fav => fav.property);
+          setFavorites(properties);
+          
+          // Sincronizar com localStorage como backup
+          const favoritesKey = getFavoritesKey();
+          if (favoritesKey) {
+            localStorage.setItem(favoritesKey, JSON.stringify(properties));
+          }
+        }
+      } catch (error) {
+        console.warn('Erro ao carregar favoritos da API, usando localStorage:', error);
+        
+        // Fallback para localStorage se a API falhar
+        const favoritesKey = getFavoritesKey();
+        if (favoritesKey) {
+          try {
+            const stored = localStorage.getItem(favoritesKey);
+            if (stored) {
+              setFavorites(JSON.parse(stored));
+            }
+          } catch (err) {
+            console.error('Erro ao carregar favoritos do localStorage:', err);
+            setFavorites([]);
+          }
+        }
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error('Erro ao carregar favoritos:', error);
-      setFavorites([]);
-    }
+    };
+
+    loadFavorites();
   }, []);
 
   // Monitorar mudanças no token (login/logout)
@@ -68,17 +99,16 @@ export function useFavorites() {
     return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
-  // Salvar no localStorage sempre que mudar
+  // Salvar no localStorage e sincronizar estado
   const saveFavorites = useCallback((newFavorites) => {
     try {
-      const favoritesKey = getFavoritesKey();
-      if (!favoritesKey) {
-        console.warn('Não foi possível salvar favoritos: usuário não identificado');
-        return;
-      }
-      
-      localStorage.setItem(favoritesKey, JSON.stringify(newFavorites));
       setFavorites(newFavorites);
+      
+      // Salvar também no localStorage como backup
+      const favoritesKey = getFavoritesKey();
+      if (favoritesKey) {
+        localStorage.setItem(favoritesKey, JSON.stringify(newFavorites));
+      }
     } catch (error) {
       console.error('Erro ao salvar favoritos:', error);
     }
@@ -90,19 +120,45 @@ export function useFavorites() {
   }, [favorites]);
 
   // Adicionar aos favoritos
-  const addFavorite = useCallback((property) => {
-    if (!isFavorite(property.id)) {
+  const addFavorite = useCallback(async (property) => {
+    if (isFavorite(property.id)) {
+      return false;
+    }
+
+    try {
+      // Adicionar na API
+      await api.post(`/favorites/${property.id}`);
+      
+      // Atualizar estado local
+      const newFavorites = [...favorites, property];
+      saveFavorites(newFavorites);
+      return true;
+    } catch (error) {
+      console.error('Erro ao adicionar favorito:', error);
+      
+      // Fallback: adicionar apenas localmente
       const newFavorites = [...favorites, property];
       saveFavorites(newFavorites);
       return true;
     }
-    return false;
   }, [favorites, isFavorite, saveFavorites]);
 
   // Remover dos favoritos
-  const removeFavorite = useCallback((propertyId) => {
-    const newFavorites = favorites.filter(fav => fav.id !== propertyId);
-    saveFavorites(newFavorites);
+  const removeFavorite = useCallback(async (propertyId) => {
+    try {
+      // Remover da API
+      await api.delete(`/favorites/${propertyId}`);
+      
+      // Atualizar estado local
+      const newFavorites = favorites.filter(fav => fav.id !== propertyId);
+      saveFavorites(newFavorites);
+    } catch (error) {
+      console.error('Erro ao remover favorito:', error);
+      
+      // Fallback: remover apenas localmente
+      const newFavorites = favorites.filter(fav => fav.id !== propertyId);
+      saveFavorites(newFavorites);
+    }
   }, [favorites, saveFavorites]);
 
   // Toggle favorito
@@ -123,5 +179,6 @@ export function useFavorites() {
     removeFavorite,
     toggleFavorite,
     count: favorites.length,
+    loading,
   };
 }
