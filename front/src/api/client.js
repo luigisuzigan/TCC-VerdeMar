@@ -5,11 +5,8 @@ const API_BASE = (import.meta.env.VITE_API_BASE || 'http://localhost:4000').repl
 
 export const api = axios.create({ 
   baseURL: API_BASE + '/api',
-  headers: {
-    'Cache-Control': 'no-cache',
-    'Pragma': 'no-cache',
-    'Expires': '0',
-  }
+  // Removido headers de cache - causam CORS issues na Vercel
+  // O backend já trata cache adequadamente
 });
 
 export function setAuthToken(token) {
