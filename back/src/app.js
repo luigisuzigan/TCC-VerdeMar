@@ -29,8 +29,35 @@ app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ limit: "10mb", extended: true }));
 app.use(morgan("dev"));
 
-// Health
-app.get("/api/health", (_, res) => res.json({ ok: true }));
+// Health Check - endpoint para verificar se a API está online
+app.get("/api/health", (_, res) => {
+  res.json({ 
+    ok: true,
+    status: "online",
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || "development",
+    version: "1.0.0"
+  });
+});
+
+// Root endpoint - informações sobre a API
+app.get("/", (_, res) => {
+  res.json({ 
+    name: "🏖️ VerdeMar API",
+    description: "API REST para plataforma de imóveis litorâneos",
+    status: "✅ Online",
+    version: "1.0.0",
+    timestamp: new Date().toISOString(),
+    documentation: {
+      health: "GET /api/health - Verificar status da API",
+      auth: "POST /api/auth/login, POST /api/auth/register",
+      properties: "GET /api/properties - Listar imóveis",
+      users: "GET /api/users - Gerenciar usuários (admin)",
+      dashboard: "GET /api/dashboard/stats - Estatísticas (admin)"
+    },
+    message: "API funcionando corretamente! Use /api/health para health check."
+  });
+});
 
 // Routes
 app.use("/api/auth", authRoutes);
