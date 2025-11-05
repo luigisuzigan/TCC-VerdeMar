@@ -16,7 +16,7 @@ const app = express();
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Permitir requisições sem origin (Postman, curl, etc)
+      // Permitir requisições sem origin (Postman, curl, SSR, etc)
       if (!origin) return callback(null, true);
       
       // Lista de origens permitidas
@@ -24,11 +24,15 @@ app.use(
         process.env.ALLOWED_ORIGIN,
         'https://tcc-verde-mar.vercel.app',
         'https://tcc-verde-mar-backend.vercel.app',
-        /^http:\/\/localhost:\d+$/  // Localhost em qualquer porta
+        'https://tcc-verde-mar-git-main-ukleitins-projects.vercel.app', // Vercel preview
+        /^https:\/\/tcc-verde-mar.*\.vercel\.app$/, // Todos os deploys da Vercel
+        /^http:\/\/localhost:\d+$/,  // Localhost em qualquer porta
+        /^http:\/\/127\.0\.0\.1:\d+$/ // 127.0.0.1 em qualquer porta
       ];
       
       // Verificar se a origem está permitida
       const isAllowed = allowedOrigins.some(allowed => {
+        if (!allowed) return false;
         if (typeof allowed === 'string') return origin === allowed;
         if (allowed instanceof RegExp) return allowed.test(origin);
         return false;
@@ -38,18 +42,41 @@ app.use(
         return callback(null, true);
       }
       
-      // Origem não permitida
-      console.warn(`CORS bloqueado para origem: ${origin}`);
+      // Em desenvolvimento, logar origem bloqueada
+      if (process.env.NODE_ENV !== 'production') {
+        console.warn(`⚠️ CORS bloqueado para origem: ${origin}`);
+      }
+      
+      // Em produção, bloquear silenciosamente
       return callback(new Error('Not allowed by CORS'));
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    allowedHeaders: [
+      'X-Requested-With',
+      'Content-Type', 
+      'Authorization', 
+      'Origin',
+      'Accept',
+      'Cache-Control', 
+      'Pragma', 
+      'Expires',
+      'X-Content-Type-Options'
+    ],
+    exposedHeaders: ['Content-Length', 'X-JSON'],
+    maxAge: 86400, // 24 horas para preflight cache
+    preflightContinue: false,
+    optionsSuccessStatus: 204
   })
 );
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ limit: "10mb", extended: true }));
 app.use(morgan("dev"));
+
+// Tratar requisições OPTIONS (preflight) globalmente
+app.options('*', (req, res) => {
+  res.status(200).end();
+});
 
 // Health Check - endpoint para verificar se a API está online
 app.get("/api/health", (_, res) => {

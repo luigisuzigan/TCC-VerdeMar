@@ -10,11 +10,13 @@
 
 ### Setup e Configuração
 - [Google Maps Setup](setup/GOOGLE_MAPS_SETUP.md) - Configurar integração com Google Maps
-- [Deploy Vercel](setup/DEPLOY_VERCEL.md) - Guia de deploy na Vercel
+- [Deploy Vercel - Geral](setup/DEPLOY_VERCEL_GERAL.md) - Guia geral de deploy (Backend + Frontend)
+- [Deploy Vercel - Frontend](setup/DEPLOY_VERCEL_FRONTEND.md) - Guia específico do frontend
 
 ## 📖 Backend
 
-Documentação específica do backend em [`/back/docs/`](../back/docs/):
+### Documentação de API e Configuração
+Documentação oficial em [`/back/docs/`](../back/docs/):
 
 - [Quick Start](../back/docs/QUICK_START.md) - Início rápido
 - [Setup Completo](../back/docs/SETUP.md) - Configuração detalhada
@@ -24,6 +26,29 @@ Documentação específica do backend em [`/back/docs/`](../back/docs/):
 - [Users API](../back/docs/USERS_API.md) - API de usuários
 - [CRUD Users Summary](../back/docs/CRUD_USERS_SUMMARY.md) - Gestão de usuários
 - [Deploy Backend](../back/docs/DEPLOY_VERCEL_BACKEND.md) - Deploy do backend
+
+### Scripts e Serviços
+Documentação técnica em [`/docs/backend/`](backend/):
+
+- [Scripts](backend/SCRIPTS.md) - Scripts utilitários
+- [Seed Data](backend/SEED_DATA.md) - Dados de teste
+- [Nearby Places Service](backend/NEARBY_PLACES_SERVICE.md) - Google Maps API
+
+## 🎨 Frontend
+
+Documentação de componentes e páginas em [`/docs/frontend/`](frontend/):
+
+### Páginas
+- [Admin Panel](frontend/pages/ADMIN_PANEL.md) - Painel administrativo
+- [Admin Dashboard](frontend/pages/ADMIN_DASHBOARD.md) - Dashboard e métricas
+- [Explorar](frontend/pages/EXPLORAR.md) - Página de exploração
+
+### Componentes
+- [Search](frontend/components/SEARCH.md) - Sistema de busca
+- [Maps](frontend/components/EXPLORAR_MAP.md) - Mapas interativos
+- [Property Details](frontend/components/PROPERTY_CONDITIONAL_DISPLAY.md) - Detalhes de imóveis
+
+📄 **Índice completo:** [Frontend README](frontend/README.md)
 
 ## 🎨 Features e Funcionalidades
 
@@ -61,16 +86,34 @@ docs/
 │
 ├── setup/                      # Guias de configuração
 │   ├── GOOGLE_MAPS_SETUP.md
-│   └── DEPLOY_VERCEL.md
+│   ├── DEPLOY_VERCEL_GERAL.md
+│   └── DEPLOY_VERCEL_FRONTEND.md
 │
 ├── features/                   # Documentação de features
 │   ├── FILTROS_ATIVOS_README.md
 │   ├── DASHBOARD_DADOS_REAIS_README.md
 │   └── ...
 │
-└── testing/                    # Relatórios de testes
-    ├── RELATORIO_FINAL_TESTES_FILTROS.md
-    └── ...
+├── testing/                    # Relatórios de testes
+│   ├── RELATORIO_FINAL_TESTES_FILTROS.md
+│   └── ...
+│
+├── frontend/                   # 🎨 Docs do frontend
+│   ├── README.md               # Índice frontend
+│   ├── pages/                  # Documentação de páginas
+│   │   ├── ADMIN_PANEL.md
+│   │   ├── ADMIN_DASHBOARD.md
+│   │   └── ...
+│   └── components/             # Documentação de componentes
+│       ├── SEARCH.md
+│       ├── EXPLORAR_MAP.md
+│       └── ...
+│
+└── backend/                    # 🔧 Docs técnicos do backend
+    ├── README.md               # Índice backend
+    ├── SCRIPTS.md
+    ├── SEED_DATA.md
+    └── NEARBY_PLACES_SERVICE.md
 ```
 
 ## 🔗 Links Rápidos
@@ -81,13 +124,24 @@ docs/
 - 📋 [Property Parameters](../back/docs/PROPERTY_PARAMETERS.md)
 - 🐛 [Troubleshooting](TROUBLESHOOTING.md)
 
+### Backend
+- 🔧 [Scripts Backend](backend/SCRIPTS.md)
+- 🗄️ [Seed Data](backend/SEED_DATA.md)
+- 🗺️ [Nearby Places](backend/NEARBY_PLACES_SERVICE.md)
+
+### Frontend
+- 🎨 [Frontend Overview](frontend/README.md)
+- 📊 [Admin Dashboard](frontend/pages/ADMIN_DASHBOARD.md)
+- 🔍 [Sistema de Busca](frontend/components/SEARCH.md)
+
 ### Features
 - 🔍 [Sistema de Filtros](features/FILTROS_ATIVOS_README.md)
 - 📊 [Dashboard](features/DASHBOARD_DADOS_REAIS_README.md)
 - 🗺️ [Google Maps](setup/GOOGLE_MAPS_SETUP.md)
 
 ### Deploy
-- ☁️ [Deploy Vercel](setup/DEPLOY_VERCEL.md)
+- ☁️ [Deploy Geral (Backend + Frontend)](setup/DEPLOY_VERCEL_GERAL.md)
+- 🎨 [Deploy Frontend](setup/DEPLOY_VERCEL_FRONTEND.md)
 - 🔧 [Deploy Backend](../back/docs/DEPLOY_VERCEL_BACKEND.md)
 
 ---

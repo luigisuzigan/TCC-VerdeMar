@@ -5,13 +5,21 @@ import { PrismaClient } from '@prisma/client';
 let prisma;
 
 if (process.env.NODE_ENV === 'production') {
+  // Em produção (Vercel), criar nova instância sempre
+  // mas com pool de conexões limitado
   prisma = new PrismaClient({
-    log: ['error'],
+    log: process.env.DEBUG_PRISMA === 'true' ? ['query', 'error', 'warn'] : ['error'],
+    datasources: {
+      db: {
+        url: process.env.DATABASE_URL
+      }
+    }
   });
 } else {
+  // Em desenvolvimento, usar singleton global
   if (!global.prisma) {
     global.prisma = new PrismaClient({
-      log: ['error'],
+      log: ['error', 'warn'],
     });
   }
   prisma = global.prisma;
@@ -77,22 +85,14 @@ const shutdown = async () => {
   process.exit(0);
 };
 
-process.on('SIGINT', shutdown);
-process.on('SIGTERM', shutdown);
-process.on('beforeExit', async () => {
-  await prisma.$disconnect();
-});
-
-// Desconectar após 10 minutos de inatividade
-let inactivityTimer;
-const resetInactivityTimer = () => {
-  clearTimeout(inactivityTimer);
-  inactivityTimer = setTimeout(async () => {
-    console.log('⏰ 10 minutos de inatividade, desconectando...');
+// Apenas em ambiente não-serverless
+if (process.env.VERCEL !== '1') {
+  process.on('SIGINT', shutdown);
+  process.on('SIGTERM', shutdown);
+  process.on('beforeExit', async () => {
     await prisma.$disconnect();
-  }, 10 * 60 * 1000);
-};
-resetInactivityTimer();
+  });
+}
 
 export { prismaWithRetry as prisma };
 export default prismaWithRetry;
