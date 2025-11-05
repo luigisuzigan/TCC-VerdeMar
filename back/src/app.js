@@ -22,8 +22,8 @@ app.use(
       // Lista de origens permitidas
       const allowedOrigins = [
         process.env.ALLOWED_ORIGIN,
-        'https://tcc-verde-mar-frontend.vercel.app',
         'https://tcc-verde-mar.vercel.app',
+        'https://tcc-verde-mar-backend.vercel.app',
         /^http:\/\/localhost:\d+$/  // Localhost em qualquer porta
       ];
       
