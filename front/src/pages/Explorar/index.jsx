@@ -720,17 +720,30 @@ function FilterSection({ title, icon, children, onClear, hasValue }) {
 
 // Property Card Component
 function PropertyCard({ property }) {
+  // Debug: log images
+  console.log('🖼️ PropertyCard:', {
+    title: property.title,
+    images: property.images,
+    firstImage: property.images?.[0],
+    imageType: typeof property.images,
+    isArray: Array.isArray(property.images)
+  });
+
   return (
     <Link 
       to={`/property/${property.id}`}
       className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow border border-slate-200 group cursor-pointer block"
     >
       {/* Image */}
-      <div className="relative h-[220px] overflow-hidden">
+      <div className="relative h-[220px] overflow-hidden bg-slate-100">
         <img
-          src={property.images?.[0] || '/placeholder.jpg'}
+          src={property.images?.[0] || '/placeholder.svg'}
           alt={property.title}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          onError={(e) => {
+            console.error('❌ Erro ao carregar imagem:', property.images?.[0]);
+            e.target.src = '/placeholder.svg';
+          }}
         />
         {/* Badge */}
         <div className="absolute top-3 left-3">
