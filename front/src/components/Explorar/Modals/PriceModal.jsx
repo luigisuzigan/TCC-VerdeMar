@@ -15,6 +15,12 @@ export default function PriceModal({ isOpen, onClose, filters, onApply }) {
   const [minPrice, setMinPrice] = useState(filters.priceMin || '');
   const [maxPrice, setMaxPrice] = useState(filters.priceMax || '');
 
+  // ✅ FIX: Sincronizar quando filters mudar (via remoção de chip)
+  useEffect(() => {
+    setMinPrice(filters.priceMin || '');
+    setMaxPrice(filters.priceMax || '');
+  }, [filters.priceMin, filters.priceMax]);
+
   // Resetar valores quando o modal abre
   useEffect(() => {
     if (isOpen) {

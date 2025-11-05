@@ -86,138 +86,132 @@ export default function TopFiltersBar({ filters, onFilterClick }) {
   };
 
   return (
-    <div className="bg-white rounded-full shadow-lg border border-slate-200/80 p-1.5 hover:shadow-xl transition-shadow duration-300">
-      <div className="flex items-center gap-0">
+    <div className="bg-white rounded-lg shadow-xl border border-slate-200/80 overflow-hidden">
+      <div className="flex items-stretch">
         {/* Location Filter */}
         <button
           onClick={() => onFilterClick('location')}
-          className={`group relative flex-1 px-6 py-3.5 rounded-full transition-all duration-300 hover:bg-slate-50 ${
+          className={`group relative flex-1 px-5 py-4 transition-all duration-200 hover:bg-slate-50 border-r border-slate-200 ${
             hasActiveFilter('location') ? 'bg-slate-50' : ''
           }`}
         >
           <div className="flex items-center gap-3">
-            <MapPin className={`w-5 h-5 transition-colors ${
-              hasActiveFilter('location') ? 'text-emerald-600' : 'text-slate-400'
+            <MapPin className={`w-5 h-5 flex-shrink-0 transition-colors ${
+              hasActiveFilter('location') ? 'text-blue-600' : 'text-slate-400'
             }`} />
-            <div className="text-left">
-              <div className="text-xs font-semibold text-slate-900">Localização</div>
-              <div className={`text-sm transition-colors ${
-                hasActiveFilter('location') ? 'text-emerald-600 font-medium' : 'text-slate-500'
+            <div className="text-left min-w-0">
+              <div className="text-xs font-medium text-slate-500 mb-0.5">Localização</div>
+              <div className={`text-sm font-semibold truncate transition-colors ${
+                hasActiveFilter('location') ? 'text-slate-900' : 'text-slate-600'
               }`}>
                 {getLocationText()}
               </div>
             </div>
           </div>
-          <div className="absolute right-0 top-1/2 -translate-y-1/2 w-px h-8 bg-slate-200"></div>
         </button>
 
         {/* Price Filter */}
         <button
           onClick={() => onFilterClick('price')}
-          className={`group relative flex-1 px-6 py-3.5 rounded-full transition-all duration-300 hover:bg-slate-50 ${
+          className={`group relative flex-1 px-5 py-4 transition-all duration-200 hover:bg-slate-50 border-r border-slate-200 ${
             hasActiveFilter('price') ? 'bg-slate-50' : ''
           }`}
         >
           <div className="flex items-center gap-3">
-            <DollarSign className={`w-5 h-5 transition-colors ${
-              hasActiveFilter('price') ? 'text-emerald-600' : 'text-slate-400'
+            <DollarSign className={`w-5 h-5 flex-shrink-0 transition-colors ${
+              hasActiveFilter('price') ? 'text-blue-600' : 'text-slate-400'
             }`} />
-            <div className="text-left">
-              <div className="text-xs font-semibold text-slate-900">Preço</div>
-              <div className={`text-sm transition-colors ${
-                hasActiveFilter('price') ? 'text-emerald-600 font-medium' : 'text-slate-500'
+            <div className="text-left min-w-0">
+              <div className="text-xs font-medium text-slate-500 mb-0.5">Preço</div>
+              <div className={`text-sm font-semibold truncate transition-colors ${
+                hasActiveFilter('price') ? 'text-slate-900' : 'text-slate-600'
               }`}>
                 {getPriceText()}
               </div>
             </div>
           </div>
-          <div className="absolute right-0 top-1/2 -translate-y-1/2 w-px h-8 bg-slate-200"></div>
         </button>
 
         {/* Property Type Filter */}
         <button
           onClick={() => onFilterClick('propertyType')}
-          className={`group relative flex-1 px-6 py-3.5 rounded-full transition-all duration-300 hover:bg-slate-50 ${
+          className={`group relative flex-1 px-5 py-4 transition-all duration-200 hover:bg-slate-50 border-r border-slate-200 ${
             hasActiveFilter('propertyType') ? 'bg-slate-50' : ''
           }`}
         >
           <div className="flex items-center gap-3">
-            <Home className={`w-5 h-5 transition-colors ${
-              hasActiveFilter('propertyType') ? 'text-emerald-600' : 'text-slate-400'
+            <Home className={`w-5 h-5 flex-shrink-0 transition-colors ${
+              hasActiveFilter('propertyType') ? 'text-blue-600' : 'text-slate-400'
             }`} />
-            <div className="text-left">
-              <div className="text-xs font-semibold text-slate-900">Tipo</div>
-              <div className={`text-sm transition-colors ${
-                hasActiveFilter('propertyType') ? 'text-emerald-600 font-medium' : 'text-slate-500'
+            <div className="text-left min-w-0">
+              <div className="text-xs font-medium text-slate-500 mb-0.5">Tipo</div>
+              <div className={`text-sm font-semibold truncate transition-colors ${
+                hasActiveFilter('propertyType') ? 'text-slate-900' : 'text-slate-600'
               }`}>
                 {getPropertyTypeText()}
               </div>
             </div>
           </div>
-          <div className="absolute right-0 top-1/2 -translate-y-1/2 w-px h-8 bg-slate-200"></div>
         </button>
 
         {/* Area Filter */}
         <button
           onClick={() => onFilterClick('area')}
-          className={`group relative flex-1 px-6 py-3.5 rounded-full transition-all duration-300 hover:bg-slate-50 ${
+          className={`group relative flex-1 px-5 py-4 transition-all duration-200 hover:bg-slate-50 border-r border-slate-200 ${
             hasActiveFilter('area') ? 'bg-slate-50' : ''
           }`}
         >
           <div className="flex items-center gap-3">
-            <Maximize2 className={`w-5 h-5 transition-colors ${
-              hasActiveFilter('area') ? 'text-emerald-600' : 'text-slate-400'
+            <Maximize2 className={`w-5 h-5 flex-shrink-0 transition-colors ${
+              hasActiveFilter('area') ? 'text-blue-600' : 'text-slate-400'
             }`} />
-            <div className="text-left">
-              <div className="text-xs font-semibold text-slate-900">Área</div>
-              <div className={`text-sm transition-colors ${
-                hasActiveFilter('area') ? 'text-emerald-600 font-medium' : 'text-slate-500'
+            <div className="text-left min-w-0">
+              <div className="text-xs font-medium text-slate-500 mb-0.5">Área</div>
+              <div className={`text-sm font-semibold truncate transition-colors ${
+                hasActiveFilter('area') ? 'text-slate-900' : 'text-slate-600'
               }`}>
                 {getAreaText()}
               </div>
             </div>
           </div>
-          <div className="absolute right-0 top-1/2 -translate-y-1/2 w-px h-8 bg-slate-200 hidden lg:block"></div>
         </button>
 
-        {/* Rooms Filter - Hidden on mobile */}
+        {/* Rooms Filter */}
         <button
           onClick={() => onFilterClick('rooms')}
-          className={`group relative hidden lg:flex flex-1 px-6 py-3.5 rounded-full transition-all duration-300 hover:bg-slate-50 ${
+          className={`group relative flex-1 px-5 py-4 transition-all duration-200 hover:bg-slate-50 border-r border-slate-200 ${
             hasActiveFilter('rooms') ? 'bg-slate-50' : ''
           }`}
         >
           <div className="flex items-center gap-3">
-            <Bed className={`w-5 h-5 transition-colors ${
-              hasActiveFilter('rooms') ? 'text-emerald-600' : 'text-slate-400'
+            <Bed className={`w-5 h-5 flex-shrink-0 transition-colors ${
+              hasActiveFilter('rooms') ? 'text-blue-600' : 'text-slate-400'
             }`} />
-            <div className="text-left">
-              <div className="text-xs font-semibold text-slate-900">Quartos</div>
-              <div className={`text-sm transition-colors ${
-                hasActiveFilter('rooms') ? 'text-emerald-600 font-medium' : 'text-slate-500'
+            <div className="text-left min-w-0">
+              <div className="text-xs font-medium text-slate-500 mb-0.5">Quartos</div>
+              <div className={`text-sm font-semibold truncate transition-colors ${
+                hasActiveFilter('rooms') ? 'text-slate-900' : 'text-slate-600'
               }`}>
                 {getRoomsText()}
               </div>
             </div>
           </div>
-          <div className="absolute right-0 top-1/2 -translate-y-1/2 w-px h-8 bg-slate-200"></div>
         </button>
 
         {/* More Filters Button */}
         <button
           onClick={() => onFilterClick('more')}
-          className="group px-5 py-3.5 rounded-full transition-all duration-300 hover:bg-slate-50"
+          className="group px-5 py-4 transition-all duration-200 hover:bg-slate-50 border-r border-slate-200"
         >
-          <Sliders className="w-5 h-5 text-slate-400 group-hover:text-emerald-600 transition-colors" />
+          <Sliders className="w-5 h-5 text-slate-400 group-hover:text-blue-600 transition-colors" />
         </button>
 
         {/* Search Button */}
         <button
           onClick={() => onFilterClick('search')}
-          className="flex items-center gap-2 px-8 py-3.5 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-full font-semibold hover:from-emerald-600 hover:to-emerald-700 transition-all duration-300 shadow-lg shadow-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/40 hover:scale-105 active:scale-95"
+          className="flex items-center justify-center gap-2 px-8 py-4 bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-all duration-200"
         >
-          <Search className="w-5 h-5" />
-          <span className="hidden sm:inline">Buscar</span>
+          <span>Search</span>
         </button>
       </div>
     </div>

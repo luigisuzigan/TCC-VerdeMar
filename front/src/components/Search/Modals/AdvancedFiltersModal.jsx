@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog } from '@headlessui/react';
 import { X } from 'lucide-react';
 
@@ -46,6 +46,19 @@ export default function AdvancedFiltersModal({ isOpen, onClose, filters, onApply
     condoAmenities: filters.condoAmenities || [],
     propertyCondition: filters.propertyCondition || '',
   });
+
+  // ✅ FIX: Sincronizar quando filters externos mudarem
+  useEffect(() => {
+    setLocalFilters({
+      bedrooms: filters.bedrooms || null,
+      bathrooms: filters.bathrooms || null,
+      parkingSpaces: filters.parkingSpaces || null,
+      suites: filters.suites || null,
+      amenities: filters.amenities || [],
+      condoAmenities: filters.condoAmenities || [],
+      propertyCondition: filters.propertyCondition || '',
+    });
+  }, [filters]);
 
   const handleNumberSelect = (field, value) => {
     setLocalFilters({

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog } from '@headlessui/react';
 import { X } from 'lucide-react';
 import Slider from 'rc-slider';
@@ -19,6 +19,13 @@ export default function PriceRangeModal({ isOpen, onClose, priceMin, priceMax, o
     priceMin || 0,
     priceMax || 5000000,
   ]);
+
+  // ✅ FIX: Sincronizar quando priceMin/priceMax mudarem
+  useEffect(() => {
+    setMin(priceMin || '');
+    setMax(priceMax || '');
+    setSliderValue([priceMin || 0, priceMax || 5000000]);
+  }, [priceMin, priceMax]);
 
   const handleSliderChange = (value) => {
     setSliderValue(value);

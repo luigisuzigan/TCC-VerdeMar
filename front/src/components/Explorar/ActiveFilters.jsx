@@ -70,8 +70,8 @@ export default function ActiveFilters({ filters, onRemove, onClearAll, filteredP
         iconColor: 'text-green-600',
         color: 'green',
         onRemove: () => {
-          onRemove('priceMin', '');
-          onRemove('priceMax', '');
+          // ✅ FIX: Remover ambos de uma vez criando novo objeto
+          onRemove('priceRange', { priceMin: '', priceMax: '' });
         },
       });
     }
@@ -90,12 +90,12 @@ export default function ActiveFilters({ filters, onRemove, onClearAll, filteredP
         key: 'area',
         label,
         icon: null,
-        emoji: '�',
+        emoji: '📐',
         iconColor: 'text-amber-600',
         color: 'amber',
         onRemove: () => {
-          onRemove('areaMin', '');
-          onRemove('areaMax', '');
+          // ✅ FIX: Remover ambos de uma vez criando novo objeto
+          onRemove('areaRange', { areaMin: '', areaMax: '' });
         },
       });
     }

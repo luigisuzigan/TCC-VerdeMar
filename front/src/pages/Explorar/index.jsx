@@ -461,16 +461,46 @@ export default function Explorar() {
   };
 
   const removeFilter = (key, value) => {
+    console.log('🗑️ removeFilter chamado:', key, value);
+    
     // Se estiver removendo a área desenhada no mapa
     if (key === 'mapArea') {
       setFilteredPropertyIds(null);
-      setSavedBoundary(null); // Limpar boundary salvo
+      setSavedBoundary(null);
       setCurrentPage(1);
-      setShouldSearch(true); // Buscar novamente sem o filtro de área
+      setShouldSearch(true);
       return;
     }
     
-    updateFilter(key, value);
+    // ✅ FIX: Criar novo objeto de filtros e aplicar
+    const newFilters = { ...filters };
+    
+    // ✅ FIX: Casos especiais de remoção de ranges (price, area)
+    if (key === 'priceRange') {
+      delete newFilters.priceMin;
+      delete newFilters.priceMax;
+    } else if (key === 'areaRange') {
+      delete newFilters.areaMin;
+      delete newFilters.areaMax;
+    } 
+    // Se o valor for null/undefined ou string vazia, deletar a chave
+    else if (value === null || value === undefined || value === '') {
+      delete newFilters[key];
+    } else {
+      newFilters[key] = value;
+    }
+    
+    console.log('🔄 Novos filtros após remoção:', newFilters);
+    
+    setFilters(newFilters);
+    setCurrentPage(1);
+    
+    // Atualizar URL
+    const params = filtersToUrlParams(newFilters);
+    navigate(`/explorar?${params.toString()}`, { replace: true });
+    
+    // ✅ FIX: Disparar busca após remover filtro
+    setShouldSearch(true);
   };
 
   const clearFilter = (key) => {
@@ -506,25 +536,42 @@ export default function Explorar() {
   const filterDescriptions = getFilterDescriptions(filters);
 
   return (
-    <main className="mx-auto max-w-[1600px] px-4 py-8">
-      {/* Top Filters Bar */}
-      <div ref={topFiltersRef} className="mb-6">
-        <TopFiltersBar
-          filters={filters}
-          onFilterClick={handleFilterClick}
-        />
+    <>
+      {/* Hero Section com Imagem de Fundo */}
+      <div className="relative w-full h-[170px] bg-gradient-to-br from-emerald-400 via-teal-500 to-cyan-600">
+        {/* Imagem de Fundo */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: `url('https://images.unsplash.com/photo-1559827260-dc66d52bef19?q=80&w=2070')`,
+          }}
+        >
+          {/* Overlay mais suave */}
+          <div className="absolute inset-0 bg-black/30"></div>
+        </div>
       </div>
 
-      {/* Active Filters Pills */}
-      <ActiveFilters
-        filters={filters}
-        filteredPropertyIds={filteredPropertyIds}
-        onRemove={removeFilter}
-        onClearAll={clearAllFilters}
-      />
+      {/* Filters Bar - Card branco sobre a imagem (overlap) */}
+      <div className="relative -mt-10 px-4 pb-6">
+        <div ref={topFiltersRef} className="mx-auto max-w-6xl">
+          <TopFiltersBar
+            filters={filters}
+            onFilterClick={handleFilterClick}
+          />
+        </div>
+      </div>
 
       {/* Main Content */}
-      <div className="mt-6">
+      <main className="mx-auto max-w-[1600px] px-4 py-2">
+        {/* Active Filters Pills */}
+        <ActiveFilters
+          filters={filters}
+          filteredPropertyIds={filteredPropertyIds}
+          onRemove={removeFilter}
+          onClearAll={clearAllFilters}
+        />
+
+        <div className="mt-6">
         {/* Header */}
         <div className="mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -692,6 +739,7 @@ export default function Explorar() {
       />
 
     </main>
+    </>
   );
 }
 

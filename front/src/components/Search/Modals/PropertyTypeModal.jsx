@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog } from '@headlessui/react';
 import { X, Home, Building2, Building, TreeDeciduous, Warehouse } from 'lucide-react';
 
@@ -16,6 +16,11 @@ const PROPERTY_TYPES = [
 
 export default function PropertyTypeModal({ isOpen, onClose, selectedTypes, onApply }) {
   const [selected, setSelected] = useState(selectedTypes || []);
+
+  // ✅ FIX: Sincronizar quando selectedTypes mudar
+  useEffect(() => {
+    setSelected(selectedTypes || []);
+  }, [selectedTypes]);
 
   const toggleType = (typeId) => {
     if (selected.includes(typeId)) {

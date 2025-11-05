@@ -1,10 +1,15 @@
 import { Dialog } from '@headlessui/react';
 import { X, Home, ChevronDown, ChevronUp } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function PropertyTypeModal({ isOpen, onClose, filters, onApply }) {
   const [selectedTypes, setSelectedTypes] = useState(filters.propertyTypes || []);
   const [expandedCategories, setExpandedCategories] = useState([]);
+
+  // ✅ FIX: Sincronizar estado quando filters.propertyTypes mudar
+  useEffect(() => {
+    setSelectedTypes(filters.propertyTypes || []);
+  }, [filters.propertyTypes]);
 
   // Estilos em destaque (principais)
   const featuredStyles = [
@@ -137,39 +142,61 @@ export default function PropertyTypeModal({ isOpen, onClose, filters, onApply })
 
   return (
     <Dialog open={isOpen} onClose={onClose} className="relative z-50">
-      <div className="fixed inset-0 bg-black/30 backdrop-blur-sm" aria-hidden="true" />
+      <div className="fixed inset-0 bg-black/40 backdrop-blur-md" aria-hidden="true" />
 
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <Dialog.Panel className="w-full max-w-3xl bg-white rounded-2xl shadow-2xl">
-          <div className="border-b border-slate-200 px-6 py-4 flex items-center justify-between">
-            <Dialog.Title className="text-xl font-bold text-slate-900 flex items-center gap-2">
-              <Home size={24} className="text-emerald-600" />
-              Tipo de Imóvel
-            </Dialog.Title>
-            <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
-              <X size={20} />
-            </button>
+        <Dialog.Panel className="w-full max-w-4xl bg-white rounded-3xl shadow-2xl transform transition-all">
+          {/* Header Moderno */}
+          <div className="relative border-b border-slate-200 bg-gradient-to-r from-emerald-50 to-teal-50 px-6 py-5 rounded-t-3xl">
+            <div className="flex items-center justify-between">
+              <Dialog.Title className="flex items-center gap-3">
+                <div className="p-2.5 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl shadow-lg shadow-emerald-200/50">
+                  <Home size={24} className="text-white" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-slate-900">Tipo de Imóvel</h2>
+                  <p className="text-sm text-slate-600 mt-0.5">Selecione os tipos que você procura</p>
+                </div>
+              </Dialog.Title>
+              <button 
+                onClick={onClose} 
+                className="p-2 hover:bg-white/80 rounded-xl transition-colors group"
+                aria-label="Fechar"
+              >
+                <X size={22} className="text-slate-600 group-hover:text-slate-900 group-hover:rotate-90 transition-all duration-300" />
+              </button>
+            </div>
           </div>
 
-          <div className="p-6 max-h-[70vh] overflow-y-auto">
+          <div className="p-6 max-h-[70vh] overflow-y-auto scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent">
+            {/* Estilos em Destaque - Design Melhorado */}
             <div className="mb-8">
-              <h3 className="text-lg font-bold text-slate-900 mb-4">Estilos em Destaque</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold text-slate-900">⭐ Mais Procurados</h3>
+                {selectedTypes.length > 0 && (
+                  <span className="px-3 py-1 bg-emerald-100 text-emerald-700 text-sm font-semibold rounded-full border border-emerald-200">
+                    {selectedTypes.length} {selectedTypes.length === 1 ? 'selecionado' : 'selecionados'}
+                  </span>
+                )}
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {featuredStyles.map((style) => (
                   <button
                     key={style.id}
                     onClick={() => toggleType(style.id)}
-                    className={`relative overflow-hidden rounded-xl aspect-square transition-all ${
-                      selectedTypes.includes(style.id) ? 'ring-4 ring-emerald-500 scale-95' : 'hover:scale-105'
+                    className={`group relative overflow-hidden rounded-2xl aspect-square transition-all duration-300 ${
+                      selectedTypes.includes(style.id) 
+                        ? 'ring-4 ring-emerald-500 scale-95 shadow-xl shadow-emerald-200/50' 
+                        : 'hover:scale-105 hover:shadow-lg'
                     }`}
                   >
-                    <div className={`absolute inset-0 bg-gradient-to-br ${style.gradient} opacity-90`}></div>
+                    <div className={`absolute inset-0 bg-gradient-to-br ${style.gradient} opacity-90 group-hover:opacity-100 transition-opacity`}></div>
                     <div className="relative h-full flex flex-col items-center justify-center text-white p-4">
-                      <div className="text-5xl mb-2">{style.icon}</div>
-                      <div className="font-bold text-lg">{style.label}</div>
+                      <div className="text-5xl mb-3 transform group-hover:scale-110 transition-transform duration-300">{style.icon}</div>
+                      <div className="font-bold text-base text-center leading-tight">{style.label}</div>
                     </div>
                     {selectedTypes.includes(style.id) && (
-                      <div className="absolute top-2 right-2 w-7 h-7 bg-white rounded-full flex items-center justify-center shadow-lg">
+                      <div className="absolute top-3 right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-lg animate-in zoom-in duration-300">
                         <svg className="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                         </svg>
@@ -180,10 +207,17 @@ export default function PropertyTypeModal({ isOpen, onClose, filters, onApply })
               </div>
             </div>
 
-            <div className="border-t border-slate-200 my-6"></div>
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-slate-200"></div>
+              </div>
+              <div className="relative flex justify-center">
+                <span className="px-4 bg-white text-sm font-medium text-slate-500">Todas as Opções</span>
+              </div>
+            </div>
 
+            {/* Categorias Expansíveis - Design Premium */}
             <div>
-              <h3 className="text-lg font-bold text-slate-900 mb-4">Todas as Categorias</h3>
               <div className="space-y-3">
                 {propertyCategories.map((category) => {
                   const isExpanded = expandedCategories.includes(category.id);
@@ -192,54 +226,76 @@ export default function PropertyTypeModal({ isOpen, onClose, filters, onApply })
                   const allSelected = selectedInCategory === categoryTypes.length;
 
                   return (
-                    <div key={category.id} className="border border-slate-200 rounded-xl overflow-hidden">
-                      <div className="bg-slate-50">
+                    <div 
+                      key={category.id} 
+                      className={`border-2 rounded-2xl overflow-hidden transition-all duration-300 ${
+                        isExpanded ? 'border-emerald-300 bg-emerald-50/30' : 'border-slate-200 hover:border-slate-300'
+                      }`}
+                    >
+                      {/* Header da Categoria */}
+                      <div className={`${isExpanded ? 'bg-gradient-to-r from-emerald-50 to-teal-50' : 'bg-slate-50/50 hover:bg-slate-100'} transition-colors`}>
                         <button
                           onClick={() => toggleCategory(category.id)}
-                          className="w-full flex items-center justify-between p-4 hover:bg-slate-100 transition-colors"
+                          className="w-full flex items-center justify-between p-4 transition-colors"
                         >
                           <div className="flex items-center gap-3 flex-1">
-                            <span className="text-2xl">{category.label.split(' ')[0]}</span>
+                            <span className="text-3xl transform transition-transform duration-300 group-hover:scale-110">
+                              {category.label.split(' ')[0]}
+                            </span>
                             <div className="text-left">
-                              <div className="font-semibold text-slate-900">{category.label.split(' ').slice(1).join(' ')}</div>
+                              <div className="font-bold text-slate-900 text-base">
+                                {category.label.split(' ').slice(1).join(' ')}
+                              </div>
                               <div className="text-sm text-slate-600">{category.description}</div>
                             </div>
                           </div>
                           <div className="flex items-center gap-3">
                             {selectedInCategory > 0 && (
-                              <span className="px-2.5 py-1 bg-emerald-600 text-white text-xs font-bold rounded-full">
+                              <span className="px-3 py-1.5 bg-emerald-500 text-white text-xs font-bold rounded-full shadow-md shadow-emerald-200/50 animate-in zoom-in">
                                 {selectedInCategory}
                               </span>
                             )}
-                            {isExpanded ? <ChevronUp size={20} className="text-slate-600" /> : <ChevronDown size={20} className="text-slate-600" />}
+                            <div className={`transform transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}>
+                              <ChevronDown size={22} className="text-slate-600" />
+                            </div>
                           </div>
                         </button>
                         
                         {isExpanded && (
                           <div className="px-4 pb-3">
-                            <button onClick={() => selectAllInCategory(category)} className="text-sm text-emerald-600 hover:text-emerald-700 font-bold">
-                              {allSelected ? '✓ Desselecionar todos' : 'Selecionar todos'}
+                            <button 
+                              onClick={() => selectAllInCategory(category)} 
+                              className="text-sm text-emerald-600 hover:text-emerald-700 font-bold hover:underline transition-all"
+                            >
+                              {allSelected ? '✓ Desselecionar todos' : '✓ Selecionar todos'}
                             </button>
                           </div>
                         )}
                       </div>
 
+                      {/* Tipos da Categoria */}
                       {isExpanded && (
-                        <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-2">
+                        <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-3 bg-white">
                           {category.types.map((type) => (
                             <button
                               key={type.id}
                               onClick={() => toggleType(type.id)}
-                              className={`flex items-center gap-3 p-3 border-2 rounded-lg transition-all text-left ${
-                                selectedTypes.includes(type.id) ? 'border-emerald-600 bg-emerald-50' : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                              className={`group flex items-center gap-3 p-3.5 border-2 rounded-xl transition-all duration-200 text-left ${
+                                selectedTypes.includes(type.id) 
+                                  ? 'border-emerald-500 bg-emerald-50 shadow-md shadow-emerald-100/50 scale-[0.98]' 
+                                  : 'border-slate-200 hover:border-emerald-300 hover:bg-emerald-50/30 hover:shadow-sm'
                               }`}
                             >
-                              <div className="text-2xl">{type.icon}</div>
-                              <div className="flex-1 font-medium text-slate-900">{type.label}</div>
+                              <div className="text-3xl transform transition-transform duration-300 group-hover:scale-110">
+                                {type.icon}
+                              </div>
+                              <div className="flex-1 font-semibold text-slate-900 text-sm">
+                                {type.label}
+                              </div>
                               {selectedTypes.includes(type.id) && (
-                                <div className="flex-shrink-0">
-                                  <div className="w-5 h-5 bg-emerald-600 rounded-full flex items-center justify-center">
-                                    <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div className="flex-shrink-0 animate-in zoom-in">
+                                  <div className="w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center shadow-md">
+                                    <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                                     </svg>
                                   </div>
@@ -255,25 +311,43 @@ export default function PropertyTypeModal({ isOpen, onClose, filters, onApply })
               </div>
             </div>
 
+            {/* Resumo de Seleção */}
             {selectedTypes.length > 0 && (
-              <div className="mt-6 p-4 bg-emerald-50 rounded-xl border border-emerald-200">
-                <p className="text-sm text-emerald-900">
-                  <span className="font-bold">{selectedTypes.length}</span> {selectedTypes.length === 1 ? 'tipo selecionado' : 'tipos selecionados'}
-                </p>
+              <div className="mt-6 p-5 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-2xl border-2 border-emerald-200 shadow-sm">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center shadow-md shadow-emerald-200/50">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <p className="text-sm font-semibold text-emerald-900">
+                    <span className="text-2xl font-bold">{selectedTypes.length}</span> {selectedTypes.length === 1 ? 'tipo selecionado' : 'tipos selecionados'}
+                  </p>
+                </div>
               </div>
             )}
           </div>
 
-          <div className="border-t border-slate-200 px-6 py-4 flex items-center justify-between">
-            <button onClick={handleReset} className="px-4 py-2 text-slate-700 font-semibold hover:bg-slate-100 rounded-lg transition-colors">
-              Limpar
+          {/* Footer com Botões - Design Premium */}
+          <div className="border-t border-slate-200 px-6 py-5 flex items-center justify-between bg-slate-50/50 rounded-b-3xl">
+            <button 
+              onClick={handleReset} 
+              className="px-5 py-2.5 text-slate-700 font-bold hover:bg-white border-2 border-transparent hover:border-slate-300 rounded-xl transition-all duration-200 hover:shadow-sm"
+            >
+              🗑️ Limpar
             </button>
             <div className="flex gap-3">
-              <button onClick={onClose} className="px-6 py-2 border border-slate-300 text-slate-700 font-semibold rounded-lg hover:bg-slate-50 transition-colors">
+              <button 
+                onClick={onClose} 
+                className="px-6 py-2.5 border-2 border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-white hover:border-slate-400 transition-all duration-200 hover:shadow-sm"
+              >
                 Cancelar
               </button>
-              <button onClick={handleApply} className="px-6 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold rounded-lg hover:from-emerald-700 hover:to-teal-700 transition-all shadow-md hover:shadow-lg hover:scale-105">
-                Aplicar
+              <button 
+                onClick={handleApply} 
+                className="px-8 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold rounded-xl hover:from-emerald-700 hover:to-teal-700 transition-all duration-200 shadow-lg shadow-emerald-200/50 hover:shadow-xl hover:shadow-emerald-300/50 hover:scale-105 active:scale-95"
+              >
+                ✓ Aplicar Filtros
               </button>
             </div>
           </div>

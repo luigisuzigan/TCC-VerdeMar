@@ -1,10 +1,16 @@
 import { Dialog } from '@headlessui/react';
 import { X, Maximize2 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function AreaModal({ isOpen, onClose, filters, onApply }) {
   const [minArea, setMinArea] = useState(filters.areaMin || '');
   const [maxArea, setMaxArea] = useState(filters.areaMax || '');
+
+  // ✅ FIX: Sincronizar quando filters mudar (via remoção de chip)
+  useEffect(() => {
+    setMinArea(filters.areaMin || '');
+    setMaxArea(filters.areaMax || '');
+  }, [filters.areaMin, filters.areaMax]);
 
   // Opções rápidas de área (em m²)
   const quickAreas = [

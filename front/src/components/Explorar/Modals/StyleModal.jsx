@@ -1,9 +1,14 @@
 import { Dialog } from '@headlessui/react';
 import { X, Sparkles } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function StyleModal({ isOpen, onClose, filters, onApply }) {
   const [selectedStyles, setSelectedStyles] = useState(filters.styles || []);
+
+  // ✅ FIX: Sincronizar quando filters mudar (via remoção de chip)
+  useEffect(() => {
+    setSelectedStyles(filters.styles || []);
+  }, [filters.styles]);
 
   const styles = [
     { 

@@ -1,6 +1,6 @@
 import { Dialog } from '@headlessui/react';
 import { X, Maximize2, Car, Waves, Dumbbell, Trees, Building2, Calendar, DollarSign, Home, Mountain, Wind } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function FiltersModal({ isOpen, onClose, filters, onApplyFilters }) {
   const [localFilters, setLocalFilters] = useState(filters);
@@ -11,6 +11,11 @@ export default function FiltersModal({ isOpen, onClose, filters, onApplyFilters 
   const [parkingMin, setParkingMin] = useState('');
   const [parkingMax, setParkingMax] = useState('');
   const [parkingExact, setParkingExact] = useState('');
+
+  // ✅ FIX: Sincronizar localFilters quando filters externos mudarem
+  useEffect(() => {
+    setLocalFilters(filters);
+  }, [filters]);
 
   const updateLocalFilter = (key, value) => {
     setLocalFilters(prev => ({ ...prev, [key]: value }));
