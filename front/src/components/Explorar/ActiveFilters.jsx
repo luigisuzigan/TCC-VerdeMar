@@ -22,8 +22,8 @@ export default function ActiveFilters({ filters, onRemove, onClearAll, filteredP
       });
     }
 
-    // Location (cidade/bairro)
-    if (filters.location) {
+    // Location (cidade/bairro) - NÃO mostrar se já tem área do mapa
+    if (filters.location && !(filteredPropertyIds && filteredPropertyIds.length > 0)) {
       items.push({
         key: 'location',
         label: filters.location,
@@ -123,6 +123,24 @@ export default function ActiveFilters({ filters, onRemove, onClearAll, filteredP
         iconColor: 'text-cyan-600',
         color: 'cyan',
         onRemove: () => onRemove('bathrooms', null),
+      });
+    }
+
+    // Styles (Estilos Arquitetônicos)
+    if (filters.styles?.length > 0) {
+      filters.styles.forEach((style) => {
+        items.push({
+          key: `style-${style}`,
+          label: style,
+          icon: null,
+          emoji: '✨',
+          iconColor: 'text-purple-600',
+          color: 'purple',
+          onRemove: () => {
+            const updated = filters.styles.filter((s) => s !== style);
+            onRemove('styles', updated);
+          },
+        });
       });
     }
 

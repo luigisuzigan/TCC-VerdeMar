@@ -199,7 +199,10 @@ export default function FloatingMapWindow({
     const propertyIds = filteredProperties.map(p => p.id);
     console.log('📤 Enviando IDs:', propertyIds.slice(0, 5), '... (total:', propertyIds.length, ')');
     
-    onApply('', propertyIds, drawnBoundary);
+    // Passar descrição da área selecionada
+    const locationText = `Área selecionada (${filteredProperties.length} imóveis)`;
+    
+    onApply(locationText, propertyIds, drawnBoundary);
     
     // NÃO fechar o mapa - apenas minimizar/ocultar
     setIsOpen(false);

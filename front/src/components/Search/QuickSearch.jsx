@@ -32,6 +32,8 @@ export default function QuickSearch() {
 
   const [activeModal, setActiveModal] = useState(null);
   const [showFloatingMap, setShowFloatingMap] = useState(false);
+  const [savedBoundary, setSavedBoundary] = useState(null);
+  const [filteredPropertyIds, setFilteredPropertyIds] = useState(null);
 
   // Buscar todas as propriedades para o mapa
   useEffect(() => {
@@ -50,37 +52,47 @@ export default function QuickSearch() {
   }, []);
 
   const handleLocationApply = (searchText, propertyIds, boundary) => {
-    console.log('📍 [QuickSearch] Área selecionada:', { searchText, boundary, propertyIds });
+    console.log('📍 [QuickSearch.handleLocationApply] CHAMADO!');
+    console.log('📍 [QuickSearch] searchText:', searchText);
+    console.log('📍 [QuickSearch] propertyIds:', propertyIds?.length || 0);
+    console.log('📍 [QuickSearch] boundary:', boundary);
+    
     setShowFloatingMap(false);
     
+    // Apenas salvar os dados da área selecionada, sem navegar
     if (propertyIds && propertyIds.length > 0) {
-      // Navegar para Explorar com os IDs filtrados
-      const params = new URLSearchParams();
-      params.append('mapFilter', 'true');
-      
-      // Incluir outros filtros existentes
-      if (filters.propertyTypes.length > 0) {
-        params.append('types', filters.propertyTypes.join(','));
-      }
-      if (filters.priceMin) params.append('priceMin', filters.priceMin);
-      if (filters.priceMax) params.append('priceMax', filters.priceMax);
-      if (filters.styles && filters.styles.length > 0) {
-        params.append('styles', filters.styles.join(','));
-      }
-      if (filters.bedrooms) params.append('bedrooms', filters.bedrooms);
-      if (filters.bathrooms) params.append('bathrooms', filters.bathrooms);
-      
-      navigate(`/explorar?${params.toString()}`, { 
-        state: { filteredPropertyIds: propertyIds } 
-      });
+      console.log('✅ [QuickSearch] Salvando área com', propertyIds.length, 'imóveis');
+      setFilteredPropertyIds(propertyIds);
+      setSavedBoundary(boundary);
+      setFilters(prev => ({ ...prev, location: searchText || 'Área selecionada' }));
+      console.log('✅ [QuickSearch] Área salva. Aguardando clique no botão Buscar.');
+    } else {
+      console.log('⚠️ [QuickSearch] Nenhum imóvel na área - limpando filtros');
+      // Limpar área se não houver imóveis
+      setFilteredPropertyIds(null);
+      setSavedBoundary(null);
+      setFilters(prev => ({ ...prev, location: searchText || '' }));
     }
   };
 
   const handleSearch = () => {
-    console.log('Buscando com filtros:', filters);
+    console.log('🔍 [QuickSearch.handleSearch] CHAMADO!');
+    console.log('🔍 [QuickSearch] Filtros:', filters);
+    console.log('📍 [QuickSearch] IDs filtrados do mapa:', filteredPropertyIds?.length || 0);
+    console.log('🗺️ [QuickSearch] Boundary salvo:', savedBoundary ? 'Sim' : 'Não');
     
-    // Criar query params para a URL
-    const params = new URLSearchParams();
+    // Debug: testar se a função está sendo chamada
+    console.log('⚡ [QuickSearch] Função handleSearch executando...');
+    
+    try {
+      // Criar query params para a URL
+      const params = new URLSearchParams();
+      
+      // Se houver área selecionada no mapa, incluir flag
+      if (filteredPropertyIds && filteredPropertyIds.length > 0) {
+        params.append('mapFilter', 'true');
+        console.log('✅ [QuickSearch] Incluindo área do mapa com', filteredPropertyIds.length, 'imóveis');
+      }
     
     if (filters.propertyTypes.length > 0) {
       params.append('types', filters.propertyTypes.join(','));
@@ -125,8 +137,21 @@ export default function QuickSearch() {
       params.append('styles', filters.styles.join(','));
     }
     
-    // Navegar para página de explorar com filtros
-    navigate(`/explorar?${params.toString()}`);
+    const navigationUrl = `/explorar?${params.toString()}`;
+    
+    // ✅ FIX: Não passar savedBoundary no state - ele tem referências circulares
+    // Passar apenas os IDs que são serializáveis
+    const navigationState = filteredPropertyIds ? { filteredPropertyIds } : undefined;
+    
+    console.log('🚀 [QuickSearch] Navegando para:', navigationUrl);
+    console.log('📦 [QuickSearch] Com state:', navigationState);
+    
+    // Navegar para página de explorar com filtros e área selecionada (se houver)
+    navigate(navigationUrl, { state: navigationState });
+    } catch (error) {
+      console.error('❌ [QuickSearch] Erro ao navegar:', error);
+      alert('Erro ao buscar imóveis. Tente novamente.');
+    }
   };
 
   const getPropertyTypeLabel = () => {
@@ -197,7 +222,10 @@ export default function QuickSearch() {
           <SearchField
             label="Preço"
             value={getPriceLabel()}
-            onClick={() => setActiveModal('price')}
+            onClick={() => {
+              console.log('💰 [QuickSearch] Abrindo modal de preço');
+              setActiveModal('price');
+            }}
             icon="💰"
           />
 
@@ -253,7 +281,7 @@ export default function QuickSearch() {
       <FloatingMapWindow
         onApply={handleLocationApply}
         initialSearchText={filters.location || ''}
-        initialBoundary={null}
+        initialBoundary={savedBoundary}
         allProperties={allProperties}
         isOpenExternal={showFloatingMap}
         onCloseExternal={() => setShowFloatingMap(false)}
