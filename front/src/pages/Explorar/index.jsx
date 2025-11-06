@@ -538,8 +538,8 @@ export default function Explorar() {
 
   return (
     <>
-      {/* Hero Section com Imagem de Fundo */}
-      <div className="relative w-full h-[170px] bg-gradient-to-br from-emerald-400 via-teal-500 to-cyan-600">
+      {/* Hero Section com Imagem de Fundo - Full width sem margin */}
+      <div className="relative w-full h-[170px] -mt-8 bg-gradient-to-br from-emerald-400 via-teal-500 to-cyan-600">
         {/* Imagem de Fundo */}
         <div 
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
