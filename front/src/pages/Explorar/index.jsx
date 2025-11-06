@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useSearchParams, useNavigate, useLocation, Link } from 'react-router-dom';
 import { MapPin, DollarSign, Home, Maximize2, X, Star } from 'lucide-react';
 import { api } from '../../api/client.js';
@@ -538,16 +538,16 @@ export default function Explorar() {
   return (
     <>
       {/* Hero Section com Imagem de Fundo - Full width sem margin */}
-      <div className="relative w-full h-[170px] -mt-8 bg-gradient-to-br from-emerald-400 via-teal-500 to-cyan-600">
+      <div className="relative w-full h-[200px] -mt-8 bg-gradient-to-br from-emerald-400 via-teal-500 to-cyan-600 overflow-hidden">
         {/* Imagem de Fundo */}
         <div 
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
-            backgroundImage: `url('https://images.unsplash.com/photo-1559827260-dc66d52bef19?q=80&w=2070')`,
+            backgroundImage: `url('/Explorar.png')`,
           }}
         >
-          {/* Overlay mais suave */}
-          <div className="absolute inset-0 bg-black/30"></div>
+          {/* Overlay */}
+          <div className="absolute inset-0 bg-black/20"></div>
         </div>
       </div>
 
@@ -577,14 +577,14 @@ export default function Explorar() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             {/* Title Section */}
             <div>
-              <h1 className="text-3xl font-bold text-slate-900 mb-1">
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent mb-2">
                 Explorar Imóveis
               </h1>
               <div className="flex items-center gap-2">
                 <p className="text-slate-600">
                   {loading ? (
                     <span className="inline-flex items-center gap-2">
-                      <svg className="animate-spin h-4 w-4 text-emerald-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <svg className="animate-spin h-4 w-4 text-cyan-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                       </svg>
@@ -592,7 +592,7 @@ export default function Explorar() {
                     </span>
                   ) : (
                     <>
-                      <span className="font-semibold text-slate-900">{totalItems || 0}</span> {totalItems === 1 ? 'imóvel encontrado' : 'imóveis encontrados'}
+                      <span className="font-bold text-cyan-600">{totalItems || 0}</span> {totalItems === 1 ? 'imóvel encontrado' : 'imóveis encontrados'}
                     </>
                   )}
                 </p>
@@ -600,15 +600,15 @@ export default function Explorar() {
             </div>
 
             {/* Sort Dropdown */}
-            <div className="flex items-center gap-3">
-              <label className="text-sm font-medium text-slate-700 whitespace-nowrap">
+            <div className="flex items-center gap-3 bg-white rounded-xl px-4 py-3 shadow-md border border-slate-200">
+              <label className="text-sm font-semibold text-slate-600 whitespace-nowrap">
                 Ordenar por:
               </label>
               <div className="relative">
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="appearance-none pl-4 pr-10 py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-medium text-slate-700 hover:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all cursor-pointer shadow-sm hover:shadow-md"
+                  className="appearance-none pl-3 pr-9 py-2 bg-gradient-to-r from-cyan-50 to-blue-50 border border-cyan-200 rounded-lg text-sm font-bold text-cyan-700 hover:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all cursor-pointer"
                 >
                   <option value="default">Padrão</option>
                   <option value="price-asc">Menor preço</option>
@@ -618,7 +618,7 @@ export default function Explorar() {
                   <option value="newest">Mais recentes</option>
                 </select>
                 {/* Custom arrow */}
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-cyan-600">
                   <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                   </svg>
@@ -768,14 +768,47 @@ function FilterSection({ title, icon, children, onClear, hasValue }) {
 
 // Property Card Component
 function PropertyCard({ property }) {
-  // Debug: log images
-  console.log('🖼️ PropertyCard:', {
-    title: property.title,
-    images: property.images,
-    firstImage: property.images?.[0],
-    imageType: typeof property.images,
-    isArray: Array.isArray(property.images)
-  });
+  const [currentImageIndex, setCurrentImageIndex] = React.useState(0);
+  
+  const images = property.images || [];
+  const hasMultipleImages = images.length > 1;
+
+  const handlePrevImage = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCurrentImageIndex((prev) => prev === 0 ? images.length - 1 : prev - 1);
+  };
+
+  const handleNextImage = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCurrentImageIndex((prev) => prev === images.length - 1 ? 0 : prev + 1);
+  };
+
+  const handleDotClick = (e, index) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCurrentImageIndex(index);
+  };
+
+  // Calcular quais dots mostrar (máximo 7)
+  const getDotIndices = () => {
+    if (images.length <= 7) {
+      return images.map((_, i) => i);
+    }
+    
+    const totalDots = 7;
+    const current = currentImageIndex;
+    const total = images.length;
+    
+    if (current < 3) {
+      return [0, 1, 2, 3, 4, 5, total - 1];
+    }
+    if (current > total - 4) {
+      return [0, total - 6, total - 5, total - 4, total - 3, total - 2, total - 1];
+    }
+    return [0, current - 2, current - 1, current, current + 1, current + 2, total - 1];
+  };
 
   return (
     <Link 
@@ -783,16 +816,56 @@ function PropertyCard({ property }) {
       className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow border border-slate-200 group cursor-pointer block"
     >
       {/* Image */}
-      <div className="relative h-[220px] overflow-hidden bg-slate-100">
+      <div className="relative h-[260px] overflow-hidden bg-slate-100">
         <img
-          src={property.images?.[0] || '/placeholder.svg'}
+          src={images[currentImageIndex] || '/placeholder.svg'}
           alt={property.title}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          className="w-full h-full object-cover transition-all duration-300"
           onError={(e) => {
-            console.error('❌ Erro ao carregar imagem:', property.images?.[0]);
             e.target.src = '/placeholder.svg';
           }}
         />
+
+        {/* Navigation Arrows */}
+        {hasMultipleImages && (
+          <>
+            <button
+              onClick={handlePrevImage}
+              className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/90 hover:bg-white shadow-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10"
+            >
+              <svg className="w-5 h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            
+            <button
+              onClick={handleNextImage}
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/90 hover:bg-white shadow-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10"
+            >
+              <svg className="w-5 h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </>
+        )}
+
+        {/* Dots Indicator */}
+        {hasMultipleImages && (
+          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1 z-10">
+            {getDotIndices().map((index, i) => (
+              <button
+                key={index}
+                onClick={(e) => handleDotClick(e, index)}
+                className={`h-1.5 rounded-full transition-all ${
+                  currentImageIndex === index 
+                    ? 'bg-white w-6' 
+                    : 'bg-white/60 w-1.5 hover:bg-white/80'
+                }`}
+              />
+            ))}
+          </div>
+        )}
+
         {/* Badge */}
         <div className="absolute top-3 left-3">
           <span className="px-3 py-1 bg-white rounded-full text-xs font-medium text-slate-700 shadow-sm">
@@ -806,56 +879,48 @@ function PropertyCard({ property }) {
       </div>
 
       {/* Content */}
-      <div className="p-4">
+      <div className="p-3">
         {/* Title */}
-        <h3 className="font-bold text-slate-900 text-lg mb-1 truncate">
+        <h3 className="font-bold text-slate-900 text-base mb-2 line-clamp-1">
           {property.title}
         </h3>
 
-        {/* Location */}
-        <div className="flex items-center gap-1 text-sm text-slate-600 mb-3">
-          <MapPin className="w-4 h-4 text-blue-600" />
-          <span>{property.city || property.address || 'Localização'}</span>
-        </div>
-
-        {/* Details */}
-        <div className="flex items-center gap-3 text-xs text-slate-600 mb-3">
-          {property.beds && (
-            <span className="flex items-center gap-1">
-              🛏️ {property.beds} quartos
-            </span>
-          )}
-          {property.baths && (
-            <span className="flex items-center gap-1">
-              🚿 {property.baths} banheiros
-            </span>
-          )}
+        {/* Location and Area */}
+        <div className="flex items-center justify-between gap-2 text-sm text-slate-600 mb-3">
+          <div className="flex items-center gap-1.5 flex-1 min-w-0">
+            <MapPin className="w-3.5 h-3.5 text-cyan-600 flex-shrink-0" />
+            <span className="truncate">{property.city || property.address || 'Localização'}</span>
+          </div>
+          
           {property.area && (
-            <span className="flex items-center gap-1">
-              📏 {property.area} m²
-            </span>
+            <div className="flex items-center gap-1 flex-shrink-0">
+              <svg className="w-3.5 h-3.5 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+              </svg>
+              <span className="font-medium text-xs">{property.area}m²</span>
+            </div>
           )}
         </div>
 
-        {/* Price */}
-        <div className="mb-3">
-          <div className="flex items-baseline gap-1">
-            <span className="text-2xl font-bold text-emerald-600">
+        {/* Price and Rating Row */}
+        <div className="flex items-center justify-between pt-2 border-t border-slate-100">
+          {/* Price */}
+          <div>
+            <span className="text-xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
               {formatCurrency(property.price)}
             </span>
           </div>
-        </div>
 
-        {/* Rating */}
-        {property.rating && (
-          <div className="flex items-center gap-1">
-            <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-            <span className="font-semibold text-slate-900">
-              {property.rating}
-            </span>
-            <span className="text-slate-500 text-sm">/5</span>
-          </div>
-        )}
+          {/* Rating */}
+          {property.rating && (
+            <div className="flex items-center gap-1 bg-amber-50 px-2 py-0.5 rounded-full">
+              <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+              <span className="font-bold text-slate-900 text-xs">
+                {property.rating}
+              </span>
+            </div>
+          )}
+        </div>
       </div>
     </Link>
   );
@@ -891,8 +956,8 @@ function getPropertyTypeLabel(type) {
 function PropertyCardSkeleton() {
   return (
     <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-200">
-      <div className="h-[220px] bg-slate-200 animate-pulse" />
-      <div className="p-4 space-y-3">
+      <div className="h-[260px] bg-slate-200 animate-pulse" />
+      <div className="p-3 space-y-2">
         <div className="h-6 bg-slate-200 rounded animate-pulse w-3/4" />
         <div className="h-4 bg-slate-200 rounded animate-pulse w-1/2" />
         <div className="h-8 bg-slate-200 rounded animate-pulse w-2/3" />

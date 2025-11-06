@@ -15,7 +15,6 @@ import Amenities from '../../components/PropertyDetails/Amenities.jsx';
 import Description from '../../components/PropertyDetails/Description.jsx';
 import ContactCard from '../../components/PropertyDetails/ContactCard.jsx';
 import LocationMap from '../../components/PropertyDetails/LocationMap.jsx';
-import NearbyPlacesSection from '../../components/PropertyDetails/NearbyPlacesSection.jsx';
 
 export default function PropertyDetails() {
   const { id } = useParams();
@@ -113,7 +112,7 @@ export default function PropertyDetails() {
       />
 
       {/* Main Content Area */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-[1600px] mx-auto px-3 sm:px-4 lg:px-6 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Main Info */}
           <div className="lg:col-span-2">
@@ -153,11 +152,6 @@ export default function PropertyDetails() {
 
           {/* Right Column - Contact Card (Sticky) */}
           <ContactCard property={property} formatCurrency={formatCurrency} />
-        </div>
-
-        {/* Seção: O que há por perto */}
-        <div className="mt-12">
-          <NearbyPlacesSection nearbyPlaces={property.nearbyPlaces} />
         </div>
       </div>
     </div>

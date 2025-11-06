@@ -1,4 +1,4 @@
-import { MapPin, DollarSign, Home, Sliders, Bed, Search, Maximize2 } from 'lucide-react';
+import { MapPin, DollarSign, Home, Sliders, Bed, Search, Maximize2, Sparkles } from 'lucide-react';
 
 export default function TopFiltersBar({ filters, onFilterClick }) {
   const getLocationText = () => {
@@ -62,6 +62,16 @@ export default function TopFiltersBar({ filters, onFilterClick }) {
     return 'Quartos e banheiros';
   };
 
+  const getStyleText = () => {
+    if (filters.styles?.length > 0) {
+      if (filters.styles.length === 1) {
+        return filters.styles[0];
+      }
+      return `${filters.styles.length} estilos`;
+    }
+    return 'Estilo';
+  };
+
   const formatPrice = (value) => {
     if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
     if (value >= 1000) return `${(value / 1000).toFixed(0)}k`;
@@ -80,29 +90,41 @@ export default function TopFiltersBar({ filters, onFilterClick }) {
         return filters.areaMin || filters.areaMax;
       case 'rooms':
         return filters.bedrooms || filters.bathrooms;
+      case 'style':
+        return filters.styles?.length > 0;
       default:
         return false;
     }
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-xl border border-slate-200/80 overflow-hidden">
-      <div className="flex items-stretch">
+    <div className="bg-white rounded-2xl shadow-2xl border border-slate-200/50 overflow-hidden backdrop-blur-sm">
+      <div className="flex items-stretch overflow-x-auto">
         {/* Location Filter */}
         <button
           onClick={() => onFilterClick('location')}
-          className={`group relative flex-1 px-5 py-4 transition-all duration-200 hover:bg-slate-50 border-r border-slate-200 ${
-            hasActiveFilter('location') ? 'bg-slate-50' : ''
+          className={`group relative flex-1 min-w-[140px] px-2 sm:px-3 lg:px-4 py-3.5 transition-all duration-200 border-r border-slate-100 ${
+            hasActiveFilter('location') 
+              ? 'bg-gradient-to-br from-cyan-50 to-blue-50' 
+              : 'hover:bg-slate-50'
           }`}
         >
-          <div className="flex items-center gap-3">
-            <MapPin className={`w-5 h-5 flex-shrink-0 transition-colors ${
-              hasActiveFilter('location') ? 'text-blue-600' : 'text-slate-400'
-            }`} />
-            <div className="text-left min-w-0">
-              <div className="text-xs font-medium text-slate-500 mb-0.5">Localização</div>
-              <div className={`text-sm font-semibold truncate transition-colors ${
-                hasActiveFilter('location') ? 'text-slate-900' : 'text-slate-600'
+          <div className="flex items-center gap-2">
+            <div className={`p-2 rounded-lg transition-all flex-shrink-0 ${
+              hasActiveFilter('location') 
+                ? 'bg-gradient-to-br from-cyan-500 to-blue-500 shadow-lg shadow-cyan-500/30' 
+                : 'bg-slate-100 group-hover:bg-cyan-50'
+            }`}>
+              <MapPin className={`w-4 h-4 transition-colors ${
+                hasActiveFilter('location') ? 'text-white' : 'text-slate-500 group-hover:text-cyan-600'
+              }`} />
+            </div>
+            <div className="text-left min-w-0 flex-1">
+              <div className="text-xs font-medium text-slate-500 mb-0.5 hidden sm:block">Localização</div>
+              <div className={`text-sm font-bold truncate transition-colors ${
+                hasActiveFilter('location') 
+                  ? 'bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent' 
+                  : 'text-slate-700'
               }`}>
                 {getLocationText()}
               </div>
@@ -113,18 +135,28 @@ export default function TopFiltersBar({ filters, onFilterClick }) {
         {/* Price Filter */}
         <button
           onClick={() => onFilterClick('price')}
-          className={`group relative flex-1 px-5 py-4 transition-all duration-200 hover:bg-slate-50 border-r border-slate-200 ${
-            hasActiveFilter('price') ? 'bg-slate-50' : ''
+          className={`group relative flex-1 min-w-[140px] px-2 sm:px-3 lg:px-4 py-3.5 transition-all duration-200 border-r border-slate-100 ${
+            hasActiveFilter('price') 
+              ? 'bg-gradient-to-br from-cyan-50 to-blue-50' 
+              : 'hover:bg-slate-50'
           }`}
         >
-          <div className="flex items-center gap-3">
-            <DollarSign className={`w-5 h-5 flex-shrink-0 transition-colors ${
-              hasActiveFilter('price') ? 'text-blue-600' : 'text-slate-400'
-            }`} />
-            <div className="text-left min-w-0">
-              <div className="text-xs font-medium text-slate-500 mb-0.5">Preço</div>
-              <div className={`text-sm font-semibold truncate transition-colors ${
-                hasActiveFilter('price') ? 'text-slate-900' : 'text-slate-600'
+          <div className="flex items-center gap-2">
+            <div className={`p-2 rounded-lg transition-all flex-shrink-0 ${
+              hasActiveFilter('price') 
+                ? 'bg-gradient-to-br from-cyan-500 to-blue-500 shadow-lg shadow-cyan-500/30' 
+                : 'bg-slate-100 group-hover:bg-cyan-50'
+            }`}>
+              <DollarSign className={`w-4 h-4 transition-colors ${
+                hasActiveFilter('price') ? 'text-white' : 'text-slate-500 group-hover:text-cyan-600'
+              }`} />
+            </div>
+            <div className="text-left min-w-0 flex-1">
+              <div className="text-xs font-medium text-slate-500 mb-0.5 hidden sm:block">Preço</div>
+              <div className={`text-sm font-bold truncate transition-colors ${
+                hasActiveFilter('price') 
+                  ? 'bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent' 
+                  : 'text-slate-700'
               }`}>
                 {getPriceText()}
               </div>
@@ -135,18 +167,28 @@ export default function TopFiltersBar({ filters, onFilterClick }) {
         {/* Property Type Filter */}
         <button
           onClick={() => onFilterClick('propertyType')}
-          className={`group relative flex-1 px-5 py-4 transition-all duration-200 hover:bg-slate-50 border-r border-slate-200 ${
-            hasActiveFilter('propertyType') ? 'bg-slate-50' : ''
+          className={`group relative flex-1 min-w-[120px] px-2 sm:px-3 lg:px-4 py-3.5 transition-all duration-200 border-r border-slate-100 ${
+            hasActiveFilter('propertyType') 
+              ? 'bg-gradient-to-br from-cyan-50 to-blue-50' 
+              : 'hover:bg-slate-50'
           }`}
         >
-          <div className="flex items-center gap-3">
-            <Home className={`w-5 h-5 flex-shrink-0 transition-colors ${
-              hasActiveFilter('propertyType') ? 'text-blue-600' : 'text-slate-400'
-            }`} />
-            <div className="text-left min-w-0">
-              <div className="text-xs font-medium text-slate-500 mb-0.5">Tipo</div>
-              <div className={`text-sm font-semibold truncate transition-colors ${
-                hasActiveFilter('propertyType') ? 'text-slate-900' : 'text-slate-600'
+          <div className="flex items-center gap-2">
+            <div className={`p-2 rounded-lg transition-all flex-shrink-0 ${
+              hasActiveFilter('propertyType') 
+                ? 'bg-gradient-to-br from-cyan-500 to-blue-500 shadow-lg shadow-cyan-500/30' 
+                : 'bg-slate-100 group-hover:bg-cyan-50'
+            }`}>
+              <Home className={`w-4 h-4 transition-colors ${
+                hasActiveFilter('propertyType') ? 'text-white' : 'text-slate-500 group-hover:text-cyan-600'
+              }`} />
+            </div>
+            <div className="text-left min-w-0 flex-1">
+              <div className="text-xs font-medium text-slate-500 mb-0.5 hidden sm:block">Tipo</div>
+              <div className={`text-sm font-bold truncate transition-colors ${
+                hasActiveFilter('propertyType') 
+                  ? 'bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent' 
+                  : 'text-slate-700'
               }`}>
                 {getPropertyTypeText()}
               </div>
@@ -157,18 +199,28 @@ export default function TopFiltersBar({ filters, onFilterClick }) {
         {/* Area Filter */}
         <button
           onClick={() => onFilterClick('area')}
-          className={`group relative flex-1 px-5 py-4 transition-all duration-200 hover:bg-slate-50 border-r border-slate-200 ${
-            hasActiveFilter('area') ? 'bg-slate-50' : ''
+          className={`group relative flex-1 min-w-[120px] px-2 sm:px-3 lg:px-4 py-3.5 transition-all duration-200 border-r border-slate-100 ${
+            hasActiveFilter('area') 
+              ? 'bg-gradient-to-br from-cyan-50 to-blue-50' 
+              : 'hover:bg-slate-50'
           }`}
         >
-          <div className="flex items-center gap-3">
-            <Maximize2 className={`w-5 h-5 flex-shrink-0 transition-colors ${
-              hasActiveFilter('area') ? 'text-blue-600' : 'text-slate-400'
-            }`} />
-            <div className="text-left min-w-0">
-              <div className="text-xs font-medium text-slate-500 mb-0.5">Área</div>
-              <div className={`text-sm font-semibold truncate transition-colors ${
-                hasActiveFilter('area') ? 'text-slate-900' : 'text-slate-600'
+          <div className="flex items-center gap-2">
+            <div className={`p-2 rounded-lg transition-all flex-shrink-0 ${
+              hasActiveFilter('area') 
+                ? 'bg-gradient-to-br from-cyan-500 to-blue-500 shadow-lg shadow-cyan-500/30' 
+                : 'bg-slate-100 group-hover:bg-cyan-50'
+            }`}>
+              <Maximize2 className={`w-4 h-4 transition-colors ${
+                hasActiveFilter('area') ? 'text-white' : 'text-slate-500 group-hover:text-cyan-600'
+              }`} />
+            </div>
+            <div className="text-left min-w-0 flex-1">
+              <div className="text-xs font-medium text-slate-500 mb-0.5 hidden sm:block">Área</div>
+              <div className={`text-sm font-bold truncate transition-colors ${
+                hasActiveFilter('area') 
+                  ? 'bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent' 
+                  : 'text-slate-700'
               }`}>
                 {getAreaText()}
               </div>
@@ -179,20 +231,62 @@ export default function TopFiltersBar({ filters, onFilterClick }) {
         {/* Rooms Filter */}
         <button
           onClick={() => onFilterClick('rooms')}
-          className={`group relative flex-1 px-5 py-4 transition-all duration-200 hover:bg-slate-50 border-r border-slate-200 ${
-            hasActiveFilter('rooms') ? 'bg-slate-50' : ''
+          className={`group relative flex-1 min-w-[140px] px-2 sm:px-3 lg:px-4 py-3.5 transition-all duration-200 border-r border-slate-100 ${
+            hasActiveFilter('rooms') 
+              ? 'bg-gradient-to-br from-cyan-50 to-blue-50' 
+              : 'hover:bg-slate-50'
           }`}
         >
-          <div className="flex items-center gap-3">
-            <Bed className={`w-5 h-5 flex-shrink-0 transition-colors ${
-              hasActiveFilter('rooms') ? 'text-blue-600' : 'text-slate-400'
-            }`} />
-            <div className="text-left min-w-0">
-              <div className="text-xs font-medium text-slate-500 mb-0.5">Quartos</div>
-              <div className={`text-sm font-semibold truncate transition-colors ${
-                hasActiveFilter('rooms') ? 'text-slate-900' : 'text-slate-600'
+          <div className="flex items-center gap-2">
+            <div className={`p-2 rounded-lg transition-all flex-shrink-0 ${
+              hasActiveFilter('rooms') 
+                ? 'bg-gradient-to-br from-cyan-500 to-blue-500 shadow-lg shadow-cyan-500/30' 
+                : 'bg-slate-100 group-hover:bg-cyan-50'
+            }`}>
+              <Bed className={`w-4 h-4 transition-colors ${
+                hasActiveFilter('rooms') ? 'text-white' : 'text-slate-500 group-hover:text-cyan-600'
+              }`} />
+            </div>
+            <div className="text-left min-w-0 flex-1">
+              <div className="text-xs font-medium text-slate-500 mb-0.5 hidden sm:block">Quartos</div>
+              <div className={`text-sm font-bold truncate transition-colors ${
+                hasActiveFilter('rooms') 
+                  ? 'bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent' 
+                  : 'text-slate-700'
               }`}>
                 {getRoomsText()}
+              </div>
+            </div>
+          </div>
+        </button>
+
+        {/* Style Filter */}
+        <button
+          onClick={() => onFilterClick('style')}
+          className={`group relative flex-1 min-w-[120px] px-2 sm:px-3 lg:px-4 py-3.5 transition-all duration-200 border-r border-slate-100 ${
+            hasActiveFilter('style') 
+              ? 'bg-gradient-to-br from-cyan-50 to-blue-50' 
+              : 'hover:bg-slate-50'
+          }`}
+        >
+          <div className="flex items-center gap-2">
+            <div className={`p-2 rounded-lg transition-all flex-shrink-0 ${
+              hasActiveFilter('style') 
+                ? 'bg-gradient-to-br from-cyan-500 to-blue-500 shadow-lg shadow-cyan-500/30' 
+                : 'bg-slate-100 group-hover:bg-cyan-50'
+            }`}>
+              <Sparkles className={`w-4 h-4 transition-colors ${
+                hasActiveFilter('style') ? 'text-white' : 'text-slate-500 group-hover:text-cyan-600'
+              }`} />
+            </div>
+            <div className="text-left min-w-0 flex-1">
+              <div className="text-xs font-medium text-slate-500 mb-0.5 hidden sm:block">Estilo</div>
+              <div className={`text-sm font-bold truncate transition-colors ${
+                hasActiveFilter('style') 
+                  ? 'bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent' 
+                  : 'text-slate-700'
+              }`}>
+                {getStyleText()}
               </div>
             </div>
           </div>
@@ -201,17 +295,42 @@ export default function TopFiltersBar({ filters, onFilterClick }) {
         {/* More Filters Button */}
         <button
           onClick={() => onFilterClick('more')}
-          className="group px-5 py-4 transition-all duration-200 hover:bg-slate-50 border-r border-slate-200"
+          className={`group relative flex-1 min-w-[80px] px-2 sm:px-3 lg:px-4 py-3.5 transition-all duration-200 border-r border-slate-100 ${
+            hasActiveFilter('more') 
+              ? 'bg-gradient-to-br from-cyan-50 to-blue-50' 
+              : 'hover:bg-slate-50'
+          }`}
         >
-          <Sliders className="w-5 h-5 text-slate-400 group-hover:text-blue-600 transition-colors" />
+          <div className="flex items-center gap-2">
+            <div className={`p-2 rounded-lg transition-all flex-shrink-0 ${
+              hasActiveFilter('more') 
+                ? 'bg-gradient-to-br from-cyan-500 to-blue-500 shadow-lg shadow-cyan-500/30' 
+                : 'bg-slate-100 group-hover:bg-cyan-50'
+            }`}>
+              <Sliders className={`w-4 h-4 transition-colors ${
+                hasActiveFilter('more') ? 'text-white' : 'text-slate-500 group-hover:text-cyan-600'
+              }`} />
+            </div>
+            <div className="text-left min-w-0 flex-1 hidden sm:block">
+              <div className="text-xs font-medium text-slate-500 mb-0.5">Mais</div>
+              <div className={`text-sm font-bold truncate transition-colors ${
+                hasActiveFilter('more') 
+                  ? 'bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent' 
+                  : 'text-slate-700'
+              }`}>
+                Filtros
+              </div>
+            </div>
+          </div>
         </button>
 
         {/* Search Button */}
         <button
           onClick={() => onFilterClick('search')}
-          className="flex items-center justify-center gap-2 px-8 py-4 bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-all duration-200"
+          className="flex items-center justify-center gap-2 px-4 sm:px-6 lg:px-8 py-3.5 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-bold transition-all duration-200 shadow-lg shadow-cyan-500/30 hover:shadow-xl hover:shadow-cyan-500/40 whitespace-nowrap min-w-fit"
         >
-          <span>Search</span>
+          <Search className="w-4 h-4 flex-shrink-0" />
+          <span className="hidden sm:inline">Buscar</span>
         </button>
       </div>
     </div>

@@ -177,39 +177,12 @@ export default function FiltersModal({ isOpen, onClose, filters, onApplyFilters 
           <div className="p-6 max-h-[calc(100vh-180px)] overflow-y-auto">
             <div className="space-y-8">
               
-              {/* === SEÇÃO: CARACTERÍSTICAS DO IMÓVEL === */}
               <div>
                 <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
                   <Home size={20} className="text-blue-600" />
                   Características do Imóvel
                 </h3>
                 <div className="space-y-6">
-
-                  {/* Area */}
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-900 mb-3">
-                      <div className="flex items-center gap-2">
-                        <Maximize2 size={18} />
-                        Área (m²)
-                      </div>
-                    </label>
-                    <div className="grid grid-cols-2 gap-3 max-w-md">
-                      <input
-                        type="number"
-                        placeholder="Mínimo"
-                        value={localFilters.areaMin || ''}
-                        onChange={(e) => updateLocalFilter('areaMin', e.target.value)}
-                        className="px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                      <input
-                        type="number"
-                        placeholder="Máximo"
-                        value={localFilters.areaMax || ''}
-                        onChange={(e) => updateLocalFilter('areaMax', e.target.value)}
-                        className="px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                    </div>
-                  </div>
 
                   {/* Vagas de Garagem - NOVO SISTEMA */}
                   <div className="pb-6 border-b border-slate-200">
