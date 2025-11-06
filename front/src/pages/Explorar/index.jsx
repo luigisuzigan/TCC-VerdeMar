@@ -813,113 +813,128 @@ function PropertyCard({ property }) {
   return (
     <Link 
       to={`/property/${property.id}`}
-      className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow border border-slate-200 group cursor-pointer block"
+      className="group block h-full"
     >
-      {/* Image */}
-      <div className="relative h-[260px] overflow-hidden bg-slate-100">
-        <img
-          src={images[currentImageIndex] || '/placeholder.svg'}
-          alt={property.title}
-          className="w-full h-full object-cover transition-all duration-300"
-          onError={(e) => {
-            e.target.src = '/placeholder.svg';
-          }}
-        />
-
-        {/* Navigation Arrows */}
-        {hasMultipleImages && (
-          <>
-            <button
-              onClick={handlePrevImage}
-              className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/90 hover:bg-white shadow-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10"
-            >
-              <svg className="w-5 h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-            
-            <button
-              onClick={handleNextImage}
-              className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/90 hover:bg-white shadow-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10"
-            >
-              <svg className="w-5 h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
-          </>
-        )}
-
-        {/* Dots Indicator */}
-        {hasMultipleImages && (
-          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1 z-10">
-            {getDotIndices().map((index, i) => (
-              <button
-                key={index}
-                onClick={(e) => handleDotClick(e, index)}
-                className={`h-1.5 rounded-full transition-all ${
-                  currentImageIndex === index 
-                    ? 'bg-white w-6' 
-                    : 'bg-white/60 w-1.5 hover:bg-white/80'
-                }`}
-              />
-            ))}
-          </div>
-        )}
-
-        {/* Badge */}
-        <div className="absolute top-3 left-3">
-          <span className="px-3 py-1 bg-white rounded-full text-xs font-medium text-slate-700 shadow-sm">
-            {getPropertyTypeLabel(property.type)}
-          </span>
-        </div>
-        {/* Favorite Button */}
-        <div className="absolute top-3 right-3">
-          <FavoriteButton property={property} size="sm" />
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="p-3">
-        {/* Title */}
-        <h3 className="font-bold text-slate-900 text-base mb-2 line-clamp-1">
-          {property.title}
-        </h3>
-
-        {/* Location and Area */}
-        <div className="flex items-center justify-between gap-2 text-sm text-slate-600 mb-3">
-          <div className="flex items-center gap-1.5 flex-1 min-w-0">
-            <MapPin className="w-3.5 h-3.5 text-cyan-600 flex-shrink-0" />
-            <span className="truncate">{property.city || property.address || 'Localização'}</span>
-          </div>
+      <div className="relative rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.02] h-full">
+        {/* Imagem */}
+        <div className="relative h-[400px] overflow-hidden">
+          <img
+            src={images[currentImageIndex] || '/placeholder.svg'}
+            alt={property.title}
+            className="w-full h-full object-cover object-bottom transition-transform duration-700 group-hover:scale-110"
+            onError={(e) => {
+              e.target.src = '/placeholder.svg';
+            }}
+          />
           
-          {property.area && (
-            <div className="flex items-center gap-1 flex-shrink-0">
-              <svg className="w-3.5 h-3.5 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
-              </svg>
-              <span className="font-medium text-xs">{property.area}m²</span>
+          {/* Overlay Gradient - Só na parte de baixo, mais baixo ainda */}
+          <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-black/50 to-transparent pointer-events-none" />
+
+          {/* Navigation Arrows */}
+          {hasMultipleImages && (
+            <>
+              <button
+                onClick={handlePrevImage}
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 hover:bg-white shadow-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all z-20"
+              >
+                <svg className="w-5 h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              
+              <button
+                onClick={handleNextImage}
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 hover:bg-white shadow-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all z-20"
+              >
+                <svg className="w-5 h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </>
+          )}
+
+          {/* Dots Indicator */}
+          {hasMultipleImages && (
+            <div className="absolute top-4 left-1/2 -translate-x-1/2 flex gap-1.5 z-20">
+              {getDotIndices().map((index, i) => (
+                <button
+                  key={index}
+                  onClick={(e) => handleDotClick(e, index)}
+                  className={`h-1.5 rounded-full transition-all ${
+                    currentImageIndex === index 
+                      ? 'bg-white w-6' 
+                      : 'bg-white/60 w-1.5 hover:bg-white/80'
+                  }`}
+                />
+              ))}
             </div>
           )}
+
+          {/* Favorite Button */}
+          <div className="absolute top-4 right-4 z-20">
+            <FavoriteButton property={property} size="sm" />
+          </div>
         </div>
 
-        {/* Price and Rating Row */}
-        <div className="flex items-center justify-between pt-2 border-t border-slate-100">
-          {/* Price */}
-          <div>
-            <span className="text-xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
-              {formatCurrency(property.price)}
-            </span>
+        {/* Info Card - Mais compacto */}
+        <div className="absolute bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md p-3 m-4 rounded-2xl shadow-xl z-10">
+          <div className="flex items-start justify-between mb-2">
+            {/* Título e Localização */}
+            <div className="flex-1">
+              <h3 className="text-base font-bold text-slate-800 mb-0.5 line-clamp-1 group-hover:text-blue-600 transition-colors">
+                {property.title}
+              </h3>
+              <p className="text-xs text-slate-600 mb-2">
+                {property.city}, {property.country || 'Brasil'}
+              </p>
+            </div>
+
+            {/* Preço - Lado direito */}
+            <div className="text-right ml-4">
+              <p className="text-[10px] text-slate-500 mb-0.5">A partir de</p>
+              <p className="text-xl font-bold text-blue-600 whitespace-nowrap">
+                {formatShortPrice(property.price)}
+              </p>
+            </div>
           </div>
 
-          {/* Rating */}
-          {property.rating && (
-            <div className="flex items-center gap-1 bg-amber-50 px-2 py-0.5 rounded-full">
-              <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-              <span className="font-bold text-slate-900 text-xs">
-                {property.rating}
-              </span>
-            </div>
-          )}
+          {/* Características - Ícones */}
+          <div className="flex items-center gap-2.5 text-xs text-slate-600">
+            {property.beds > 0 && (
+              <div className="flex items-center gap-1.5">
+                <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+                <span className="whitespace-nowrap">{property.beds} {property.beds === 1 ? 'quarto' : 'quartos'}</span>
+              </div>
+            )}
+            
+            {property.baths > 0 && (
+              <div className="flex items-center gap-1.5">
+                <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
+                </svg>
+                <span className="whitespace-nowrap">{property.baths} {property.baths === 1 ? 'banheiro' : 'banheiros'}</span>
+              </div>
+            )}
+            
+            {property.area > 0 && (
+              <div className="flex items-center gap-1.5">
+                <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                </svg>
+                <span className="whitespace-nowrap">{property.area}m²</span>
+              </div>
+            )}
+
+            {/* Rating */}
+            {property.rating && (
+              <div className="flex items-center gap-1.5 ml-auto">
+                <Star className="w-4 h-4 fill-amber-400 text-amber-400 flex-shrink-0" />
+                <span className="whitespace-nowrap font-semibold">{property.rating}</span>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </Link>
@@ -934,6 +949,18 @@ function formatCurrency(value) {
     currency: 'BRL',
     minimumFractionDigits: 0,
   }).format(value);
+}
+
+// Helper function to format short price (ex: R$ 850k)
+function formatShortPrice(value) {
+  if (!value) return 'R$ 0';
+  if (value >= 1000000) {
+    return `R$ ${(value / 1000000).toFixed(1)}mi`;
+  }
+  if (value >= 1000) {
+    return `R$ ${(value / 1000).toFixed(0)}k`;
+  }
+  return formatCurrency(value);
 }
 
 // Helper function to get property type label
