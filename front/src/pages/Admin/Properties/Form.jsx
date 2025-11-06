@@ -41,7 +41,7 @@ const empty = {
   area: 0,
   beds: 0,
   baths: 0,
-  guests: 1,
+  // guests: removido - campo não existe mais no schema
   suites: 0,
   parkingSpaces: 0,
   floor: null,
@@ -60,6 +60,7 @@ const empty = {
   rating: 0,
   published: false
   // featured: removido - campo não existe no schema
+  // reviewCount: removido - campo não existe no schema
 };
 
 const CATEGORIES = [
@@ -319,9 +320,7 @@ export default function AdminPropertyForm() {
       if (!model.area || parseInt(model.area) <= 0) {
         validationErrors.push('Área deve ser maior que zero');
       }
-      if (model.guests && parseInt(model.guests) < 1) {
-        validationErrors.push('Número de hóspedes deve ser pelo menos 1');
-      }
+      // guests: removido - campo não existe mais no schema
       
       if (validationErrors.length > 0) {
         setError(validationErrors.join('; '));
@@ -351,7 +350,7 @@ export default function AdminPropertyForm() {
         area: parseInt(model.area),
         beds: parseInt(model.beds) || 0,
         baths: parseInt(model.baths) || 0,
-        guests: parseInt(model.guests) || 1, // Default para 1 se vazio
+        // guests: removido - campo não existe mais no schema
         
         // Campos opcionais - texto
         description: model.description || '',
@@ -398,7 +397,7 @@ export default function AdminPropertyForm() {
         area: payload.area,
         beds: payload.beds,
         baths: payload.baths,
-        guests: payload.guests,
+        // guests: removido
         imagesCount: images.length,
         amenitiesCount: selectedAmenities.length,
         naturalConditionsCount: selectedNaturalConditions.length
@@ -879,24 +878,7 @@ export default function AdminPropertyForm() {
               </div>
             )}
 
-            {/* Hóspedes - OBRIGATÓRIO */}
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Capacidade de Hóspedes <span className="text-red-500">*</span>
-              </label>
-              <input 
-                type="number"
-                className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                value={model.guests || ''} 
-                onChange={(e) => update('guests', e.target.value)}
-                min={1}
-                placeholder="4"
-                required
-              />
-              <p className="mt-1 text-xs text-slate-500">
-                Quantas pessoas podem se hospedar no imóvel
-              </p>
-            </div>
+            {/* guests: removido - campo não existe mais no schema */}
 
             {/* Suítes - Condicional */}
             {shouldShowField(selectedType, 'suites') && (
@@ -1336,7 +1318,7 @@ export default function AdminPropertyForm() {
               Campos obrigatórios marcados com <span className="text-red-600">*</span>
             </p>
             <p className="text-xs text-blue-700 mt-1">
-              Certifique-se de preencher: Título, Cidade, Preço, Área, Quartos, Banheiros e Hóspedes antes de salvar.
+              Certifique-se de preencher: Título, Cidade, Preço, Área, Quartos e Banheiros antes de salvar.
             </p>
           </div>
         </div>

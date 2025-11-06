@@ -185,7 +185,7 @@ const propertyValidators = [
   body('area').isInt({ min: 0 }).toInt(),
   body('beds').isInt({ min: 0 }).toInt(),
   body('baths').isInt({ min: 0 }).toInt(),
-  body('guests').isInt({ min: 0 }).toInt(),
+  // guests: removido - campo não existe mais no schema
   body('suites').optional().isInt({ min: 0 }).toInt(),
   body('parkingSpaces').optional().isInt({ min: 0 }).toInt(),
   body('floor').optional().isInt({ min: 0 }).toInt(),
@@ -202,9 +202,9 @@ const propertyValidators = [
   body('images').optional().isString(), // JSON string
   body('mainImage').optional().isString(),
   body('rating').optional().isFloat({ min: 0, max: 10 }).toFloat(),
-  body('reviewCount').optional().isInt({ min: 0 }).toInt(),
+  // reviewCount: removido - campo não existe mais no schema
   body('published').optional().isBoolean().toBoolean(),
-  body('featured').optional().isBoolean().toBoolean(),
+  // featured: removido - campo não existe mais no schema
 ];
 
 router.post('/', authMiddleware, requireAdmin, propertyValidators, async (req, res) => {
@@ -245,7 +245,7 @@ router.post('/', authMiddleware, requireAdmin, propertyValidators, async (req, r
       area: data.area,
       beds: data.beds,
       baths: data.baths,
-      guests: data.guests,
+      // guests: removido
       userId: data.userId
     });
     

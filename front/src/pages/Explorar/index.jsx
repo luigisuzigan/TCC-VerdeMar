@@ -1,9 +1,8 @@
-import { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useSearchParams, useNavigate, useLocation, Link } from 'react-router-dom';
 import { MapPin, DollarSign, Home, Maximize2, X, Star } from 'lucide-react';
 import { api } from '../../api/client.js';
 import { parseFiltersFromUrl, getFilterDescriptions, countActiveFilters, filtersToUrlParams } from '../../utils/filterHelpers.js';
-import { getPropertyMainImage } from '../../utils/imageHelpers.js';
 import FavoriteButton from '../../components/FavoriteButton';
 import ActiveFilters from '../../components/Explorar/ActiveFilters.jsx';
 import Pagination from '../../components/Explorar/Pagination.jsx';
@@ -539,22 +538,22 @@ export default function Explorar() {
   return (
     <>
       {/* Hero Section com Imagem de Fundo - Full width sem margin */}
-      <div className="relative w-full h-[240px] -mt-8 bg-gradient-to-r from-slate-900 to-slate-800">
+      <div className="relative w-full h-[200px] -mt-8 bg-gradient-to-br from-emerald-400 via-teal-500 to-cyan-600 overflow-hidden">
         {/* Imagem de Fundo */}
         <div 
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
-            backgroundImage: `url('https://images.unsplash.com/photo-1559827260-dc66d52bef19?q=80&w=2070')`,
+            backgroundImage: `url('/Explorar.png')`,
           }}
         >
-          {/* Overlay gradiente suave */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/10 to-transparent"></div>
+          {/* Overlay */}
+          <div className="absolute inset-0 bg-black/20"></div>
         </div>
       </div>
 
       {/* Filters Bar - Card branco sobre a imagem (overlap) */}
-      <div className="relative -mt-16 px-4 pb-6 z-10">
-        <div ref={topFiltersRef} className="mx-auto max-w-7xl">
+      <div className="relative -mt-10 px-4 pb-6">
+        <div ref={topFiltersRef} className="mx-auto max-w-6xl">
           <TopFiltersBar
             filters={filters}
             onFilterClick={handleFilterClick}
@@ -563,7 +562,7 @@ export default function Explorar() {
       </div>
 
       {/* Main Content */}
-      <main className="mx-auto max-w-[1600px] px-8 py-4">
+      <main className="mx-auto max-w-[1600px] px-4 py-2">
         {/* Active Filters Pills */}
         <ActiveFilters
           filters={filters}
@@ -578,11 +577,14 @@ export default function Explorar() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             {/* Title Section */}
             <div>
-              <div className="flex items-center gap-3">
-                <p className="text-lg text-slate-600">
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent mb-2">
+                Explorar Imóveis
+              </h1>
+              <div className="flex items-center gap-2">
+                <p className="text-slate-600">
                   {loading ? (
                     <span className="inline-flex items-center gap-2">
-                      <svg className="animate-spin h-4 w-4 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <svg className="animate-spin h-4 w-4 text-cyan-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                       </svg>
@@ -590,7 +592,7 @@ export default function Explorar() {
                     </span>
                   ) : (
                     <>
-                      <span className="font-bold text-slate-900 text-xl">{totalItems || 0}</span> <span className="text-slate-500">{totalItems === 1 ? 'imóvel encontrado' : 'imóveis encontrados'}</span>
+                      <span className="font-bold text-cyan-600">{totalItems || 0}</span> {totalItems === 1 ? 'imóvel encontrado' : 'imóveis encontrados'}
                     </>
                   )}
                 </p>
@@ -598,15 +600,15 @@ export default function Explorar() {
             </div>
 
             {/* Sort Dropdown */}
-            <div className="flex items-center gap-3">
-              <label className="text-sm font-medium text-slate-600 whitespace-nowrap">
+            <div className="flex items-center gap-3 bg-white rounded-xl px-4 py-3 shadow-md border border-slate-200">
+              <label className="text-sm font-semibold text-slate-600 whitespace-nowrap">
                 Ordenar por:
               </label>
               <div className="relative">
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="appearance-none pl-4 pr-10 py-2.5 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all cursor-pointer"
+                  className="appearance-none pl-3 pr-9 py-2 bg-gradient-to-r from-cyan-50 to-blue-50 border border-cyan-200 rounded-lg text-sm font-bold text-cyan-700 hover:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all cursor-pointer"
                 >
                   <option value="default">Padrão</option>
                   <option value="price-asc">Menor preço</option>
@@ -616,7 +618,7 @@ export default function Explorar() {
                   <option value="newest">Mais recentes</option>
                 </select>
                 {/* Custom arrow */}
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-400">
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-cyan-600">
                   <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                   </svg>
@@ -627,9 +629,9 @@ export default function Explorar() {
         </div>
 
         {/* Property Grid - 3 por linha */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mt-6">
           {loading
-            ? Array.from({ length: 9 }).map((_, i) => <PropertyCardSkeleton key={i} />)
+            ? Array.from({ length: 6 }).map((_, i) => <PropertyCardSkeleton key={i} />)
             : sortedItems.map((property) => <PropertyCard key={property.id} property={property} />)}
         </div>
 
@@ -648,24 +650,20 @@ export default function Explorar() {
 
         {/* Empty State */}
         {!loading && items.length === 0 && (
-          <div className="text-center py-16 bg-slate-50 rounded-xl border border-slate-200">
-            <div className="max-w-md mx-auto">
-              <div className="mb-6">
-                <Home className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-              </div>
-              <h3 className="text-xl font-semibold text-slate-900 mb-2">
-                Nenhum imóvel encontrado
-              </h3>
-              <p className="text-slate-600 mb-6">
-                Tente ajustar seus filtros para ver mais resultados
-              </p>
-              <button
-                onClick={clearAllFilters}
-                className="px-6 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                Limpar todos os filtros
-              </button>
-            </div>
+          <div className="text-center py-12">
+            <Home className="w-16 h-16 text-slate-300 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-slate-900 mb-2">
+              Nenhum imóvel encontrado
+            </h3>
+            <p className="text-slate-600 mb-4">
+              Tente ajustar seus filtros para ver mais resultados
+            </p>
+            <button
+              onClick={clearAllFilters}
+              className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700"
+            >
+              Limpar filtros
+            </button>
           </div>
         )}
       </div>
@@ -770,90 +768,173 @@ function FilterSection({ title, icon, children, onClear, hasValue }) {
 
 // Property Card Component
 function PropertyCard({ property }) {
-  // Debug: log images
-  console.log('🖼️ PropertyCard:', {
-    title: property.title,
-    images: property.images,
-    firstImage: property.images?.[0],
-    imageType: typeof property.images,
-    isArray: Array.isArray(property.images)
-  });
+  const [currentImageIndex, setCurrentImageIndex] = React.useState(0);
+  
+  const images = property.images || [];
+  const hasMultipleImages = images.length > 1;
+
+  const handlePrevImage = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCurrentImageIndex((prev) => prev === 0 ? images.length - 1 : prev - 1);
+  };
+
+  const handleNextImage = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCurrentImageIndex((prev) => prev === images.length - 1 ? 0 : prev + 1);
+  };
+
+  const handleDotClick = (e, index) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCurrentImageIndex(index);
+  };
+
+  // Calcular quais dots mostrar (máximo 7)
+  const getDotIndices = () => {
+    if (images.length <= 7) {
+      return images.map((_, i) => i);
+    }
+    
+    const totalDots = 7;
+    const current = currentImageIndex;
+    const total = images.length;
+    
+    if (current < 3) {
+      return [0, 1, 2, 3, 4, 5, total - 1];
+    }
+    if (current > total - 4) {
+      return [0, total - 6, total - 5, total - 4, total - 3, total - 2, total - 1];
+    }
+    return [0, current - 2, current - 1, current, current + 1, current + 2, total - 1];
+  };
 
   return (
-    <Link 
+    <Link
       to={`/property/${property.id}`}
-      className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 border border-slate-200 group cursor-pointer block"
+      className="group block h-full"
     >
-      {/* Image */}
-      <div className="relative h-[240px] overflow-hidden bg-slate-100">
-        <img
-          src={getPropertyMainImage(property, '/placeholder.svg')}
-          alt={property.title}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-          onError={(e) => {
-            console.error('❌ Erro ao carregar imagem:', getPropertyMainImage(property));
-            e.target.src = '/placeholder.svg';
-          }}
-        />
-        
-        {/* Favorite Button */}
-        <div className="absolute top-3 right-3">
-          <FavoriteButton property={property} size="sm" />
-        </div>
-      </div>
+      <div className="relative rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.02] h-full">
+        {/* Imagem */}
+        <div className="relative h-[400px] overflow-hidden">
+          <img
+            src={images[currentImageIndex] || '/placeholder.svg'}
+            alt={property.title}
+            className="w-full h-full object-cover object-bottom transition-transform duration-700 group-hover:scale-110"
+            onError={(e) => {
+              e.target.src = '/placeholder.svg';
+            }}
+          />
 
-      {/* Content */}
-      <div className="p-4">
-        {/* Location */}
-        <div className="flex items-center gap-1.5 text-sm text-slate-500 mb-2">
-          <MapPin className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
-          <span className="truncate">{property.city || property.address || 'Localização'}</span>
-        </div>
+          {/* Overlay Gradient - Só na parte de baixo, mais baixo ainda */}
+          <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-black/50 to-transparent pointer-events-none" />
 
-        {/* Title */}
-        <h3 className="font-semibold text-slate-900 text-base mb-3 line-clamp-1 group-hover:text-blue-600 transition-colors">
-          {property.title}
-        </h3>
+          {/* Navigation Arrows */}
+          {hasMultipleImages && (
+            <>
+              <button
+                onClick={handlePrevImage}
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 hover:bg-white shadow-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all z-20"
+              >
+                <svg className="w-5 h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
 
-        {/* Details */}
-        <div className="flex items-center gap-4 text-sm text-slate-600 mb-4 pb-4 border-b border-slate-100">
-          {property.area && (
-            <span className="flex items-center gap-1.5 font-medium">
-              <Maximize2 className="w-4 h-4 text-blue-600" />
-              {property.area} m²
-            </span>
+              <button
+                onClick={handleNextImage}
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 hover:bg-white shadow-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all z-20"
+              >
+                <svg className="w-5 h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </>
           )}
-          {property.beds && (
-            <span className="flex items-center gap-1.5">
-              �️ {property.beds}
-            </span>
+
+          {/* Dots Indicator */}
+          {hasMultipleImages && (
+            <div className="absolute top-4 left-1/2 -translate-x-1/2 flex gap-1.5 z-20">
+              {getDotIndices().map((index, i) => (
+                <button
+                  key={index}
+                  onClick={(e) => handleDotClick(e, index)}
+                  className={`h-1.5 rounded-full transition-all ${
+                    currentImageIndex === index 
+                      ? 'bg-white w-6' 
+                      : 'bg-white/60 w-1.5 hover:bg-white/80'
+                  }`}
+                />
+              ))}
+            </div>
           )}
-          {property.baths && (
-            <span className="flex items-center gap-1.5">
-              � {property.baths}
-            </span>
-          )}
+
+          {/* Favorite Button */}
+          <div className="absolute top-4 right-4 z-20">
+            <FavoriteButton property={property} size="sm" />
+          </div>
         </div>
 
-        {/* Price and Rating */}
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="flex items-baseline gap-1">
-              <span className="text-2xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
-                {formatCurrency(property.price)}
-              </span>
+        {/* Info Card - Mais compacto */}
+        <div className="absolute bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md p-3 m-4 rounded-2xl shadow-xl z-10">
+          <div className="flex items-start justify-between mb-2">
+            {/* Título e Localização */}
+            <div className="flex-1">
+              <h3 className="text-base font-bold text-slate-800 mb-0.5 line-clamp-1 group-hover:text-blue-600 transition-colors">
+                {property.title}
+              </h3>
+              <p className="text-xs text-slate-600 mb-2">
+                {property.city}, {property.country || 'Brasil'}
+              </p>
+            </div>
+
+            {/* Preço - Lado direito */}
+            <div className="text-right ml-4">
+              <p className="text-[10px] text-slate-500 mb-0.5">A partir de</p>
+              <p className="text-xl font-bold text-blue-600 whitespace-nowrap">
+                {formatShortPrice(property.price)}
+              </p>
             </div>
           </div>
-          
-          {/* Rating */}
-          {property.rating && (
-            <div className="flex items-center gap-1 bg-yellow-50 px-2.5 py-1 rounded-lg">
-              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-              <span className="font-bold text-slate-900 text-sm">
-                {property.rating}
-              </span>
-            </div>
-          )}
+
+          {/* Características - Ícones */}
+          <div className="flex items-center gap-2.5 text-xs text-slate-600">
+            {property.beds > 0 && (
+              <div className="flex items-center gap-1.5">
+                <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+                <span className="whitespace-nowrap">{property.beds} {property.beds === 1 ? 'quarto' : 'quartos'}</span>
+              </div>
+            )}
+
+            {property.baths > 0 && (
+              <div className="flex items-center gap-1.5">
+                <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
+                </svg>
+                <span className="whitespace-nowrap">{property.baths} {property.baths === 1 ? 'banheiro' : 'banheiros'}</span>
+              </div>
+            )}
+
+            {property.area > 0 && (
+              <div className="flex items-center gap-1.5">
+                <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                </svg>
+                <span className="whitespace-nowrap">{property.area}m²</span>
+              </div>
+            )}
+
+            {/* Rating */}
+            {property.rating && (
+              <div className="flex items-center gap-1.5 ml-auto">
+                <Star className="w-4 h-4 fill-amber-400 text-amber-400 flex-shrink-0" />
+                <span className="whitespace-nowrap font-semibold">{property.rating}</span>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </Link>
@@ -868,6 +949,18 @@ function formatCurrency(value) {
     currency: 'BRL',
     minimumFractionDigits: 0,
   }).format(value);
+}
+
+// Helper function to format short price (ex: R$ 850k)
+function formatShortPrice(value) {
+  if (!value) return 'R$ 0';
+  if (value >= 1000000) {
+    return `R$ ${(value / 1000000).toFixed(1)}mi`;
+  }
+  if (value >= 1000) {
+    return `R$ ${(value / 1000).toFixed(0)}k`;
+  }
+  return formatCurrency(value);
 }
 
 // Helper function to get property type label
@@ -889,19 +982,13 @@ function getPropertyTypeLabel(type) {
 // Skeleton Loader
 function PropertyCardSkeleton() {
   return (
-    <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-slate-200">
-      <div className="h-[240px] bg-gradient-to-br from-slate-200 to-slate-100 animate-pulse" />
-      <div className="p-4 space-y-3">
-        <div className="h-4 bg-slate-200 rounded-lg animate-pulse w-1/2" />
-        <div className="h-5 bg-slate-200 rounded-lg animate-pulse w-3/4" />
-        <div className="flex gap-3">
-          <div className="h-4 bg-slate-200 rounded-lg animate-pulse w-16" />
-          <div className="h-4 bg-slate-200 rounded-lg animate-pulse w-12" />
-          <div className="h-4 bg-slate-200 rounded-lg animate-pulse w-12" />
-        </div>
-        <div className="pt-3 border-t border-slate-100">
-          <div className="h-6 bg-slate-200 rounded-lg animate-pulse w-2/3" />
-        </div>
+    <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-200">
+      <div className="h-[260px] bg-slate-200 animate-pulse" />
+      <div className="p-3 space-y-2">
+        <div className="h-6 bg-slate-200 rounded animate-pulse w-3/4" />
+        <div className="h-4 bg-slate-200 rounded animate-pulse w-1/2" />
+        <div className="h-8 bg-slate-200 rounded animate-pulse w-2/3" />
+        <div className="h-4 bg-slate-200 rounded animate-pulse w-1/3" />
       </div>
     </div>
   );
