@@ -26,6 +26,7 @@ export default function AdminPropertiesList() {
   const limit = 1000; // Mostrar todos
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [togglingId, setTogglingId] = useState(null); // ID do imóvel sendo atualizado
 
   useEffect(() => {
     fetchProperties();
@@ -59,12 +60,28 @@ export default function AdminPropertiesList() {
   };
 
   const handleTogglePublish = async (id, currentStatus) => {
+    setTogglingId(id); // Iniciar indicador de carregamento
+    
     try {
-      await api.patch(`/properties/${id}`, { published: !currentStatus });
-      fetchProperties();
+      const newStatus = !currentStatus;
+      await api.patch(`/properties/${id}/publish`, { published: newStatus });
+      
+      // Atualizar o estado local imediatamente para feedback visual rápido
+      setProperties(prevProps => 
+        prevProps.map(p => 
+          p.id === id ? { ...p, published: newStatus } : p
+        )
+      );
+      
+      // Mostrar mensagem de sucesso
+      console.log(`✅ Imóvel ${newStatus ? 'publicado' : 'ocultado'} com sucesso`);
     } catch (error) {
       console.error('Erro ao atualizar status:', error);
-      alert('Erro ao atualizar status da propriedade');
+      alert(`Erro ao ${!currentStatus ? 'publicar' : 'ocultar'} o imóvel. Tente novamente.`);
+      // Reverter em caso de erro
+      fetchProperties();
+    } finally {
+      setTogglingId(null); // Finalizar indicador de carregamento
     }
   };
 
@@ -387,17 +404,29 @@ export default function AdminPropertiesList() {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => handleTogglePublish(property.id, property.published)}
+                      disabled={togglingId === property.id}
                       className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
-                        property.published
+                        togglingId === property.id
+                          ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                          : property.published
                           ? 'bg-slate-100 text-slate-700 hover:bg-slate-200'
                           : 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
                       }`}
                       title={property.published ? 'Despublicar' : 'Publicar'}
                     >
-                      {property.published ? <EyeOff size={16} /> : <Eye size={16} />}
-                      <span className="hidden sm:inline">
-                        {property.published ? 'Ocultar' : 'Publicar'}
-                      </span>
+                      {togglingId === property.id ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-slate-400"></div>
+                          <span className="hidden sm:inline">Aguarde...</span>
+                        </>
+                      ) : (
+                        <>
+                          {property.published ? <EyeOff size={16} /> : <Eye size={16} />}
+                          <span className="hidden sm:inline">
+                            {property.published ? 'Ocultar' : 'Publicar'}
+                          </span>
+                        </>
+                      )}
                     </button>
                     
                     <Link

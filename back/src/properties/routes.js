@@ -236,10 +236,24 @@ router.post('/', authMiddleware, requireAdmin, propertyValidators, async (req, r
       userId: req.user.id
     };
     
+    console.log('📝 [POST /properties] Dados recebidos:', {
+      title: data.title,
+      category: data.category,
+      type: data.type,
+      price: data.price,
+      city: data.city,
+      area: data.area,
+      beds: data.beds,
+      baths: data.baths,
+      guests: data.guests,
+      userId: data.userId
+    });
+    
     const item = await createProperty(data);
     res.status(201).json(item);
   } catch (error) {
-    console.error('Erro ao criar imóvel:', error);
+    console.error('❌ [POST /properties] Erro ao criar imóvel:', error);
+    console.error('❌ Stack:', error.stack);
     res.status(500).json({ 
       error: 'Erro ao criar imóvel',
       message: error.message 

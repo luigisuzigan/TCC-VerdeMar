@@ -79,6 +79,7 @@ model Property {
   area              Int            // m²
   beds              Int
   baths             Int
+  guests            Int            @default(1) // Capacidade de hóspedes
   suites            Int            @default(0)
   parkingSpaces     Int            @default(0)
   

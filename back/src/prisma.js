@@ -89,9 +89,10 @@ const shutdown = async () => {
 if (process.env.VERCEL !== '1') {
   process.on('SIGINT', shutdown);
   process.on('SIGTERM', shutdown);
-  process.on('beforeExit', async () => {
-    await prisma.$disconnect();
-  });
+  // REMOVIDO: beforeExit estava desconectando prematuramente
+  // process.on('beforeExit', async () => {
+  //   await prisma.$disconnect();
+  // });
 }
 
 export { prismaWithRetry as prisma };

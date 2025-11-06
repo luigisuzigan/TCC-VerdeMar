@@ -6,14 +6,10 @@ import {
   Eye,
   Users,
   Heart,
-  Star,
-  MessageSquare,
   Activity,
   Clock,
-  CheckCircle,
   AlertCircle,
-  BarChart3,
-  PieChart
+  BarChart3
 } from 'lucide-react';
 import { api } from '../../api/client';
 import { Link } from 'react-router-dom';
@@ -104,7 +100,7 @@ export default function Dashboard() {
     );
   }
 
-  const { overview, usersByRole, trends, distributions, topProperties, messages, recentActivity, financial } = stats;
+  const { overview, usersByRole, trends, distributions, topProperties, recentActivity, financial } = stats;
 
   return (
     <div className="space-y-8">
@@ -115,7 +111,7 @@ export default function Dashboard() {
       </div>
 
       {/* Cards principais */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <StatCard
           title="Total de Imóveis"
           value={overview.totalProperties}
@@ -137,29 +133,15 @@ export default function Dashboard() {
           color="purple"
           subtitle="Total"
         />
-        <StatCard
-          title="Mensagens"
-          value={overview.unreadMessages}
-          icon={MessageSquare}
-          color="orange"
-          subtitle="Não lidas"
-        />
       </div>
 
       {/* Cards secundários */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <StatCard
           title="Favoritos"
           value={overview.totalFavorites}
           icon={Heart}
           color="red"
-          small
-        />
-        <StatCard
-          title="Avaliações"
-          value={overview.totalReviews}
-          icon={Star}
-          color="yellow"
           small
         />
         <StatCard
@@ -374,72 +356,6 @@ export default function Dashboard() {
             ))
           ) : (
             <p className="text-gray-500 text-center py-8">Nenhuma atividade recente</p>
-          )}
-        </div>
-      </div>
-
-      {/* Mensagens de Contato */}
-      <div className="bg-white p-6 rounded-lg shadow">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-          <MessageSquare className="w-5 h-5" />
-          Mensagens Recentes
-        </h2>
-        <div className="space-y-4">
-          {messages.length > 0 ? (
-            messages.map((message) => (
-              <div
-                key={message.id}
-                className={`p-4 rounded-lg border-2 ${
-                  message.status === 'NEW'
-                    ? 'border-emerald-200 bg-emerald-50'
-                    : 'border-gray-200 bg-gray-50'
-                }`}
-              >
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-emerald-600 text-white flex items-center justify-center font-semibold">
-                      {message.name.charAt(0).toUpperCase()}
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-900">{message.name}</p>
-                      <p className="text-sm text-gray-500">{message.email}</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <span
-                      className={`inline-block px-2 py-1 text-xs font-semibold rounded-full ${
-                        message.status === 'NEW'
-                          ? 'bg-emerald-100 text-emerald-700'
-                          : message.status === 'READ'
-                          ? 'bg-blue-100 text-blue-700'
-                          : 'bg-gray-100 text-gray-700'
-                      }`}
-                    >
-                      {message.status === 'NEW' ? 'Nova' : message.status === 'READ' ? 'Lida' : 'Respondida'}
-                    </span>
-                    <p className="text-xs text-gray-500 mt-1">
-                      {formatTimeAgo(message.createdAt)}
-                    </p>
-                  </div>
-                </div>
-                {message.subject && (
-                  <p className="text-sm font-medium text-gray-900 mb-1">
-                    {message.subject}
-                  </p>
-                )}
-                <p className="text-sm text-gray-600 mb-3">{message.message}</p>
-                <div className="flex gap-2">
-                  <button className="px-3 py-1 text-sm bg-emerald-600 text-white rounded hover:bg-emerald-700">
-                    Responder
-                  </button>
-                  <button className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300">
-                    Arquivar
-                  </button>
-                </div>
-              </div>
-            ))
-          ) : (
-            <p className="text-gray-500 text-center py-8">Nenhuma mensagem disponível</p>
           )}
         </div>
       </div>

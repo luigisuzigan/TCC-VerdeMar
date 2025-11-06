@@ -58,8 +58,8 @@ const empty = {
   images: '[]',
   mainImage: '',
   rating: 0,
-  published: false,
-  featured: false
+  published: false
+  // featured: removido - campo não existe no schema
 };
 
 const CATEGORIES = [
@@ -301,6 +301,35 @@ export default function AdminPropertyForm() {
     setError('');
     
     try {
+      // Validação prévia de campos obrigatórios
+      const validationErrors = [];
+      
+      if (!model.title || model.title.trim().length === 0) {
+        validationErrors.push('Título é obrigatório');
+      } else if (model.title.trim().length > 120) {
+        validationErrors.push('Título deve ter no máximo 120 caracteres');
+      }
+      
+      if (!model.city || model.city.trim().length === 0) {
+        validationErrors.push('Cidade é obrigatória');
+      }
+      if (!model.price || parseFloat(model.price) <= 0) {
+        validationErrors.push('Preço deve ser maior que zero');
+      }
+      if (!model.area || parseInt(model.area) <= 0) {
+        validationErrors.push('Área deve ser maior que zero');
+      }
+      if (model.guests && parseInt(model.guests) < 1) {
+        validationErrors.push('Número de hóspedes deve ser pelo menos 1');
+      }
+      
+      if (validationErrors.length > 0) {
+        setError(validationErrors.join('; '));
+        setSaving(false);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+      
       const images = imagesText.split(/\n+/).map((s) => s.trim()).filter(Boolean);
       
       console.log('📸 Processamento de imagens:');
@@ -314,15 +343,15 @@ export default function AdminPropertyForm() {
       // Preparar payload com campos obrigatórios e opcionais
       const payload = { 
         // Campos obrigatórios
-        title: model.title || '',
-        price: parseFloat(model.price) || 0,
+        title: model.title.trim(),
+        price: parseFloat(model.price),
         currency: model.currency || 'BRL',
-        city: model.city || '',
+        city: model.city.trim(),
         country: model.country || 'Brasil',
-        area: parseInt(model.area) || 0,
+        area: parseInt(model.area),
         beds: parseInt(model.beds) || 0,
         baths: parseInt(model.baths) || 0,
-        guests: parseInt(model.guests) || 1,
+        guests: parseInt(model.guests) || 1, // Default para 1 se vazio
         
         // Campos opcionais - texto
         description: model.description || '',
@@ -356,35 +385,66 @@ export default function AdminPropertyForm() {
         
         // Rating e flags
         rating: parseFloat(model.rating) || 0,
-        published: model.published || false,
-        featured: model.featured || false
+        published: model.published || false
+        // featured: removido - campo não existe no schema Prisma
       };
       
       console.log('📤 Enviando dados:', {
         title: payload.title,
         category: payload.category,
         type: payload.type,
+        price: payload.price,
+        city: payload.city,
+        area: payload.area,
+        beds: payload.beds,
+        baths: payload.baths,
+        guests: payload.guests,
         imagesCount: images.length,
         amenitiesCount: selectedAmenities.length,
         naturalConditionsCount: selectedNaturalConditions.length
       });
       
+      console.log('📦 Payload completo:', payload);
+      
       if (id) {
+        console.log(`🔄 Atualizando imóvel ${id}...`);
         const { data } = await api.put(`/properties/${id}`, payload);
         console.log('✅ Imóvel atualizado:', data);
       } else {
+        console.log('🆕 Criando novo imóvel...');
         const { data } = await api.post('/properties', payload);
         console.log('✅ Imóvel criado:', data);
       }
       navigate('/admin/properties');
     } catch (e) {
-      const msg = e?.response?.data?.error || e?.response?.data?.errors?.[0]?.msg || 'Erro ao salvar';
-      setError(msg);
       console.error('❌ Erro ao salvar:', e);
       console.error('Detalhes completos:', e?.response?.data);
-      if (e?.response?.data?.errors) {
-        console.error('Erros de validação:', e.response.data.errors);
+      
+      let errorMessage = 'Erro ao salvar';
+      
+      // Se houver erros de validação do backend
+      if (e?.response?.data?.errors && Array.isArray(e.response.data.errors)) {
+        const errors = e.response.data.errors;
+        console.error('Erros de validação:', errors);
+        
+        // Formatar erros de validação de forma legível
+        const errorMessages = errors.map(err => {
+          const field = err.param || err.field || 'Campo';
+          const message = err.msg || err.message || 'Valor inválido';
+          return `${field}: ${message}`;
+        });
+        
+        errorMessage = errorMessages.join('; ');
+      } else if (e?.response?.data?.error) {
+        errorMessage = e.response.data.error;
+      } else if (e?.response?.data?.message) {
+        errorMessage = e.response.data.message;
+      } else if (e?.message) {
+        errorMessage = e.message;
       }
+      
+      setError(errorMessage);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } finally { 
       setSaving(false); 
     }
@@ -416,11 +476,12 @@ export default function AdminPropertyForm() {
       </div>
 
       {error && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 flex items-start gap-3">
+        <div className="mb-6 p-4 bg-red-50 border-2 border-red-300 rounded-xl text-red-800 flex items-start gap-3 shadow-sm">
           <X className="flex-shrink-0 mt-0.5" size={20} />
-          <div>
-            <p className="font-medium">Erro ao salvar</p>
-            <p className="text-sm">{error}</p>
+          <div className="flex-1">
+            <p className="font-bold text-base mb-1">❌ Erro ao salvar o imóvel</p>
+            <p className="text-sm leading-relaxed whitespace-pre-line">{error}</p>
+            <p className="text-xs mt-2 text-red-600">Verifique os campos destacados e tente novamente.</p>
           </div>
         </div>
       )}
@@ -817,6 +878,25 @@ export default function AdminPropertyForm() {
                 />
               </div>
             )}
+
+            {/* Hóspedes - OBRIGATÓRIO */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Capacidade de Hóspedes <span className="text-red-500">*</span>
+              </label>
+              <input 
+                type="number"
+                className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                value={model.guests || ''} 
+                onChange={(e) => update('guests', e.target.value)}
+                min={1}
+                placeholder="4"
+                required
+              />
+              <p className="mt-1 text-xs text-slate-500">
+                Quantas pessoas podem se hospedar no imóvel
+              </p>
+            </div>
 
             {/* Suítes - Condicional */}
             {shouldShowField(selectedType, 'suites') && (
@@ -1245,6 +1325,19 @@ export default function AdminPropertyForm() {
                 </span>
               </div>
             </label>
+          </div>
+        </div>
+
+        {/* Nota sobre Campos Obrigatórios */}
+        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-start gap-3">
+          <HelpCircle size={20} className="text-blue-600 flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-medium text-blue-900">
+              Campos obrigatórios marcados com <span className="text-red-600">*</span>
+            </p>
+            <p className="text-xs text-blue-700 mt-1">
+              Certifique-se de preencher: Título, Cidade, Preço, Área, Quartos, Banheiros e Hóspedes antes de salvar.
+            </p>
           </div>
         </div>
 
