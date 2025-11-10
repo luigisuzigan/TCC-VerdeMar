@@ -221,7 +221,7 @@ export default function AdminPropertyForm() {
         state: model.state || '',
         neighborhood: model.neighborhood || '',
         zipCode: model.zipCode || '',
-        architecturalStyle: model.architecturalStyle || '',
+        style: model.architecturalStyle || '',
         propertyCondition: model.propertyCondition || '',
         ...(model.latitude && { latitude: parseFloat(model.latitude) }),
         ...(model.longitude && { longitude: parseFloat(model.longitude) }),
@@ -232,7 +232,7 @@ export default function AdminPropertyForm() {
         ...(model.iptu && { iptu: parseFloat(model.iptu) }),
         ...(model.homeInsurance && { homeInsurance: parseFloat(model.homeInsurance) }),
         ...(model.yearBuilt && { yearBuilt: parseInt(model.yearBuilt) }),
-        ...(shouldShowField(selectedType, 'lotSize') && model.lotSize && { lotSize: parseFloat(model.lotSize) }),
+        ...(shouldShowField(selectedType, 'lotSize') && model.lotSize && { lotSize: parseInt(model.lotSize) }),
         images: JSON.stringify(images),
         amenities: JSON.stringify(selectedAmenities),
         naturalConditions: JSON.stringify(selectedNaturalConditions),
@@ -244,6 +244,7 @@ export default function AdminPropertyForm() {
       console.log('🚀 PAYLOAD ENVIADO:', payload);
       console.log('📸 Images array:', images);
       console.log('🖼️ MainImage:', mainImage);
+      console.log('🔍 PAYLOAD COMPLETO (stringificado):', JSON.stringify(payload, null, 2));
       
       if (id) {
         await api.put(`/properties/${id}`, payload);
@@ -253,6 +254,9 @@ export default function AdminPropertyForm() {
       navigate('/admin/properties');
     } catch (e) {
       console.error('❌ Erro ao salvar:', e);
+      console.error('📛 Resposta do servidor:', e?.response?.data);
+      console.error('📊 Status:', e?.response?.status);
+      console.error('📋 Headers:', e?.response?.headers);
       let errorMessage = 'Erro ao salvar';
       
       if (e?.response?.data?.errors && Array.isArray(e.response.data.errors)) {
