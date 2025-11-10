@@ -320,10 +320,45 @@ export default function AdminPropertyForm() {
       if (!model.area || parseInt(model.area) <= 0) {
         validationErrors.push('Área deve ser maior que zero');
       }
-      // guests: removido - campo não existe mais no schema
+      
+      // Validação condicional baseada no tipo
+      if (isFieldRequired(selectedType, 'beds') && (!model.beds && model.beds !== 0)) {
+        validationErrors.push(`Quartos é obrigatório para ${selectedType}`);
+      }
+      if (isFieldRequired(selectedType, 'baths') && (!model.baths && model.baths !== 0)) {
+        validationErrors.push(`Banheiros é obrigatório para ${selectedType}`);
+      }
+      if (isFieldRequired(selectedType, 'suites') && (!model.suites && model.suites !== 0)) {
+        validationErrors.push(`Suítes é obrigatório para ${selectedType}`);
+      }
+      if (isFieldRequired(selectedType, 'parkingSpaces') && (!model.parkingSpaces && model.parkingSpaces !== 0)) {
+        validationErrors.push(`Vagas de garagem é obrigatório para ${selectedType}`);
+      }
+      if (isFieldRequired(selectedType, 'floor') && !model.floor && model.floor !== 0) {
+        validationErrors.push(`Andar é obrigatório para ${selectedType}`);
+      }
+      if (isFieldRequired(selectedType, 'totalFloors') && !model.totalFloors) {
+        validationErrors.push(`Total de andares é obrigatório para ${selectedType}`);
+      }
+      if (isFieldRequired(selectedType, 'condoFee') && !model.condoFee) {
+        validationErrors.push(`Condomínio é obrigatório para ${selectedType}`);
+      }
+      if (isFieldRequired(selectedType, 'lotSize') && !model.lotSize) {
+        validationErrors.push(`Área do lote é obrigatório para ${selectedType}`);
+      }
+      
+      // Validar CEP (obrigatório)
+      if (!model.zipCode || model.zipCode.trim().length === 0) {
+        validationErrors.push('CEP é obrigatório');
+      }
+      
+      // Validar Estado (obrigatório)
+      if (!model.state || model.state.trim().length === 0) {
+        validationErrors.push('Estado é obrigatório');
+      }
       
       if (validationErrors.length > 0) {
-        setError(validationErrors.join('; '));
+        setError(validationErrors.join(';\n'));
         setSaving(false);
         window.scrollTo({ top: 0, behavior: 'smooth' });
         return;
@@ -339,23 +374,34 @@ export default function AdminPropertyForm() {
       // Se mainImage não está definida mas há imagens, usar a primeira
       const mainImage = model.mainImage || (images.length > 0 ? images[0] : '');
       
-      // Preparar payload com campos obrigatórios e opcionais
+      // Preparar payload - garantir que campos condicionalmente obrigatórios sejam enviados
       const payload = { 
-        // Campos obrigatórios
+        // Campos sempre obrigatórios
         title: model.title.trim(),
         price: parseFloat(model.price),
         currency: model.currency || 'BRL',
         city: model.city.trim(),
         country: model.country || 'Brasil',
         area: parseInt(model.area),
-        beds: parseInt(model.beds) || 0,
-        baths: parseInt(model.baths) || 0,
-        // guests: removido - campo não existe mais no schema
+        
+        // Categoria e tipo
+        category: selectedCategory || 'Residencial',
+        type: selectedType || 'Casa',
+        
+        // Campos condicionais - enviar apenas se o campo for visível para o tipo
+        // Usar 0 como padrão se o campo for obrigatório mas não preenchido
+        ...(shouldShowField(selectedType, 'beds') && { 
+          beds: parseInt(model.beds) || 0 
+        }),
+        ...(shouldShowField(selectedType, 'baths') && { 
+          baths: parseInt(model.baths) || 0 
+        }),
+        ...(shouldShowField(selectedType, 'parkingSpaces') && { 
+          parkingSpaces: parseInt(model.parkingSpaces) || 0 
+        }),
         
         // Campos opcionais - texto
         description: model.description || '',
-        type: selectedType || 'Casa',
-        category: selectedCategory || 'Residencial',
         address: model.address || '',
         state: model.state || '',
         neighborhood: model.neighborhood || '',
@@ -363,14 +409,13 @@ export default function AdminPropertyForm() {
         style: model.style || '',
         propertyCondition: model.propertyCondition || '',
         
-        // Campos opcionais - numéricos (só envia se tiver valor)
+        // Campos opcionais - numéricos (só envia se tiver valor E se o campo for aplicável)
         ...(model.latitude && { latitude: parseFloat(model.latitude) }),
         ...(model.longitude && { longitude: parseFloat(model.longitude) }),
-        ...(model.suites && { suites: parseInt(model.suites) }),
-        ...(model.parkingSpaces && { parkingSpaces: parseInt(model.parkingSpaces) }),
-        ...(model.floor && { floor: parseInt(model.floor) }),
-        ...(model.totalFloors && { totalFloors: parseInt(model.totalFloors) }),
-        ...(model.condoFee && { condoFee: parseFloat(model.condoFee) }),
+        ...(shouldShowField(selectedType, 'suites') && model.suites && { suites: parseInt(model.suites) }),
+        ...(shouldShowField(selectedType, 'floor') && model.floor && { floor: parseInt(model.floor) }),
+        ...(shouldShowField(selectedType, 'totalFloors') && model.totalFloors && { totalFloors: parseInt(model.totalFloors) }),
+        ...(shouldShowField(selectedType, 'condoFee') && model.condoFee && { condoFee: parseFloat(model.condoFee) }),
         ...(model.iptu && { iptu: parseFloat(model.iptu) }),
         ...(model.homeInsurance && { homeInsurance: parseFloat(model.homeInsurance) }),
         ...(model.yearBuilt && { yearBuilt: parseInt(model.yearBuilt) }),
@@ -385,7 +430,6 @@ export default function AdminPropertyForm() {
         // Rating e flags
         rating: parseFloat(model.rating) || 0,
         published: model.published || false
-        // featured: removido - campo não existe no schema Prisma
       };
       
       console.log('📤 Enviando dados:', {
@@ -397,7 +441,10 @@ export default function AdminPropertyForm() {
         area: payload.area,
         beds: payload.beds,
         baths: payload.baths,
-        // guests: removido
+        parkingSpaces: payload.parkingSpaces,
+        floor: payload.floor,
+        totalFloors: payload.totalFloors,
+        condoFee: payload.condoFee,
         imagesCount: images.length,
         amenitiesCount: selectedAmenities.length,
         naturalConditionsCount: selectedNaturalConditions.length
@@ -430,10 +477,10 @@ export default function AdminPropertyForm() {
         const errorMessages = errors.map(err => {
           const field = err.param || err.field || 'Campo';
           const message = err.msg || err.message || 'Valor inválido';
-          return `${field}: ${message}`;
+          return `• ${field}: ${message}`;
         });
         
-        errorMessage = errorMessages.join('; ');
+        errorMessage = 'Erros de validação:\n' + errorMessages.join('\n');
       } else if (e?.response?.data?.error) {
         errorMessage = e.response.data.error;
       } else if (e?.response?.data?.message) {
@@ -617,8 +664,13 @@ export default function AdminPropertyForm() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
+              <label className="block text-sm font-medium text-slate-700 mb-2 flex items-center gap-2">
                 Ano de Construção
+                <HelpCircle 
+                  size={16} 
+                  className="text-slate-400 cursor-help" 
+                  title="Ano em que o imóvel foi construído"
+                />
               </label>
               <input 
                 type="number"
@@ -683,13 +735,13 @@ export default function AdminPropertyForm() {
 
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">
-                Estado *
+                Estado (UF) *
               </label>
               <input 
                 type="text"
                 className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                 value={model.state || ''} 
-                onChange={(e) => update('state', e.target.value)}
+                onChange={(e) => update('state', e.target.value.toUpperCase())}
                 placeholder="Ex: SC"
                 maxLength={2}
                 required 
@@ -818,16 +870,14 @@ export default function AdminPropertyForm() {
             </div>
 
             {/* Área do Lote - Condicional */}
-            {(selectedType.includes('Casa') || selectedType.includes('Sobrado') || 
-              selectedType.includes('Chácara') || selectedType.includes('Sítio') || 
-              selectedType.includes('Fazenda') || selectedType.includes('Terreno')) && (
+            {shouldShowField(selectedType, 'lotSize') && (
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2 flex items-center gap-2">
                   Área do Lote/Terreno (m²) {isFieldRequired(selectedType, 'lotSize') && <span className="text-red-500">*</span>}
                   <HelpCircle 
                     size={16} 
                     className="text-slate-400 cursor-help" 
-                    title="Área total do terreno/lote"
+                    title="Área total do terreno/lote (diferente da área construída)"
                   />
                 </label>
                 <input 
@@ -839,6 +889,12 @@ export default function AdminPropertyForm() {
                   placeholder="500"
                   required={isFieldRequired(selectedType, 'lotSize')}
                 />
+                <p className="mt-1 text-xs text-slate-500">
+                  {selectedType.includes('Terreno') 
+                    ? 'Para terrenos, este valor geralmente é igual à Área total'
+                    : 'Área total do lote (pode ser maior que a área construída)'
+                  }
+                </p>
               </div>
             )}
 

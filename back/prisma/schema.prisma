@@ -68,10 +68,10 @@ model Property {
   // Localização
   address           String         @default("")
   city              String
-  state             String         @default("")
+  state             String         // UF - Obrigatório (Ex: SC, SP, RJ)
   country           String
   neighborhood      String?        // Bairro
-  zipCode           String?
+  zipCode           String         // CEP - Obrigatório
   latitude          Float?
   longitude         Float?
   

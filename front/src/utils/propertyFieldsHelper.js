@@ -7,37 +7,37 @@
 const REQUIRED_FIELDS = {
   // Residenciais
   'Apartamento': ['floor', 'totalFloors', 'condoFee', 'beds', 'baths', 'parkingSpaces'],
-  'Casa': ['beds', 'baths', 'parkingSpaces'],
-  'Sobrado': ['beds', 'baths', 'parkingSpaces'],
-  'Cobertura': ['floor', 'totalFloors', 'condoFee', 'beds', 'baths', 'suites', 'parkingSpaces'],
+  'Casa': ['beds', 'baths', 'parkingSpaces', 'lotSize'],
+  'Sobrado': ['beds', 'baths', 'parkingSpaces', 'lotSize', 'totalFloors'],
+  'Cobertura': ['floor', 'totalFloors', 'condoFee', 'beds', 'baths', 'parkingSpaces', 'suites'],
   'Kitnet / Studio / Loft': ['baths'],
   'Condomínio residencial': ['condoFee', 'totalFloors'],
-  'Chácara': [],
-  'Sítio / Fazenda': [],
+  'Chácara': ['lotSize'],
+  'Sítio / Fazenda': ['lotSize'],
   
-  // Terrenos
-  'Terreno residencial': ['area'],
-  'Terreno comercial': ['area'],
-  'Terreno misto': ['area'],
-  'Terreno rural': ['area'],
-  'Terreno em condomínio': ['area', 'condoFee'],
+  // Terrenos - TODOS precisam de lotSize
+  'Terreno residencial': ['area', 'lotSize'],
+  'Terreno comercial': ['area', 'lotSize'],
+  'Terreno misto': ['area', 'lotSize'],
+  'Terreno rural': ['area', 'lotSize'],
+  'Terreno em condomínio': ['area', 'lotSize', 'condoFee'],
   
   // Comerciais
   'Sala comercial / Escritório': ['area', 'floor', 'totalFloors', 'condoFee', 'parkingSpaces'],
   'Loja / Ponto comercial': ['area', 'parkingSpaces'],
   'Prédio comercial': ['area', 'totalFloors', 'parkingSpaces'],
-  'Galpão comercial': ['area', 'parkingSpaces'],
+  'Galpão comercial': ['area', 'parkingSpaces', 'lotSize'],
   'Hotel / Pousada': ['beds', 'baths'],
   
   // Industriais
-  'Galpão industrial': ['area', 'parkingSpaces'],
+  'Galpão industrial': ['area', 'parkingSpaces', 'lotSize'],
   'Condomínio industrial': ['area'],
-  'Terreno industrial': ['area'],
-  'Fábrica / Armazém': ['area', 'parkingSpaces'],
+  'Terreno industrial': ['area', 'lotSize'],
+  'Fábrica / Armazém': ['area', 'parkingSpaces', 'lotSize'],
   
   // Especiais
-  'Loteamento': ['area'],
-  'Área / Gleba': ['area'],
+  'Loteamento': ['area', 'lotSize'],
+  'Área / Gleba': ['area', 'lotSize'],
   'Empreendimento em construção': [],
   'Imóvel de uso misto': ['beds', 'baths']
 };
@@ -46,9 +46,11 @@ const REQUIRED_FIELDS = {
 const HIDDEN_FIELDS = {
   'Casa': ['floor', 'totalFloors'],
   'Sobrado': ['floor'],
-  'Kitnet / Studio / Loft': ['suites'],
+  'Kitnet / Studio / Loft': ['suites', 'lotSize'],
   'Chácara': ['floor', 'totalFloors', 'condoFee'],
   'Sítio / Fazenda': ['floor', 'totalFloors', 'condoFee'],
+  'Apartamento': ['lotSize'], // Apartamento não tem lote
+  'Cobertura': ['lotSize'], // Cobertura não tem lote
   
   'Terreno residencial': ['beds', 'baths', 'suites', 'floor', 'totalFloors', 'parkingSpaces'],
   'Terreno comercial': ['beds', 'baths', 'suites', 'floor', 'totalFloors', 'parkingSpaces'],
@@ -56,18 +58,21 @@ const HIDDEN_FIELDS = {
   'Terreno rural': ['beds', 'baths', 'suites', 'floor', 'totalFloors', 'parkingSpaces', 'condoFee'],
   'Terreno em condomínio': ['beds', 'baths', 'suites', 'floor', 'totalFloors', 'parkingSpaces'],
   
-  'Sala comercial / Escritório': ['beds', 'suites'],
-  'Loja / Ponto comercial': ['beds', 'baths', 'suites', 'totalFloors'],
-  'Prédio comercial': ['beds', 'baths', 'suites'],
+  'Sala comercial / Escritório': ['beds', 'suites', 'lotSize'],
+  'Loja / Ponto comercial': ['beds', 'baths', 'suites', 'totalFloors', 'lotSize'],
+  'Prédio comercial': ['beds', 'baths', 'suites', 'lotSize'],
   'Galpão comercial': ['beds', 'baths', 'suites', 'floor', 'totalFloors', 'condoFee'],
+  'Hotel / Pousada': ['floor', 'lotSize'], // Hotel pode ter suites
   
   'Galpão industrial': ['beds', 'baths', 'suites', 'floor', 'totalFloors', 'condoFee'],
-  'Condomínio industrial': ['beds', 'baths', 'suites', 'floor', 'totalFloors'],
+  'Condomínio industrial': ['beds', 'baths', 'suites', 'floor', 'totalFloors', 'lotSize'],
   'Terreno industrial': ['beds', 'baths', 'suites', 'floor', 'totalFloors', 'parkingSpaces', 'condoFee'],
   'Fábrica / Armazém': ['beds', 'baths', 'suites', 'floor', 'totalFloors', 'condoFee'],
   
   'Loteamento': ['beds', 'baths', 'suites', 'floor', 'totalFloors', 'parkingSpaces', 'condoFee'],
-  'Área / Gleba': ['beds', 'baths', 'suites', 'floor', 'totalFloors', 'parkingSpaces', 'condoFee']
+  'Área / Gleba': ['beds', 'baths', 'suites', 'floor', 'totalFloors', 'parkingSpaces', 'condoFee'],
+  'Empreendimento em construção': [], // Pode ter qualquer campo
+  'Imóvel de uso misto': [] // Pode ter qualquer campo
 };
 
 /**

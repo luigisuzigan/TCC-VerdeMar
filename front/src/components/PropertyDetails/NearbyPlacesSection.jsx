@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { MapPin, Star, Navigation } from 'lucide-react';
 
 /**
@@ -6,8 +6,6 @@ import { MapPin, Star, Navigation } from 'lucide-react';
  * Usa dados reais da Google Maps Places API
  */
 export default function NearbyPlacesSection({ nearbyPlaces }) {
-  const [selectedCategory, setSelectedCategory] = useState('schools');
-
   // Categorias disponíveis com ícones e labels
   const categories = {
     schools: { label: 'Escolas', icon: '🏫', color: 'blue' },
@@ -45,6 +43,27 @@ export default function NearbyPlacesSection({ nearbyPlaces }) {
     places = {};
   }
 
+  // Encontrar a primeira categoria que tem locais
+  const getFirstCategoryWithPlaces = () => {
+    const categoryKeys = Object.keys(categories);
+    for (const key of categoryKeys) {
+      if (places[key] && places[key].length > 0) {
+        return key;
+      }
+    }
+    return 'schools'; // Fallback padrão
+  };
+
+  // Estado da categoria selecionada - inicia com a primeira que tem dados
+  const [selectedCategory, setSelectedCategory] = useState(getFirstCategoryWithPlaces());
+
+  // Atualizar categoria selecionada quando nearbyPlaces mudar
+  useEffect(() => {
+    const firstCategory = getFirstCategoryWithPlaces();
+    setSelectedCategory(firstCategory);
+    console.log('🎯 Categoria inicial selecionada:', firstCategory);
+  }, [nearbyPlaces]);
+
   // Locais da categoria selecionada
   const selectedPlaces = places[selectedCategory] || [];
   
@@ -53,15 +72,28 @@ export default function NearbyPlacesSection({ nearbyPlaces }) {
   // Se não há nenhum local cadastrado
   if (Object.keys(places).length === 0 || Object.values(places).every(arr => arr.length === 0)) {
     return (
-      <section className="mt-12 p-8 bg-slate-50 rounded-2xl border border-slate-200">
+      <section className="mt-12 p-8 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-2xl border border-blue-200">
         <div className="text-center">
-          <MapPin size={48} className="mx-auto mb-4 text-slate-400" />
-          <h3 className="text-xl font-semibold text-slate-700 mb-2">
+          <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <MapPin size={32} className="text-blue-600" />
+          </div>
+          <h3 className="text-xl font-semibold text-slate-900 mb-2">
             Locais próximos não disponíveis
           </h3>
-          <p className="text-slate-600">
-            As informações sobre locais próximos ainda não foram adicionadas para este imóvel.
+          <p className="text-slate-700 mb-4">
+            Os locais próximos serão carregados automaticamente pelo Google Maps quando o imóvel tiver coordenadas cadastradas.
           </p>
+          <div className="max-w-md mx-auto text-left bg-white p-4 rounded-xl border border-blue-200">
+            <p className="text-sm text-slate-600 mb-2">
+              <strong className="text-blue-600">💡 Como funciona:</strong>
+            </p>
+            <ul className="text-sm text-slate-600 space-y-1 list-disc list-inside">
+              <li>O sistema busca automaticamente escolas, supermercados, hospitais e outros locais</li>
+              <li>Os dados vêm direto do Google Maps Places API</li>
+              <li>Nenhum cadastro manual é necessário</li>
+              <li>Basta ter latitude e longitude do imóvel</li>
+            </ul>
+          </div>
         </div>
       </section>
     );

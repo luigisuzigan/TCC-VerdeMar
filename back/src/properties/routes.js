@@ -176,10 +176,10 @@ const propertyValidators = [
   body('currency').isIn(['BRL', 'USD', 'EUR']),
   body('address').optional().isString().isLength({ max: 200 }),
   body('city').isString().isLength({ min: 1, max: 80 }),
-  body('state').optional().isString().isLength({ max: 50 }),
+  body('state').isString().isLength({ min: 2, max: 2 }), // UF obrigatório 2 caracteres
   body('country').isString().isLength({ min: 1, max: 80 }),
   body('neighborhood').optional().isString().isLength({ max: 100 }),
-  body('zipCode').optional().isString().isLength({ max: 20 }),
+  body('zipCode').isString().isLength({ min: 1, max: 20 }), // CEP obrigatório
   body('latitude').optional().isFloat({ min: -90, max: 90 }),
   body('longitude').optional().isFloat({ min: -180, max: 180 }),
   body('area').isInt({ min: 0 }).toInt(),

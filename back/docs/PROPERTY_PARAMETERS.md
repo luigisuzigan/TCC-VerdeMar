@@ -33,7 +33,7 @@ Esta documentação detalha todos os parâmetros que cada imóvel possui no sist
 
 ### `description` (String)
 - **Descrição**: Descrição detalhada do imóvel
-- **Obrigatório**: Não
+- **Obrigatório**: Sim
 - **Limite**: Até 800 caracteres
 - **Exemplo**: `"Apartamento completamente mobiliado com vista panorâmica para o mar. Localizado em condomínio de alto padrão com academia, piscina e área gourmet."`
 - **Uso**: Exibido na página de detalhes
@@ -99,7 +99,7 @@ Esta documentação detalha todos os parâmetros que cada imóvel possui no sist
 
 ### `style` (String, Opcional) - **NOVO CAMPO**
 - **Descrição**: Estilo arquitetônico/construtivo do imóvel
-- **Obrigatório**: Não
+- **Obrigatório**: Sim
 - **Valores sugeridos**:
   - `"Moderno"` - Arquitetura contemporânea, linhas retas, minimalista
   - `"Clássico"` - Arquitetura tradicional, elegante
@@ -164,7 +164,7 @@ Esta documentação detalha todos os parâmetros que cada imóvel possui no sist
 
 ### `iptu` (Float, Opcional)
 - **Descrição**: Valor **anual** do IPTU (Imposto Predial e Territorial Urbano)
-- **Obrigatório**: Não
+- **Obrigatório**: Sim
 - **Formato**: Número decimal
 - **Exemplo**: `1200.00` (R$ 1.200,00/ano → R$ 100,00/mês)
 - **Uso**: Cálculo de custos mensais totais (divide por 12)
@@ -335,7 +335,7 @@ Esta documentação detalha todos os parâmetros que cada imóvel possui no sist
 
 ### `yearBuilt` (Int, Opcional)
 - **Descrição**: Ano de construção do imóvel
-- **Obrigatório**: Não
+- **Obrigatório**: Sim
 - **Formato**: Número inteiro (4 dígitos)
 - **Exemplo**: `2018`
 - **Uso**: Filtros de idade, avaliação de conservação
@@ -343,7 +343,7 @@ Esta documentação detalha todos os parâmetros que cada imóvel possui no sist
 
 ### `propertyCondition` (Enum, Opcional)
 - **Descrição**: Estado de conservação do imóvel
-- **Obrigatório**: Não
+- **Obrigatório**: Sim
 - **Valores**: `"Novo"`, `"Seminovo"`, `"Usado"`, `"Reformado"`
 - **Exemplo**: `"Novo"`
 - **Uso**: Filtros de condição, expectativa de manutenção
