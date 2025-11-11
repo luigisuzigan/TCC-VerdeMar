@@ -526,10 +526,20 @@ Os campos devem aparecer/desaparecer dinamicamente baseado no tipo de imóvel se
 ```
 - Latitude (input number, helper)
 - Longitude (input number, helper)
-- [Botão: Buscar coordenadas pelo endereço]
-- [Preview: Mini-mapa mostrando localização]
+- [Botão: Buscar coordenadas pelo endereço] ✅
+- [Botão: Usar Minha Localização] ✅
+- [Botão: Limpar Coordenadas] ✅
+- [Preview: Mini-mapa mostrando localização] ✅
+- [Aviso se Google Maps API não configurada] ✅
 ```
 **Por quê?** Necessário para exibir no mapa e calcular locais próximos
+
+**✨ Funcionalidades Implementadas:**
+- ✅ **Buscar Coordenadas**: Converte endereço em lat/lng usando Google Maps Geocoding API
+- ✅ **Minha Localização**: Usa geolocation do navegador para pegar coordenadas atuais
+- ✅ **Preview do Mapa**: iframe do Google Maps mostrando pin na localização exata
+- ✅ **Coordenadas no Preview**: Exibe lat/lng formatadas com 6 casas decimais
+- ✅ **Validação**: Aviso se API key não estiver configurada
 
 ---
 
@@ -592,77 +602,336 @@ Total: R$ XXX,XX
 
 ## 🔢 SEÇÃO 6: CARACTERÍSTICAS DO IMÓVEL (Condicionais)
 
-### **Card 6.1: 📐 Áreas**
+### **🎨 VISUAL: Card único com gradiente roxo-violeta**
+
+```jsx
+<div className="bg-white rounded-2xl border-2 border-slate-200 shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+  {/* Header com gradiente roxo-violeta */}
+  <div className="bg-gradient-to-r from-purple-500 to-violet-500 px-8 py-6 text-center">
+    <h2 className="text-3xl font-bold text-white flex items-center justify-center gap-3">
+      <Home size={32} />
+      🏠 CARACTERÍSTICAS DO IMÓVEL
+    </h2>
+    <p className="text-purple-50 text-sm mt-2">Áreas, cômodos e estrutura do imóvel</p>
+  </div>
+
+  <div className="p-8 space-y-6">
+    
+    {/* 1. ÁREAS (Grid 2 colunas) */}
+    <div>
+      <label className="flex items-center justify-between mb-3">
+        <span className="text-lg font-bold text-slate-900 flex items-center gap-2">
+          <Ruler size={20} className="text-purple-600" />
+          📐 Áreas do Imóvel
+        </span>
+        <span className="text-xs bg-red-100 text-red-700 px-3 py-1 rounded-full font-semibold">
+          Obrigatório
+        </span>
+      </label>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Área Total */}
+        <div>
+          <label className="block text-sm font-bold text-slate-700 mb-2">
+            Área Total (m²) *
+          </label>
+          <input 
+            type="number"
+            step="0.01"
+            placeholder="250.00"
+            className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all text-lg"
+          />
+          <p className="text-xs text-slate-500 mt-1">
+            💡 Área total do terreno/lote
+          </p>
+        </div>
+
+        {/* Área Construída */}
+        <div>
+          <label className="block text-sm font-bold text-slate-700 mb-2">
+            Área Construída (m²) *
+          </label>
+          <input 
+            type="number"
+            step="0.01"
+            placeholder="180.00"
+            className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all text-lg"
+          />
+          <p className="text-xs text-slate-500 mt-1">
+            💡 Área edificada do imóvel
+          </p>
+        </div>
+      </div>
+
+      {/* Info dinâmica por tipo */}
+      <div className="bg-purple-50 border border-purple-200 rounded-xl p-4 mt-4">
+        <p className="text-xs text-purple-700">
+          <strong>Apartamento:</strong> Área construída = área útil do apartamento<br/>
+          <strong>Casa/Sobrado:</strong> Área total = lote, área construída = edificação<br/>
+          <strong>Terreno:</strong> Área construída pode ser 0 se não tiver construção
+        </p>
+      </div>
+    </div>
+
+    {/* Divisor */}
+    <div className="border-t border-slate-200"></div>
+
+    {/* 2. CÔMODOS - Grid 4 colunas (condicional para residenciais) */}
+    <div>
+      <label className="flex items-center justify-between mb-3">
+        <span className="text-lg font-bold text-slate-900 flex items-center gap-2">
+          <DoorOpen size={20} className="text-slate-600" />
+          🛏️ Cômodos
+        </span>
+        <span className="text-xs bg-red-100 text-red-700 px-3 py-1 rounded-full font-semibold">
+          Obrigatório para residenciais
+        </span>
+      </label>
+
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {/* Card Quartos */}
+        <div className="bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200 rounded-xl p-5 hover:shadow-lg transition-all">
+          <div className="flex items-center gap-3">
+            <div className="w-14 h-14 bg-blue-500 rounded-xl flex items-center justify-center flex-shrink-0">
+              <Bed size={28} className="text-white" />
+            </div>
+            <div className="flex-1">
+              <label className="block text-xs font-bold text-blue-900 mb-1">
+                Quartos *
+              </label>
+              <input 
+                type="number"
+                min="0"
+                placeholder="3"
+                className="w-full px-3 py-2 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-2xl font-bold text-blue-900 text-center bg-white"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Card Suítes */}
+        <div className="bg-gradient-to-br from-purple-50 to-purple-100 border-2 border-purple-200 rounded-xl p-5 hover:shadow-lg transition-all">
+          <div className="flex items-center gap-3">
+            <div className="w-14 h-14 bg-purple-500 rounded-xl flex items-center justify-center flex-shrink-0">
+              <Crown size={28} className="text-white" />
+            </div>
+            <div className="flex-1">
+              <label className="block text-xs font-bold text-purple-900 mb-1">
+                Suítes
+              </label>
+              <input 
+                type="number"
+                min="0"
+                placeholder="1"
+                className="w-full px-3 py-2 border-2 border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all text-2xl font-bold text-purple-900 text-center bg-white"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Card Banheiros */}
+        <div className="bg-gradient-to-br from-cyan-50 to-cyan-100 border-2 border-cyan-200 rounded-xl p-5 hover:shadow-lg transition-all">
+          <div className="flex items-center gap-3">
+            <div className="w-14 h-14 bg-cyan-500 rounded-xl flex items-center justify-center flex-shrink-0">
+              <Bath size={28} className="text-white" />
+            </div>
+            <div className="flex-1">
+              <label className="block text-xs font-bold text-cyan-900 mb-1">
+                Banheiros *
+              </label>
+              <input 
+                type="number"
+                min="0"
+                placeholder="2"
+                className="w-full px-3 py-2 border-2 border-cyan-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all text-2xl font-bold text-cyan-900 text-center bg-white"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Card Vagas */}
+        <div className="bg-gradient-to-br from-orange-50 to-orange-100 border-2 border-orange-200 rounded-xl p-5 hover:shadow-lg transition-all">
+          <div className="flex items-center gap-3">
+            <div className="w-14 h-14 bg-orange-500 rounded-xl flex items-center justify-center flex-shrink-0">
+              <Car size={28} className="text-white" />
+            </div>
+            <div className="flex-1">
+              <label className="block text-xs font-bold text-orange-900 mb-1">
+                Vagas
+              </label>
+              <input 
+                type="number"
+                min="0"
+                placeholder="2"
+                className="w-full px-3 py-2 border-2 border-orange-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all text-2xl font-bold text-orange-900 text-center bg-white"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p className="text-xs text-slate-500 mt-3 flex items-center gap-1">
+        <Info size={12} />
+        Esses campos não aparecem para terrenos vazios e imóveis comerciais
+      </p>
+    </div>
+
+    {/* Divisor */}
+    <div className="border-t border-slate-200"></div>
+
+    {/* 3. ANDARES (condicional por tipo) */}
+    <div>
+      <label className="flex items-center justify-between mb-3">
+        <span className="text-lg font-bold text-slate-900 flex items-center gap-2">
+          <Building2 size={20} className="text-slate-600" />
+          🏗️ Informações de Andares
+        </span>
+        <span className="text-xs bg-slate-100 text-slate-600 px-3 py-1 rounded-full font-semibold">
+          Condicional
+        </span>
+      </label>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Andar do Imóvel (Apartamento/Sala) */}
+        <div>
+          <label className="block text-sm font-bold text-slate-700 mb-2">
+            🏢 Andar do Imóvel
+          </label>
+          <input 
+            type="number"
+            min="0"
+            placeholder="Ex: 5"
+            className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all text-lg"
+          />
+          <p className="text-xs text-slate-500 mt-1">
+            💡 Para apartamentos/salas: qual andar? (0 = térreo)
+          </p>
+        </div>
+
+        {/* Total de Andares */}
+        <div>
+          <label className="block text-sm font-bold text-slate-700 mb-2">
+            📊 Total de Andares
+          </label>
+          <input 
+            type="number"
+            min="1"
+            placeholder="Ex: 12"
+            className="w-full px-4 py-3 border-2 border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all text-lg"
+          />
+          <p className="text-xs text-slate-500 mt-1">
+            💡 Apartamento: andares do prédio | Sobrado: andares da casa
+          </p>
+        </div>
+      </div>
+
+      {/* Info por tipo */}
+      <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mt-4">
+        <p className="text-xs text-blue-700">
+          <strong>🏢 Apartamento/Sala:</strong> "Andar" = em qual andar está? | "Total" = quantos andares tem o prédio?<br/>
+          <strong>🏠 Sobrado:</strong> "Total" = quantos andares tem a casa? (obrigatório, mínimo 2)<br/>
+          <strong>🏡 Casa:</strong> "Total" = opcional, informe se tiver mais de 1 andar<br/>
+          <strong>🏗️ Terreno:</strong> Não se aplica (campos ocultos)
+        </p>
+      </div>
+    </div>
+
+  </div>
+</div>
 ```
-- Área Construída * (m²) [sempre obrigatório]
-- Área do Lote/Terreno (m²) * [obrigatório para Casa, Sobrado, Terrenos, Galpões]
-- [Helper dinâmico por tipo]
-- [Cálculo: Preço por m²]
-```
-**Helpers contextuais:**
-- Para **Terrenos**: "Para terrenos, área construída = área do lote"
-- Para **Casa/Sobrado**: "Área do lote pode ser maior que área construída"
-- Para **Apartamento**: "Área do lote não se aplica" (campo oculto)
+
+### **✨ Características do Visual:**
+
+#### **Layout Otimizado:**
+- ✅ **Card único grande** com todas as características
+- ✅ **Header roxo-violeta** (diferente das seções anteriores)
+- ✅ **3 subseções bem definidas**:
+  1. Áreas (2 colunas): Área Total + Área Construída
+  2. Cômodos (4 colunas): Quartos + Suítes + Banheiros + Vagas
+  3. Andares (2 colunas): Andar do Imóvel + Total de Andares
+
+#### **Áreas:**
+- ✅ **Área Total (m²)** - obrigatório para todos
+  - Helper: "Área total do terreno/lote"
+- ✅ **Área Construída (m²)** - obrigatório para todos
+  - Helper: "Área edificada do imóvel"
+- ✅ **Info box dinâmica** explicando diferenças por tipo
+
+#### **Cômodos (Grid 4 colunas):**
+- ✅ **Campos centralizados** com números grandes
+- ✅ **Emojis nos labels** para identificação visual rápida
+- ✅ Quartos * (obrigatório para residenciais)
+- ✅ Suítes (opcional)
+- ✅ Banheiros * (obrigatório para residenciais)
+- ✅ Vagas de Garagem (opcional)
+- ✅ **Helper text** indicando que não aparecem para terrenos/comerciais
+
+#### **Andares:**
+- ✅ **2 campos separados** para diferentes contextos
+- ✅ **Helpers específicos** por tipo de imóvel
+- ✅ **Info box azul** explicando uso por tipo:
+  - Apartamento/Sala: andar onde está + total do prédio
+  - Sobrado: total de andares da casa (obrigatório, min 2)
+  - Casa: total de andares (opcional)
+  - Terreno: campos ocultos
+
+#### **Cores e Identidade:**
+- Gradiente: **Roxo-Violeta** (Purple/Violet)
+- Badge Obrigatório: **Vermelho**
+- Badge Condicional: **Cinza**
+- Info boxes: **Roxo claro** e **Azul claro**
+
+#### **Responsividade:**
+- **Desktop**: 
+  - Áreas: 2 colunas
+  - Cômodos: 4 colunas
+  - Andares: 2 colunas
+- **Mobile**: Tudo em 1 coluna (empilhado)
+
+#### **UX Melhorada:**
+- ✅ Inputs de área com `step="0.01"` para casas decimais
+- ✅ Inputs de cômodos centralizados para melhor visualização
+- ✅ Placeholders com exemplos realistas
+- ✅ Helpers contextuais por tipo de imóvel
+- ✅ Info boxes educativos
 
 ---
 
-### **Card 6.2: 🛏️ Quartos** [CONDICIONAL - só aparece para tipos residenciais]
+### **Card 6.1: 📐 Áreas**
+```
+- Área Total (m²) * [sempre obrigatório]
+- Área Construída (m²) * [sempre obrigatório]
+- [Helper dinâmico por tipo]
+- [Info box com explicações]
+```
+**Por quê?** Informações essenciais para precificação e comparação
+
+---
+
+### **Card 6.2: 🛏️ Cômodos** [CONDICIONAL - só aparece para tipos residenciais]
 ```
 - Quartos * [obrigatório para Casa, Sobrado, Apartamento, Cobertura]
+- Suítes (opcional, obrigatório para Cobertura)
+- Banheiros * [obrigatório para Casa, Sobrado, Apartamento, Cobertura]
+- Vagas de Garagem (opcional)
 - [Não aparece para: Terrenos, Salas comerciais, Galpões, Lojas]
 ```
 
 ---
 
-### **Card 6.3: 🚿 Banheiros** [CONDICIONAL]
+### **Card 6.3: 🏗️ Andares** [CONDICIONAL]
 ```
-- Banheiros * [obrigatório para Casa, Sobrado, Apartamento, Cobertura]
-- [Inclui lavabos]
-```
-
----
-
-### **Card 6.4: 👑 Suítes** [CONDICIONAL]
-```
-- Suítes * [obrigatório para Cobertura]
-- Suítes (opcional para Casa, Sobrado, Hotel/Pousada)
-- [Helper: Quartos com banheiro privativo]
-- [Não aparece para: Terrenos, Kitnets, Comerciais]
-```
-
----
-
-### **Card 6.5: 🚗 Vagas de Garagem** [CONDICIONAL]
-```
-- Vagas de Garagem * [obrigatório para Casa, Sobrado, Apartamento, Cobertura]
-- [Não aparece para: Terrenos sem construção]
-```
-
----
-
-### **Card 6.6: 🏢 Andar do Imóvel** [CONDICIONAL - só Apartamento, Cobertura, Sala]
-```
-- Andar * [obrigatório para Apartamento, Cobertura, Sala comercial]
-- [Helper: Em qual andar do prédio está localizado]
-- [NÃO aparece para: Casa, Sobrado, Terreno, Galpão]
-```
-
----
-
-### **Card 6.7: 🏗️ Total de Andares** [CONDICIONAL]
-```
-- Total de Andares do Prédio * [obrigatório para Apartamento, Cobertura, Condomínio]
-- [Helper: Quantos andares tem o prédio]
-
-OU
-
-- Número de Andares da Casa (opcional para Casa, obrigatório para Sobrado)
-- [Helper: Quantos andares tem esta casa? Ex: casa de 2 andares]
+- Andar do Imóvel * [obrigatório para Apartamento, Cobertura, Sala comercial]
+- Total de Andares * [obrigatório para Apartamento (prédio), Sobrado (casa)]
+- Total de Andares (opcional para Casa se tiver mais de 1 andar)
+- [Helper dinâmico por tipo]
+- [Info box explicativa]
+- [NÃO aparece para: Terreno]
 ```
 **Por quê separar?**
-- **Apartamento**: totalFloors = andares do prédio (ex: 12 andares)
-- **Sobrado**: totalFloors = andares da própria casa (ex: 2 andares)
-- **Casa**: totalFloors = opcional (se tem mais de 1 andar)
+- **Apartamento**: andar onde está + total do prédio
+- **Sobrado**: total de andares da própria casa (min 2)
+- **Casa**: total de andares (opcional)
 
 ---
 

@@ -8,7 +8,6 @@ import IdentificationSection from './FormSections/IdentificationSection.jsx';
 import CategoryTypeSection from './FormSections/CategoryTypeSection.jsx';
 import LocationSection from './FormSections/LocationSection.jsx';
 import PriceSection from './FormSections/PriceSection.jsx';
-import MonthlyCostsSection from './FormSections/MonthlyCostsSection.jsx';
 import CharacteristicsSection from './FormSections/CharacteristicsSection.jsx';
 import AmenitiesSection from './FormSections/AmenitiesSection.jsx';
 import NaturalConditionsSection from './FormSections/NaturalConditionsSection.jsx';
@@ -128,8 +127,7 @@ export default function AdminPropertyForm() {
         '1. Identificação': [],
         '2. Categoria e Tipo': [],
         '3. Localização': [],
-        '4. Preço e Área': [],
-        '5. Custos Mensais': [],
+        '4. Preço e Custos': [],
         '6. Características': []
       };
       
@@ -151,17 +149,15 @@ export default function AdminPropertyForm() {
         errorsBySections['3. Localização'].push('Estado é obrigatório');
       }
       
-      // Seção 4: Preço e Área
+      // Seção 4: Preço e Custos
       if (!model.price || parseFloat(model.price) <= 0) {
-        errorsBySections['4. Preço e Área'].push('Preço deve ser maior que zero');
+        errorsBySections['4. Preço e Custos'].push('Preço deve ser maior que zero');
       }
       if (!model.area || parseInt(model.area) <= 0) {
-        errorsBySections['4. Preço e Área'].push('Área deve ser maior que zero');
+        errorsBySections['4. Preço e Custos'].push('Área deve ser maior que zero');
       }
-      
-      // Seção 5: Custos Mensais
       if (isFieldRequired(selectedType, 'condoFee') && !model.condoFee) {
-        errorsBySections['5. Custos Mensais'].push(`Condomínio é obrigatório para ${selectedType}`);
+        errorsBySections['4. Preço e Custos'].push(`Condomínio é obrigatório para ${selectedType}`);
       }
       
       // Seção 6: Características
@@ -333,17 +329,6 @@ export default function AdminPropertyForm() {
         <PriceSection 
           model={model}
           update={update}
-          area={model.area}
-          price={model.price}
-        />
-
-        <MonthlyCostsSection 
-          model={model}
-          update={update}
-          selectedType={selectedType}
-          condoFee={model.condoFee}
-          iptu={model.iptu}
-          homeInsurance={model.homeInsurance}
         />
 
         <CharacteristicsSection 
