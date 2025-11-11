@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Save, X, Home } from 'lucide-react';
 import { api } from '../../../api/client.js';
-import { shouldShowField, isFieldRequired, PROPERTY_TYPES_BY_CATEGORY } from '../../../utils/propertyFieldsHelper.js';
+import { PROPERTY_TYPES_BY_CATEGORY } from '../../../utils/propertyFieldsHelper.js';
 import { CATEGORIES, STYLES, PROPERTY_CONDITIONS, AMENITIES_LIST, NATURAL_CONDITIONS } from './constants.js';
 import IdentificationSection from './FormSections/IdentificationSection.jsx';
 import CategoryTypeSection from './FormSections/CategoryTypeSection.jsx';
@@ -40,7 +40,6 @@ const empty = {
   homeInsurance: null,
   yearBuilt: null,
   propertyCondition: '',
-  lotSize: null,
   amenities: '[]',
   naturalConditions: '[]',
   architecturalStyle: '',
@@ -156,42 +155,22 @@ export default function AdminPropertyForm() {
       if (!model.area || parseInt(model.area) <= 0) {
         errorsBySections['4. Preço e Custos'].push('Área deve ser maior que zero');
       }
-      if (isFieldRequired(selectedType, 'condoFee') && !model.condoFee) {
-        errorsBySections['4. Preço e Custos'].push(`Condomínio é obrigatório para ${selectedType}`);
-      }
       
-      // Seção 6: Características
-      if (isFieldRequired(selectedType, 'beds') && (!model.beds && model.beds !== 0)) {
-        errorsBySections['6. Características'].push(`Quartos é obrigatório para ${selectedType}`);
-      }
-      if (isFieldRequired(selectedType, 'baths') && (!model.baths && model.baths !== 0)) {
-        errorsBySections['6. Características'].push(`Banheiros é obrigatório para ${selectedType}`);
-      }
-      if (isFieldRequired(selectedType, 'suites') && (!model.suites && model.suites !== 0)) {
-        errorsBySections['6. Características'].push(`Suítes é obrigatório para ${selectedType}`);
-      }
-      if (isFieldRequired(selectedType, 'parkingSpaces') && (!model.parkingSpaces && model.parkingSpaces !== 0)) {
-        errorsBySections['6. Características'].push(`Vagas de garagem é obrigatório para ${selectedType}`);
-      }
-      if (isFieldRequired(selectedType, 'floor') && !model.floor && model.floor !== 0) {
-        errorsBySections['6. Características'].push(`Andar é obrigatório para ${selectedType}`);
-      }
-      if (isFieldRequired(selectedType, 'totalFloors') && !model.totalFloors) {
-        errorsBySections['6. Características'].push(`Total de andares é obrigatório para ${selectedType}`);
-      }
-      // lotSize NÃO é obrigatório - removido para não bloquear salvamento
+      // VALIDAÇÕES CONDICIONAIS REMOVIDAS
+      // Agora todos os campos são opcionais, basta preencher com 0 se não aplicar
       
       // Verificar se há erros
-      const allErrors = [];
+      const errorMessages = [];
       Object.entries(errorsBySections).forEach(([section, errors]) => {
         if (errors.length > 0) {
-          allErrors.push(`\n📍 ${section}:`);
-          errors.forEach(err => allErrors.push(`   • ${err}`));
+          errors.forEach(err => {
+            errorMessages.push(`${section}: ${err}`);
+          });
         }
       });
       
-      if (allErrors.length > 0) {
-        setError('Preencha os campos obrigatórios abaixo:' + allErrors.join('\n'));
+      if (errorMessages.length > 0) {
+        setError(errorMessages.join(' • '));
         setSaving(false);
         // NÃO rola para o topo, mantém o usuário onde está
         return;
@@ -206,12 +185,14 @@ export default function AdminPropertyForm() {
         currency: model.currency || 'BRL',
         city: model.city.trim(),
         country: model.country || 'Brasil',
-        area: parseInt(model.area),
+        area: parseInt(model.area) || 0,
+        ...(model.totalArea && { totalArea: parseInt(model.totalArea) }),
         category: selectedCategory || 'Residencial',
         type: selectedType || 'Casa',
-        ...(shouldShowField(selectedType, 'beds') && { beds: parseInt(model.beds) || 0 }),
-        ...(shouldShowField(selectedType, 'baths') && { baths: parseInt(model.baths) || 0 }),
-        ...(shouldShowField(selectedType, 'parkingSpaces') && { parkingSpaces: parseInt(model.parkingSpaces) || 0 }),
+        beds: parseInt(model.beds) || 0,
+        baths: parseInt(model.baths) || 0,
+        parkingSpaces: parseInt(model.parkingSpaces) || 0,
+        suites: parseInt(model.suites) || 0,
         description: model.description || '',
         address: model.address || '',
         state: model.state || '',
@@ -221,14 +202,12 @@ export default function AdminPropertyForm() {
         propertyCondition: model.propertyCondition || '',
         ...(model.latitude && { latitude: parseFloat(model.latitude) }),
         ...(model.longitude && { longitude: parseFloat(model.longitude) }),
-        ...(shouldShowField(selectedType, 'suites') && model.suites && { suites: parseInt(model.suites) }),
-        ...(shouldShowField(selectedType, 'floor') && model.floor && { floor: parseInt(model.floor) }),
-        ...(shouldShowField(selectedType, 'totalFloors') && model.totalFloors && { totalFloors: parseInt(model.totalFloors) }),
-        ...(shouldShowField(selectedType, 'condoFee') && model.condoFee && { condoFee: parseFloat(model.condoFee) }),
+        ...(model.floor && { floor: parseInt(model.floor) }),
+        ...(model.totalFloors && { totalFloors: parseInt(model.totalFloors) }),
+        ...(model.condoFee && { condoFee: parseFloat(model.condoFee) }),
         ...(model.iptu && { iptu: parseFloat(model.iptu) }),
         ...(model.homeInsurance && { homeInsurance: parseFloat(model.homeInsurance) }),
         ...(model.yearBuilt && { yearBuilt: parseInt(model.yearBuilt) }),
-        ...(shouldShowField(selectedType, 'lotSize') && model.lotSize && { lotSize: parseInt(model.lotSize) }),
         images: JSON.stringify(images),
         amenities: JSON.stringify(selectedAmenities),
         naturalConditions: JSON.stringify(selectedNaturalConditions),
@@ -356,51 +335,53 @@ export default function AdminPropertyForm() {
           update={update}
         />
 
-        <div className="flex items-center justify-end gap-4 pt-4 border-t-2 border-slate-200">
-          <button 
-            type="button" 
-            onClick={() => navigate('/admin/properties')}
-            className="px-8 py-3.5 border-2 border-slate-300 text-slate-700 rounded-xl font-semibold hover:bg-slate-100 hover:border-slate-400 transition-all flex items-center gap-2 shadow-sm"
-          >
-            <X size={20} />
-            Cancelar
-          </button>
-          <button 
-            type="submit"
-            disabled={saving} 
-            className="px-8 py-3.5 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white rounded-xl font-semibold hover:from-emerald-700 hover:to-emerald-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-lg shadow-emerald-200"
-          >
-            <Save size={20} />
-            {saving ? 'Salvando...' : id ? 'Atualizar Imóvel' : 'Criar Imóvel'}
-          </button>
-        </div>
-      </form>
-
-      {/* Banner de erro fixo na parte inferior */}
-      {error && (
-        <div className="fixed bottom-0 left-0 right-0 bg-red-600 text-white p-6 shadow-2xl z-50 animate-slide-up">
-          <div className="max-w-6xl mx-auto">
-            <div className="flex items-start gap-4">
-              <div className="flex-shrink-0 bg-white text-red-600 rounded-full p-2">
-                <X size={24} />
+        {/* Barra de ações com notificação de erro ao lado */}
+        <div className="flex items-center justify-between gap-4 pt-4 border-t-2 border-slate-200">
+          {/* Notificação de erro inline (lado esquerdo) */}
+          {error && (
+            <div className="flex-1 max-w-md bg-red-50 border-2 border-red-200 rounded-xl p-3 flex items-start gap-3 animate-slide-in">
+              <div className="flex-shrink-0 bg-red-500 text-white rounded-full p-1.5 mt-0.5">
+                <X size={16} />
               </div>
-              <div className="flex-1">
-                <h3 className="font-bold text-xl mb-2">❌ Não foi possível salvar o imóvel</h3>
-                <div className="text-sm leading-relaxed whitespace-pre-line bg-red-700 bg-opacity-50 rounded-lg p-4 font-mono">
+              <div className="flex-1 min-w-0">
+                <h4 className="font-bold text-sm text-red-900 mb-1">
+                  Erro ao salvar
+                </h4>
+                <p className="text-xs text-red-700 line-clamp-2">
                   {error}
-                </div>
+                </p>
               </div>
               <button
                 onClick={() => setError('')}
-                className="flex-shrink-0 bg-white text-red-600 hover:bg-red-50 rounded-lg p-2 transition-colors"
+                className="flex-shrink-0 text-red-400 hover:text-red-600 transition-colors"
                 title="Fechar"
               >
-                <X size={20} />
+                <X size={16} />
               </button>
             </div>
+          )}
+
+          {/* Botões de ação (lado direito) */}
+          <div className="flex items-center gap-4">
+            <button 
+              type="button" 
+              onClick={() => navigate('/admin/properties')}
+              className="px-8 py-3.5 border-2 border-slate-300 text-slate-700 rounded-xl font-semibold hover:bg-slate-100 hover:border-slate-400 transition-all flex items-center gap-2 shadow-sm"
+            >
+              <X size={20} />
+              Cancelar
+            </button>
+            <button 
+              type="submit"
+              disabled={saving} 
+              className="px-8 py-3.5 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white rounded-xl font-semibold hover:from-emerald-700 hover:to-emerald-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-lg shadow-emerald-200"
+            >
+              <Save size={20} />
+              {saving ? 'Salvando...' : id ? 'Atualizar Imóvel' : 'Criar Imóvel'}
+            </button>
           </div>
         </div>
-      )}
+      </form>
     </div>
   );
 }

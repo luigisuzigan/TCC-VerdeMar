@@ -1,92 +1,25 @@
 /**
  * Configuração de campos condicionais por tipo de imóvel
- * Define quais campos são obrigatórios, opcionais ou não aplicáveis para cada tipo
+ * SIMPLIFICADO: Todos os campos disponíveis para todos os tipos
+ * Se não aplicar, preencher com 0 e não aparecerá nos detalhes
  */
 
 // Campos obrigatórios por tipo de imóvel
 export const REQUIRED_FIELDS = {
-  // Residenciais
-  'Apartamento': ['floor', 'totalFloors', 'condoFee', 'beds', 'baths', 'parkingSpaces'],
-  'Casa': ['beds', 'baths', 'parkingSpaces', 'lotSize'],
-  'Sobrado': ['beds', 'baths', 'parkingSpaces', 'lotSize', 'totalFloors'],
-  'Cobertura': ['floor', 'totalFloors', 'condoFee', 'beds', 'baths', 'parkingSpaces', 'suites'],
-  'Kitnet / Studio / Loft': ['baths'],
-  'Condomínio residencial': ['condoFee', 'totalFloors'],
-  'Chácara': ['lotSize'],
-  'Sítio / Fazenda': ['lotSize'],
-  
-  // Terrenos - TODOS precisam de lotSize
-  'Terreno residencial': ['area', 'lotSize'],
-  'Terreno comercial': ['area', 'lotSize'],
-  'Terreno misto': ['area', 'lotSize'],
-  'Terreno rural': ['area', 'lotSize'],
-  'Terreno em condomínio': ['area', 'lotSize', 'condoFee'],
-  
-  // Comerciais
-  'Sala comercial / Escritório': ['area', 'floor', 'totalFloors', 'condoFee', 'parkingSpaces'],
-  'Loja / Ponto comercial': ['area', 'parkingSpaces'],
-  'Prédio comercial': ['area', 'totalFloors', 'parkingSpaces'],
-  'Galpão comercial': ['area', 'parkingSpaces', 'lotSize'],
-  'Hotel / Pousada': ['beds', 'baths'],
-  
-  // Industriais
-  'Galpão industrial': ['area', 'parkingSpaces', 'lotSize'],
-  'Condomínio industrial': ['area'],
-  'Terreno industrial': ['area', 'lotSize'],
-  'Fábrica / Armazém': ['area', 'parkingSpaces', 'lotSize'],
-  
-  // Especiais
-  'Loteamento': ['area', 'lotSize'],
-  'Área / Gleba': ['area', 'lotSize'],
-  'Empreendimento em construção': [],
-  'Imóvel de uso misto': ['beds', 'baths']
+  // NENHUM CAMPO CONDICIONAL OBRIGATÓRIO
+  // Apenas campos básicos são obrigatórios (validados nas rotas)
 };
 
 // Campos que NÃO devem ser preenchidos (não aplicáveis) por tipo
 export const HIDDEN_FIELDS = {
-  // Residenciais
-  'Casa': ['floor', 'totalFloors'],
-  'Sobrado': ['floor'],
-  'Kitnet / Studio / Loft': ['suites', 'lotSize'],
-  'Chácara': ['floor', 'totalFloors', 'condoFee'],
-  'Sítio / Fazenda': ['floor', 'totalFloors', 'condoFee'],
-  'Apartamento': ['lotSize'], // Apartamento não tem lote
-  'Cobertura': ['lotSize'], // Cobertura não tem lote
-  
-  // Terrenos (não têm quartos, banheiros, etc)
-  'Terreno residencial': ['beds', 'baths', 'suites', 'floor', 'totalFloors', 'parkingSpaces'],
-  'Terreno comercial': ['beds', 'baths', 'suites', 'floor', 'totalFloors', 'parkingSpaces'],
-  'Terreno misto': ['beds', 'baths', 'suites', 'floor', 'totalFloors', 'parkingSpaces'],
-  'Terreno rural': ['beds', 'baths', 'suites', 'floor', 'totalFloors', 'parkingSpaces', 'condoFee'],
-  'Terreno em condomínio': ['beds', 'baths', 'suites', 'floor', 'totalFloors', 'parkingSpaces'],
-  
-  // Comerciais
-  'Sala comercial / Escritório': ['beds', 'suites', 'lotSize'],
-  'Loja / Ponto comercial': ['beds', 'baths', 'suites', 'totalFloors', 'lotSize'],
-  'Prédio comercial': ['beds', 'baths', 'suites', 'lotSize'],
-  'Galpão comercial': ['beds', 'baths', 'suites', 'floor', 'totalFloors', 'condoFee'],
-  'Hotel / Pousada': ['floor', 'lotSize'], // Hotel pode ter suites
-  
-  // Industriais
-  'Galpão industrial': ['beds', 'baths', 'suites', 'floor', 'totalFloors', 'condoFee'],
-  'Condomínio industrial': ['beds', 'baths', 'suites', 'floor', 'totalFloors', 'lotSize'],
-  'Terreno industrial': ['beds', 'baths', 'suites', 'floor', 'totalFloors', 'parkingSpaces', 'condoFee'],
-  'Fábrica / Armazém': ['beds', 'baths', 'suites', 'floor', 'totalFloors', 'condoFee'],
-  
-  // Especiais
-  'Loteamento': ['beds', 'baths', 'suites', 'floor', 'totalFloors', 'parkingSpaces', 'condoFee'],
-  'Área / Gleba': ['beds', 'baths', 'suites', 'floor', 'totalFloors', 'parkingSpaces', 'condoFee'],
-  'Empreendimento em construção': [], // Pode ter qualquer campo
-  'Imóvel de uso misto': [] // Pode ter qualquer campo
+  // NENHUM CAMPO ESCONDIDO
+  // Todos os campos aparecem para todos os tipos
+  // Se não aplicar, preencher com 0
 };
 
 // Campos opcionais por tipo (podem ou não ser preenchidos)
 export const OPTIONAL_FIELDS = {
-  'Casa': ['suites', 'condoFee', 'iptu', 'yearBuilt', 'propertyCondition'],
-  'Sobrado': ['suites', 'totalFloors', 'condoFee', 'iptu', 'yearBuilt', 'propertyCondition'],
-  'Kitnet / Studio / Loft': ['beds', 'floor', 'condoFee', 'parkingSpaces', 'iptu'],
-  'Loja / Ponto comercial': ['baths', 'floor', 'condoFee', 'iptu'],
-  // ... adicione mais conforme necessário
+  // Todos os campos são opcionais para todos os tipos
 };
 
 /**
@@ -104,40 +37,15 @@ export function getFieldsForPropertyType(type) {
 
 /**
  * Valida se os campos fornecidos estão corretos para o tipo de imóvel
+ * SIMPLIFICADO: Não valida mais campos condicionais
  * @param {string} type - Tipo do imóvel
  * @param {Object} data - Dados do imóvel
- * @returns {Array} Array de erros (vazio se tudo OK)
+ * @returns {Array} Array de erros (sempre vazio agora)
  */
 export function validatePropertyFields(type, data) {
-  const config = getFieldsForPropertyType(type);
-  const errors = [];
-  
-  // Verificar campos obrigatórios
-  config.required.forEach(field => {
-    if (data[field] === undefined || data[field] === null || data[field] === '') {
-      // Permitir 0 como valor válido
-      if (data[field] !== 0) {
-        errors.push({
-          field,
-          message: `Campo "${field}" é obrigatório para ${type}`,
-          type: 'required'
-        });
-      }
-    }
-  });
-  
-  // Verificar campos que não devem existir
-  config.hidden.forEach(field => {
-    if (data[field] !== undefined && data[field] !== null && data[field] !== '' && data[field] !== 0) {
-      errors.push({
-        field,
-        message: `Campo "${field}" não se aplica a ${type}`,
-        type: 'not_applicable'
-      });
-    }
-  });
-  
-  return errors;
+  // Não validar mais campos condicionais
+  // Todos os campos são aceitos para todos os tipos
+  return [];
 }
 
 /**

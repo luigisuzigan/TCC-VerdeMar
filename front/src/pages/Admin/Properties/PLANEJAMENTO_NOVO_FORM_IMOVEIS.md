@@ -937,42 +937,512 @@ Total: R$ XXX,XX
 
 ## 🔢 SEÇÃO 7: COMODIDADES E AMENIDADES (Opcional para todos)
 
-### **Card 7.1: ✅ Comodidades** (card expansível)
-```
-[Header]
-✅ Comodidades (X selecionadas)
-[Botão: Limpar todas]
+### 🎨 VISUAL: Card único com gradiente teal-cyan
 
-[Grid 4 colunas de checkboxes]
+**HEADER DO CARD:**
+- Gradiente: teal → cyan (from-teal-500 to-cyan-500)
+- Ícone: Sparkles (32px) + texto "✅ COMODIDADES DO IMÓVEL"
+- Subtítulo: "Selecione todas as comodidades disponíveis"
+- Badge lateral: "X de 200+ opções selecionadas" (atualiza dinamicamente)
+- Botão secundário: "Limpar Todas" (branco outline)
+
+---
+
+### 📦 ESTRUTURA: Categorias Expansíveis (Acordeão)
+
+**CATEGORIA 1: 🏊 Lazer e Área Externa**
+- Cor do badge: Blue (azul)
+- Ícone: Waves
+- Grid: 4 colunas (desktop) | 2 colunas (mobile)
+- Checkboxes com ícones personalizados
+
+**Itens:**
 - Piscina
-- WiFi
+- Piscina Aquecida
+- Hidromassagem / Jacuzzi
+- Academia / Fitness
+- Sauna
+- Spa
 - Churrasqueira
-- Academia
-- ... (lista completa)
+- Área Gourmet
+- Forno de Pizza
+- Jardim
+- Varanda
+- Sacada
+- Terraço
+- Deck
+- Gazebo / Pergolado
+- Quadra Poliesportiva
+- Quadra de Tênis
+- Campo de Futebol
+- Playground
+- Salão de Jogos
+- Salão de Festas
+- Sala de Cinema / Home Theater
+- Brinquedoteca
 
-[Altura máxima com scroll]
-```
-**Por quê?** Diferenciais importantes, mas opcional
+---
+
+**CATEGORIA 2: 🌐 Tecnologia e Conectividade**
+- Cor do badge: Purple (roxo)
+- Ícone: Wifi
+- Grid: 4 colunas (desktop) | 2 colunas (mobile)
+
+**Itens:**
+- WiFi
+- Internet Fibra Óptica
+- TV a Cabo
+- Smart TV
+- Sistema de Som Integrado
+- Automação Residencial / Smart Home
+- Interfone
+- Vídeo Porteiro
+- Portão Eletrônico
+
+---
+
+**CATEGORIA 3: ❄️ Climatização**
+- Cor do badge: Cyan (ciano)
+- Ícone: Snowflake
+- Grid: 4 colunas (desktop) | 2 colunas (mobile)
+
+**Itens:**
+- Ar-condicionado
+- Ar-condicionado Central
+- Ar-condicionado Split
+- Aquecedor
+- Aquecedor a Gás
+- Aquecedor Solar
+- Ventilador de Teto
+- Lareira
+- Lareira a Lenha
+- Lareira a Gás
+
+---
+
+**CATEGORIA 4: 🚗 Estacionamento e Garagem**
+- Cor do badge: Slate (cinza escuro)
+- Ícone: Car
+- Grid: 4 colunas (desktop) | 2 colunas (mobile)
+
+**Itens:**
+- Garagem Coberta
+- Garagem Descoberta
+- 1 Vaga
+- 2 Vagas
+- 3 Vagas
+- 4+ Vagas
+- Vaga para Visitantes
+- Carregador para Carro Elétrico
+
+---
+
+**CATEGORIA 5: 🍳 Cozinha e Eletrodomésticos**
+- Cor do badge: Orange (laranja)
+- Ícone: ChefHat
+- Grid: 4 colunas (desktop) | 2 colunas (mobile)
+
+**Itens:**
+- Cozinha Equipada
+- Cozinha Planejada
+- Cozinha Gourmet
+- Ilha / Bancada Americana
+- Geladeira
+- Freezer
+- Fogão
+- Cooktop
+- Forno Elétrico
+- Forno a Gás
+- Micro-ondas
+- Lava-louças
+- Máquina de Lavar Roupa
+- Máquina de Secar Roupa
+- Adega Climatizada
+- Coifa / Depurador
+- Purificador de Água
+- Filtro de Água
+
+---
+
+**CATEGORIA 6: 🔒 Segurança**
+- Cor do badge: Red (vermelho)
+- Ícone: Shield
+- Grid: 4 colunas (desktop) | 2 colunas (mobile)
+
+**Itens:**
+- Portaria 24h
+- Segurança 24h
+- Câmeras de Segurança
+- Circuito Fechado de TV (CFTV)
+- Alarme
+- Cerca Elétrica
+- Muros Altos
+- Grades nas Janelas
+- Porta Blindada
+- Cofre
+
+---
+
+**CATEGORIA 7: ♿ Acessibilidade**
+- Cor do badge: Indigo (índigo)
+- Ícone: Accessibility
+- Grid: 4 colunas (desktop) | 2 colunas (mobile)
+
+**Itens:**
+- Elevador
+- Elevador Social
+- Elevador de Serviço
+- Acessível para Cadeirantes
+- Rampa de Acesso
+- Banheiro Adaptado
+- Corrimãos
+
+---
+
+**CATEGORIA 8: 🐕 Pets e Família**
+- Cor do badge: Pink (rosa)
+- Ícone: Dog
+- Grid: 4 colunas (desktop) | 2 colunas (mobile)
+
+**Itens:**
+- Aceita Pets
+- Aceita Cães
+- Aceita Gatos
+- Pet Place / Área para Pets
+- Playground Infantil
+- Área Kids
+
+---
+
+**CATEGORIA 9: 🏢 Condomínio e Infraestrutura**
+- Cor do badge: Violet (violeta)
+- Ícone: Building
+- Grid: 4 colunas (desktop) | 2 colunas (mobile)
+
+**Itens:**
+- Salão de Festas do Condomínio
+- Academia do Condomínio
+- Piscina do Condomínio
+- Espaço Coworking
+- Bicicletário
+- Lavanderia Coletiva
+- Depósito / Closet Privativo
+- Zelador / Síndico
+
+---
+
+**CATEGORIA 10: 🌊 Água e Utilidades**
+- Cor do badge: Sky (azul céu)
+- Ícone: Droplets
+- Grid: 4 colunas (desktop) | 2 colunas (mobile)
+
+**Itens:**
+- Caixa d'água
+- Cisterna
+- Aquecimento Solar
+- Bomba d'água
+- Gerador
+- Energia Solar / Painéis Fotovoltaicos
+
+---
+
+**CATEGORIA 11: 🛏️ Quartos e Banheiros**
+- Cor do badge: Rose (rosa escuro)
+- Ícone: Bed
+- Grid: 4 colunas (desktop) | 2 colunas (mobile)
+
+**Itens:**
+- Suíte Master
+- Closet
+- Banheira
+- Box Blindex
+- Ducha
+- Armários Embutidos
+- Guarda-roupas Embutido
+
+---
+
+**CATEGORIA 12: 🏠 Estrutura e Acabamentos**
+- Cor do badge: Amber (âmbar)
+- Ícone: Home
+- Grid: 4 colunas (desktop) | 2 colunas (mobile)
+
+**Itens:**
+- Pé-direito Alto
+- Piso Frio
+- Piso Laminado
+- Piso de Madeira
+- Piso Porcelanato
+- Gesso / Sancas
+- Molduras / Rodatetos
+- Papel de Parede
+- Pintura Nova
+
+---
+
+### 🎯 COMPORTAMENTO DO ACORDEÃO:
+
+**Estados dos Painéis:**
+- **Fechado**: Mostra nome da categoria + ícone + badge com "X itens selecionados"
+- **Aberto**: Expande e mostra grid de checkboxes
+- **Expansão**: Animação suave (transition 300ms)
+- **Padrão**: Todas as categorias fechadas inicialmente
+- **Múltiplos abertos**: Permitir abrir várias categorias ao mesmo tempo
+
+**Header de Cada Categoria:**
+- Fundo: Gradiente suave da cor da categoria (50 → 100)
+- Borda lateral esquerda: 4px sólida na cor da categoria
+- Hover: Shadow e leve escurecimento
+- Cursor: pointer
+- Ícone de seta: ChevronDown (rotaciona 180° quando aberto)
+
+**Checkboxes:**
+- Tamanho: Grande e fácil de clicar
+- Cor de seleção: Cor da categoria
+- Label: Texto claro e legível
+- Hover: Background suave
+- Animação: Check mark suave
+
+**Resumo Visual (Topo do Card):**
+- "12 categorias disponíveis"
+- "Total: 45 comodidades selecionadas"
+- Barra de progresso visual opcional (percentual de seleção)
 
 ---
 
 ## 🔢 SEÇÃO 8: CONDIÇÕES NATURAIS (Opcional para todos)
 
-### **Card 8.1: 🌿 Condições Naturais** (card expansível)
-```
-[Header]
-🌿 Condições Naturais (X selecionadas)
-[Botão: Limpar todas]
+### 🎨 VISUAL: Card com tema natural - Gradiente verde-esmeralda
 
-[Grid 4 colunas de checkboxes]
+**HEADER DO CARD:**
+- Gradiente: verde → esmeralda (from-green-500 to-emerald-500)
+- Ícone: Leaf (32px) + texto "🌿 CONDIÇÕES NATURAIS"
+- Subtítulo: "Características naturais e ambientais do imóvel"
+- Badge lateral: "X de 100+ condições selecionadas" (atualiza dinamicamente)
+- Botão secundário: "Limpar Todas" (branco outline)
+
+---
+
+### 🌳 ESTRUTURA: Grid de Cards com Categorias Visuais
+
+**LAYOUT DIFERENCIADO:**
+- **NÃO** usar acordeão (diferente das amenidades)
+- Todas as categorias visíveis ao mesmo tempo
+- Grid de 2 colunas (desktop) | 1 coluna (mobile)
+- Cada categoria = Card colorido individual
+- Altura uniforme e visual equilibrado
+
+---
+
+### 📦 CATEGORIAS (8 Cards Coloridos):
+
+**CARD 1: 🌊 Vista e Localização**
+- Gradiente: Blue → Cyan (from-blue-400 to-cyan-400)
+- Ícone grande: Eye (28px)
+- Badge: "14 opções"
+- Grid interno: 2 colunas de checkboxes
+- Borda: 3px azul neon
+
+**Itens:**
 - Vista para o mar
-- Ventilação cruzada
-- Sol da manhã
-- ... (lista completa)
+- Vista panorâmica do mar
+- Frente para o mar
+- Pé na areia
+- Vista para a praia
+- Vista para a montanha
+- Vista para o lago
+- Vista para o rio
+- Vista para a cidade
+- Vista para a natureza
+- Vista para o verde
+- Vista para o parque
+- Vista desobstruída
+- Vista privilegiada
 
-[Altura máxima com scroll]
-```
-**Por quê?** Diferenciais ambientais importantes
+---
+
+**CARD 2: 💨 Ventilação e Ar**
+- Gradiente: Sky → Teal (from-sky-400 to-teal-400)
+- Ícone grande: Wind (28px)
+- Badge: "8 opções"
+- Grid interno: 2 colunas
+
+**Itens:**
+- Ventilação natural
+- Ventilação cruzada
+- Brisa marítima
+- Brisa constante
+- Circulação de ar excelente
+- Ambientes arejados
+- Janelas amplas
+- Portas de vidro
+
+---
+
+**CARD 3: ☀️ Iluminação Solar**
+- Gradiente: Yellow → Orange (from-yellow-400 to-orange-400)
+- Ícone grande: Sun (28px)
+- Badge: "11 opções"
+- Grid interno: 2 colunas
+
+**Itens:**
+- Sol da manhã
+- Sol da tarde
+- Sol o dia todo
+- Muito sol
+- Iluminação natural abundante
+- Claridade natural
+- Face norte
+- Face sul
+- Face leste
+- Face oeste
+- Claraboias / Luz zenital
+
+---
+
+**CARD 4: 🌡️ Clima e Conforto**
+- Gradiente: Amber → Rose (from-amber-400 to-rose-400)
+- Ícone grande: Thermometer (28px)
+- Badge: "7 opções"
+- Grid interno: 2 colunas
+
+**Itens:**
+- Clima ameno
+- Clima tropical
+- Temperatura agradável
+- Fresco no verão
+- Quente no inverno
+- Sombra natural de árvores
+- Microclima agradável
+
+---
+
+**CARD 5: 🌳 Natureza e Verde**
+- Gradiente: Green → Lime (from-green-500 to-lime-400)
+- Ícone grande: Trees (28px)
+- Badge: "12 opções"
+- Grid interno: 2 colunas
+
+**Itens:**
+- Área verde
+- Arborizado
+- Jardim natural
+- Mata nativa
+- Árvores frutíferas
+- Pomar
+- Horta
+- Contato com a natureza
+- Fauna local
+- Pássaros
+- Borboletas
+- Ecossistema preservado
+
+---
+
+**CARD 6: 🏞️ Terreno e Topografia**
+- Gradiente: Stone → Slate (from-stone-400 to-slate-500)
+- Ícone grande: Mountain (28px)
+- Badge: "7 opções"
+- Grid interno: 2 colunas
+
+**Itens:**
+- Terreno plano
+- Terreno em declive
+- Terreno em aclive
+- Elevado / Ponto alto
+- Vista de cima
+- Solo firme
+- Solo drenado
+
+---
+
+**CARD 7: 🌅 Características Especiais**
+- Gradiente: Purple → Pink (from-purple-400 to-pink-400)
+- Ícone grande: Sparkles (28px)
+- Badge: "10 opções"
+- Grid interno: 2 colunas
+
+**Itens:**
+- Nascer do sol
+- Pôr do sol
+- Céu estrelado
+- Noite tranquila
+- Silêncio / Ambiente calmo
+- Privacidade
+- Área isolada
+- Exclusividade
+- Som das ondas
+- Acesso direto à praia
+
+---
+
+**CARD 8: 🌿 Sustentabilidade**
+- Gradiente: Emerald → Green (from-emerald-500 to-green-600)
+- Ícone grande: Recycle (28px)
+- Badge: "10 opções"
+- Grid interno: 2 colunas
+
+**Itens:**
+- Casa sustentável
+- Bioconstrução
+- Materiais naturais
+- Captação de água da chuva
+- Compostagem
+- Fossa ecológica
+- Biodigestor
+- Energia renovável
+- Baixo impacto ambiental
+- Água de nascente / Poço artesiano
+
+---
+
+### 🎯 ESTILO DOS CHECKBOXES:
+
+**Aparência:**
+- Checkbox customizado com cor da categoria
+- Label com hover effect suave
+- Texto: font-medium, text-sm
+- Espaçamento generoso entre itens
+- Animação de check suave
+
+**Estados:**
+- **Não selecionado**: Background branco, borda cinza clara
+- **Hover**: Background da cor da categoria (opacity 10%)
+- **Selecionado**: Background da cor da categoria (opacity 20%), borda da cor da categoria, texto bold
+
+---
+
+### 🎨 HIERARQUIA VISUAL:
+
+**Header de Cada Card:**
+- Gradiente no topo (altura: 80px)
+- Ícone centralizado acima do título
+- Título: font-bold, text-lg, branco
+- Badge: posição absoluta (top-right)
+- Sombra suave
+
+**Corpo do Card:**
+- Background: branco
+- Padding: 6 (24px)
+- Border-radius: 2xl
+- Shadow: lg com hover:xl
+- Border: 2px da cor do gradiente
+
+**Resumo Visual (Rodapé do Card Principal):**
+- Mostrar total selecionado por categoria
+- Barra de progresso visual opcional
+- "8 categorias • 79 opções disponíveis"
+
+---
+
+### 💡 DIFERENCIAIS DESTE DESIGN:
+
+✅ **Não usa acordeão** - Tudo sempre visível
+✅ **Cards coloridos individuais** - Cada categoria se destaca
+✅ **Grid 2x4** - Layout espacioso e organizado
+✅ **Tema natural** - Cores da natureza (verde, azul, amarelo)
+✅ **Visual premium** - Gradientes suaves e modernos
+✅ **Fácil escaneamento** - Encontra rapidamente a categoria desejada
 
 ---
 

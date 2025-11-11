@@ -183,6 +183,7 @@ const propertyValidators = [
   body('latitude').optional().isFloat({ min: -90, max: 90 }),
   body('longitude').optional().isFloat({ min: -180, max: 180 }),
   body('area').isInt({ min: 0 }).toInt(),
+  body('totalArea').optional().isInt({ min: 0 }).toInt(),
   body('beds').isInt({ min: 0 }).toInt(),
   body('baths').isInt({ min: 0 }).toInt(),
   // guests: removido - campo não existe mais no schema
@@ -195,7 +196,6 @@ const propertyValidators = [
   body('homeInsurance').optional().isFloat({ min: 0 }),
   body('yearBuilt').optional().isInt({ min: 1800 }),
   body('propertyCondition').optional().isString().isIn(['Novo', 'Seminovo', 'Usado', 'Reformado', '']),
-  body('lotSize').optional().isInt({ min: 0 }).toInt(),
   body('amenities').optional().isString(), // JSON string
   body('naturalConditions').optional().isString(), // JSON string
   body('style').optional().isString().isLength({ max: 50 }),

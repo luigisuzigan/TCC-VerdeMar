@@ -61,16 +61,18 @@ export default function LocationSection({ model, update }) {
       return;
     }
 
-    // Montar endereço completo
+    // Montar endereço completo - incluindo CEP do campo obrigatório se disponível
     const addressParts = [
       model.address,
+      model.neighborhood,
       model.city,
       model.state,
+      model.zipCode, // Incluir CEP do campo obrigatório
       model.country || 'Brasil'
     ].filter(part => part && part.trim() !== '');
 
     if (addressParts.length === 0) {
-      alert('⚠️ Preencha pelo menos a cidade para buscar as coordenadas');
+      alert('⚠️ Preencha pelo menos o CEP ou a cidade para buscar as coordenadas');
       return;
     }
 
@@ -94,6 +96,15 @@ export default function LocationSection({ model, update }) {
   const handleClearCoordinates = () => {
     update('latitude', '');
     update('longitude', '');
+    
+    // Limpar instâncias do mapa para permitir recriação
+    if (markerRef.current) {
+      markerRef.current.setMap(null);
+      markerRef.current = null;
+    }
+    if (mapInstanceRef.current) {
+      mapInstanceRef.current = null;
+    }
   };
 
   // Usar localização atual do navegador
@@ -117,7 +128,19 @@ export default function LocationSection({ model, update }) {
 
   // Inicializar Google Maps Interativo
   useEffect(() => {
-    if (!model.latitude || !model.longitude || !mapRef.current) return;
+    // Se não há coordenadas, limpar o mapa
+    if (!model.latitude || !model.longitude) {
+      if (markerRef.current) {
+        markerRef.current.setMap(null);
+        markerRef.current = null;
+      }
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current = null;
+      }
+      return;
+    }
+
+    if (!mapRef.current) return;
 
     // Carregar Google Maps API se ainda não foi carregado
     if (!window.google?.maps) {
@@ -433,8 +456,14 @@ export default function LocationSection({ model, update }) {
 
               <p className="text-sm text-slate-500 flex items-center gap-1">
                 <Info size={14} />
-                � As coordenadas são usadas para exibir o imóvel no mapa
+                🔍 As coordenadas são usadas para exibir o imóvel no mapa
               </p>
+              
+              <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3">
+                <p className="text-xs text-emerald-700 font-medium">
+                  💡 <strong>Dica:</strong> O botão "Buscar" usa o endereço completo preenchido acima (incluindo o CEP do campo obrigatório)
+                </p>
+              </div>
             </div>
 
             {/* COLUNA DIREITA: Mini-mapa Preview */}

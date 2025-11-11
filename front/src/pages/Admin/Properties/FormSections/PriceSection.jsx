@@ -11,6 +11,15 @@ export default function PriceSection({ model, update }) {
   
   // Verificar se deve mostrar resumo
   const mostrarResumo = condominio > 0 || iptuAnual > 0 || seguro > 0;
+  
+  // Mapeamento de símbolos de moeda
+  const currencySymbols = {
+    BRL: 'R$',
+    USD: 'US$',
+    EUR: '€'
+  };
+  
+  const getCurrencySymbol = () => currencySymbols[model.currency || 'BRL'] || 'R$';
 
   return (
     <div className="bg-white rounded-2xl border-2 border-slate-200 shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
@@ -29,26 +38,36 @@ export default function PriceSection({ model, update }) {
         {/* 1. VALOR DE VENDA */}
         <div>
           <label className="flex items-center justify-between mb-3">
-            <span className="text-lg font-bold text-slate-900 flex items-center gap-2">
-              <DollarSign size={20} className="text-amber-600" />
-              💵 Valor de Venda
+            <span className="text-lg font-bold text-slate-900">
+              Valor de Venda
             </span>
             <span className="text-xs bg-red-100 text-red-700 px-3 py-1 rounded-full font-semibold">
               Obrigatório
             </span>
           </label>
-          <input 
-            type="number"
-            step="1"
-            value={model.price || ''}
-            onChange={(e) => update('price', e.target.value)}
-            placeholder="850000"
-            className="w-full px-4 py-3 border-2 border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all text-lg font-semibold"
-            required
-          />
-          <p className="text-sm text-slate-500 mt-2">
-            💡 Digite apenas números, sem pontos ou vírgulas
-          </p>
+          
+          {/* Input de preço */}
+          <div className="flex items-center gap-3">
+            <select
+              value={model.currency || 'BRL'}
+              onChange={(e) => update('currency', e.target.value)}
+              className="px-4 py-3 border-2 border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-slate-900 font-semibold"
+            >
+              <option value="BRL">R$ (BRL)</option>
+              <option value="USD">US$ (USD)</option>
+              <option value="EUR">€ (EUR)</option>
+            </select>
+            
+            <input 
+              type="number"
+              step="0.01"
+              value={model.price || ''}
+              onChange={(e) => update('price', e.target.value)}
+              placeholder="850000"
+              className="flex-1 px-4 py-3 border-2 border-slate-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-slate-900 text-lg font-semibold"
+              required
+            />
+          </div>
         </div>
 
         {/* Divisor */}

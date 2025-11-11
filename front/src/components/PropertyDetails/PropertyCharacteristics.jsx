@@ -34,8 +34,8 @@ export default function PropertyCharacteristics({ property, formatCurrency, getP
           </div>
         )}
 
-        {/* Quartos - condicional */}
-        {shouldShowField(type, 'beds') && property.beds > 0 && (
+        {/* Quartos - exibir se > 0 */}
+        {property.beds > 0 && (
           <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
             <div className="flex items-center gap-2 text-slate-600 mb-2">
               <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
@@ -49,8 +49,8 @@ export default function PropertyCharacteristics({ property, formatCurrency, getP
           </div>
         )}
 
-        {/* Banheiros - condicional */}
-        {shouldShowField(type, 'baths') && property.baths > 0 && (
+        {/* Banheiros - exibir se > 0 */}
+        {property.baths > 0 && (
           <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
             <div className="flex items-center gap-2 text-slate-600 mb-2">
               <div className="w-10 h-10 bg-cyan-100 rounded-xl flex items-center justify-center">
@@ -64,8 +64,8 @@ export default function PropertyCharacteristics({ property, formatCurrency, getP
           </div>
         )}
 
-        {/* Suítes - condicional */}
-        {shouldShowField(type, 'suites') && property.suites > 0 && (
+        {/* Suítes - exibir se > 0 */}
+        {property.suites > 0 && (
           <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
             <div className="flex items-center gap-2 text-slate-600 mb-2">
               <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
@@ -79,8 +79,8 @@ export default function PropertyCharacteristics({ property, formatCurrency, getP
           </div>
         )}
 
-        {/* Vagas - condicional */}
-        {shouldShowField(type, 'parkingSpaces') && property.parkingSpaces > 0 && (
+        {/* Vagas - exibir se > 0 */}
+        {property.parkingSpaces > 0 && (
           <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
             <div className="flex items-center gap-2 text-slate-600 mb-2">
               <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center">
@@ -109,8 +109,8 @@ export default function PropertyCharacteristics({ property, formatCurrency, getP
           </div>
         )}
 
-        {/* Andar - apenas para apartamentos/coberturas */}
-        {isApartment && property.floor && (
+        {/* Andar - exibir se tiver valor > 0 */}
+        {property.floor > 0 && (
           <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
             <div className="flex items-center gap-2 text-slate-600 mb-2">
               <div className="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center">
@@ -119,7 +119,7 @@ export default function PropertyCharacteristics({ property, formatCurrency, getP
               <span className="text-sm font-medium text-slate-600">Andar</span>
             </div>
             <div className="text-2xl font-bold text-slate-900">
-              {property.floor}º {property.totalFloors && `/ ${property.totalFloors}`}
+              {property.floor}º {property.totalFloors && property.totalFloors > 0 && `/ ${property.totalFloors}`}
             </div>
           </div>
         )}

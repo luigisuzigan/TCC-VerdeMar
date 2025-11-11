@@ -1,211 +1,281 @@
-import { Layers, Ruler, Bed, Bath, Crown, Car, Info } from 'lucide-react';
-import { shouldShowField, isFieldRequired } from '../../../../utils/propertyFieldsHelper';
+import { Home, Ruler, Bed, Bath, Crown, Car, Info, Building2, DoorOpen } from 'lucide-react';
 
 export default function CharacteristicsSection({ 
   model, 
   update, 
   selectedType 
 }) {
-  return (
-    <>
-      {/* Card 6.1: Estrutura do Prédio - Condicional */}
-      {(shouldShowField(selectedType, 'floor') || shouldShowField(selectedType, 'totalFloors')) && (
-        <div className="bg-white rounded-xl p-6 border-l-4 border-l-indigo-500 border border-slate-200 shadow-sm">
-          <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-            <Layers size={22} className="text-indigo-600" />
-            Estrutura do Prédio
-            <span className="ml-auto text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">
-              Condicional
-            </span>
-          </h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Andar - Condicional */}
-            {shouldShowField(selectedType, 'floor') && (
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
-                  Andar 
-                  {isFieldRequired(selectedType, 'floor') && (
-                    <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-medium">
-                      Obrigatório
-                    </span>
-                  )}
-                </label>
-                <input 
-                  type="number"
-                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  value={model.floor || ''} 
-                  onChange={(e) => update('floor', e.target.value)}
-                  min={0}
-                  placeholder="Ex: 5"
-                  required={isFieldRequired(selectedType, 'floor')}
-                />
-                <p className="text-xs text-slate-500 mt-1 flex items-center gap-1">
-                  <Info size={12} />
-                  Andar onde está localizado o imóvel
-                </p>
-              </div>
-            )}
+  // Formatar número com separador de milhares
+  const formatNumber = (value) => {
+    if (!value) return '';
+    const num = value.toString().replace(/\D/g, '');
+    return num.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  };
+  
+  // Remover formatação
+  const unformatNumber = (value) => {
+    return value.replace(/\./g, '');
+  };
 
-            {/* Total de Andares - Condicional */}
-            {shouldShowField(selectedType, 'totalFloors') && (
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
-                  Total de Andares 
-                  {isFieldRequired(selectedType, 'totalFloors') && (
-                    <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-medium">
-                      Obrigatório
-                    </span>
-                  )}
-                </label>
-                <input 
-                  type="number"
-                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  value={model.totalFloors || ''} 
-                  onChange={(e) => update('totalFloors', e.target.value)}
-                  min={1}
-                  placeholder="Ex: 12"
-                  required={isFieldRequired(selectedType, 'totalFloors')}
-                />
-                <p className="text-xs text-slate-500 mt-1 flex items-center gap-1">
-                  <Info size={12} />
-                  Total de andares do prédio (ou da casa para sobrados)
-                </p>
+  return (
+    <div className="bg-white rounded-2xl border-2 border-slate-200 shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+      {/* Header com gradiente roxo-violeta */}
+      <div className="bg-gradient-to-r from-purple-500 to-violet-500 px-8 py-6 text-center">
+        <h2 className="text-3xl font-bold text-white flex items-center justify-center gap-3">
+          <Home size={32} />
+          🏠 CARACTERÍSTICAS DO IMÓVEL
+        </h2>
+        <p className="text-purple-50 text-sm mt-2">Áreas, cômodos e estrutura do imóvel</p>
+      </div>
+
+      <div className="p-8 space-y-6">
+        
+        {/* 1. ÁREAS - MINIMALISTA TIPO DASHBOARD */}
+        <div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Área Construída - Minimalista */}
+            <div className="bg-white rounded-xl p-6 border-2 border-slate-200 hover:border-blue-300 transition-all shadow-sm">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
+                  <Home size={20} className="text-white" />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-slate-900">
+                    Área Construída
+                  </label>
+                  <span className="text-xs text-slate-500">Espaço edificado</span>
+                </div>
               </div>
-            )}
+              
+              <div className="flex items-center justify-center gap-2">
+                <input 
+                  type="text"
+                  value={formatNumber(model.area || '')}
+                  onChange={(e) => {
+                    const value = unformatNumber(e.target.value);
+                    update('area', value);
+                  }}
+                  placeholder="___"
+                  className="w-32 text-4xl font-black text-blue-600 border-0 border-b-4 border-blue-200 focus:border-blue-500 focus:outline-none focus:ring-0 placeholder:text-slate-200 text-center pb-2"
+                  required
+                />
+                <span className="text-3xl font-bold text-slate-600 flex-shrink-0">m²</span>
+              </div>
+            </div>
+
+            {/* Área Total - Minimalista */}
+            <div className="bg-white rounded-xl p-6 border-2 border-slate-200 hover:border-green-300 transition-all shadow-sm">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center">
+                  <Ruler size={20} className="text-white" />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-slate-900">
+                    Área Total Terreno
+                  </label>
+                  <span className="text-xs text-slate-500">Lote completo (opcional)</span>
+                </div>
+              </div>
+              
+              <div className="flex items-center justify-center gap-2">
+                <input 
+                  type="text"
+                  value={formatNumber(model.totalArea || '')}
+                  onChange={(e) => {
+                    const value = unformatNumber(e.target.value);
+                    update('totalArea', value);
+                  }}
+                  placeholder="___"
+                  className="w-32 text-4xl font-black text-green-600 border-0 border-b-4 border-green-200 focus:border-green-500 focus:outline-none focus:ring-0 placeholder:text-slate-200 text-center pb-2"
+                />
+                <span className="text-3xl font-bold text-slate-600 flex-shrink-0">m²</span>
+              </div>
+            </div>
           </div>
         </div>
-      )}
 
-      {/* Card 6.2: Área do Lote - Condicional e OPCIONAL */}
-      {shouldShowField(selectedType, 'lotSize') && (
-        <div className="bg-white rounded-xl p-6 border-l-4 border-l-amber-500 border border-slate-200 shadow-sm">
-          <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-            <Ruler size={22} className="text-amber-600" />
-            Área do Lote/Terreno
-            <span className="ml-auto text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">
+        {/* Divisor */}
+        <div className="border-t border-slate-200"></div>
+
+        {/* 2. CÔMODOS - MINIMALISTA TIPO DASHBOARD */}
+        <div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {/* Quartos - Minimalista */}
+            <div className="bg-white rounded-xl p-4 border-2 border-slate-200 hover:border-blue-300 transition-all shadow-sm">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+                  <Bed size={16} className="text-white" />
+                </div>
+                <label className="text-xs font-bold text-slate-700">
+                  Quartos
+                </label>
+              </div>
+              <input 
+                type="text"
+                value={model.beds || ''}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/\D/g, '');
+                  update('beds', value);
+                }}
+                placeholder="__"
+                className="w-full text-4xl font-black text-blue-600 border-0 border-b-4 border-blue-200 focus:border-blue-500 focus:outline-none focus:ring-0 placeholder:text-slate-200 text-center pb-2"
+              />
+            </div>
+
+            {/* Suítes - Minimalista */}
+            <div className="bg-white rounded-xl p-4 border-2 border-slate-200 hover:border-purple-300 transition-all shadow-sm">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center">
+                  <Crown size={16} className="text-white" />
+                </div>
+                <label className="text-xs font-bold text-slate-700">
+                  Suítes
+                </label>
+              </div>
+              <input 
+                type="text"
+                value={model.suites || ''}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/\D/g, '');
+                  update('suites', value);
+                }}
+                placeholder="__"
+                className="w-full text-4xl font-black text-purple-600 border-0 border-b-4 border-purple-200 focus:border-purple-500 focus:outline-none focus:ring-0 placeholder:text-slate-200 text-center pb-2"
+              />
+            </div>
+
+            {/* Banheiros - Minimalista */}
+            <div className="bg-white rounded-xl p-4 border-2 border-slate-200 hover:border-cyan-300 transition-all shadow-sm">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-8 h-8 bg-cyan-500 rounded-lg flex items-center justify-center">
+                  <Bath size={16} className="text-white" />
+                </div>
+                <label className="text-xs font-bold text-slate-700">
+                  Banheiros
+                </label>
+              </div>
+              <input 
+                type="text"
+                value={model.baths || ''}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/\D/g, '');
+                  update('baths', value);
+                }}
+                placeholder="__"
+                className="w-full text-4xl font-black text-cyan-600 border-0 border-b-4 border-cyan-200 focus:border-cyan-500 focus:outline-none focus:ring-0 placeholder:text-slate-200 text-center pb-2"
+              />
+            </div>
+
+            {/* Vagas - Minimalista */}
+            <div className="bg-white rounded-xl p-4 border-2 border-slate-200 hover:border-orange-300 transition-all shadow-sm">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
+                  <Car size={16} className="text-white" />
+                </div>
+                <label className="text-xs font-bold text-slate-700">
+                  Vagas
+                </label>
+              </div>
+              <input 
+                type="text"
+                value={model.parkingSpaces || ''}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/\D/g, '');
+                  update('parkingSpaces', value);
+                }}
+                placeholder="__"
+                className="w-full text-4xl font-black text-orange-600 border-0 border-b-4 border-orange-200 focus:border-orange-500 focus:outline-none focus:ring-0 placeholder:text-slate-200 text-center pb-2"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="border-t border-slate-200"></div>
+
+        {/* 3. ANDARES - MINIMALISTA E ELEGANTE */}
+        <div>
+          <label className="flex items-center justify-between mb-4">
+            <span className="text-lg font-bold text-slate-900 flex items-center gap-2">
+              <Building2 size={20} className="text-slate-600" />
+              🏗️ Informações de Andares
+            </span>
+            <span className="text-xs bg-slate-100 text-slate-600 px-3 py-1 rounded-full font-semibold">
               Opcional
             </span>
-          </h3>
-          <input 
-            type="number"
-            step="0.01"
-            className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-lg"
-            value={model.lotSize || ''} 
-            onChange={(e) => update('lotSize', e.target.value)}
-            min={0}
-            placeholder="500"
-            required={false}
-          />
-          <p className="text-xs text-slate-500 mt-2 flex items-center gap-1">
-            <Info size={12} />
-            {selectedType.includes('Terreno') 
-              ? 'Para terrenos, este valor geralmente é igual à Área total'
-              : 'Área total do lote (pode ser maior que a área construída)'
-            }
-          </p>
-        </div>
-      )}
+          </label>
 
-      {/* Card 6.3: Quartos - Condicional */}
-      {shouldShowField(selectedType, 'beds') && (
-        <div className="bg-white rounded-xl p-6 border-l-4 border-l-purple-500 border border-slate-200 shadow-sm">
-          <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-            <Bed size={22} className="text-purple-600" />
-            Quartos
-            {isFieldRequired(selectedType, 'beds') && (
-              <span className="ml-auto text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-medium">
-                Obrigatório
-              </span>
-            )}
-          </h3>
-          <input 
-            type="number"
-            className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-lg"
-            value={model.beds || ''} 
-            onChange={(e) => update('beds', e.target.value)}
-            min={0}
-            placeholder="2"
-            required={isFieldRequired(selectedType, 'beds')}
-          />
-        </div>
-      )}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Andar do Imóvel - MINIMALISTA */}
+            <div className="bg-gradient-to-br from-slate-50 to-gray-50 rounded-2xl p-6 border-2 border-slate-200 hover:border-slate-300 transition-all">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 bg-slate-600 rounded-xl flex items-center justify-center shadow-md">
+                  <Building2 size={24} className="text-white" />
+                </div>
+                <div>
+                  <label className="block text-base font-bold text-slate-900">
+                    Andar do Imóvel
+                  </label>
+                  <span className="text-xs text-slate-600">Para apartamentos/salas</span>
+                </div>
+              </div>
+              
+              <input 
+                type="text"
+                value={model.floor || ''}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/\D/g, '');
+                  update('floor', value);
+                }}
+                className="w-full px-6 py-4 border-2 border-slate-300 rounded-xl focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all text-4xl font-bold text-slate-900 text-center bg-white placeholder:text-slate-300"
+                placeholder="5"
+              />
+              <p className="text-xs text-slate-500 mt-2 text-center">
+                💡 0 = térreo
+              </p>
+            </div>
 
-      {/* Card 6.4: Banheiros - Condicional */}
-      {shouldShowField(selectedType, 'baths') && (
-        <div className="bg-white rounded-xl p-6 border-l-4 border-l-cyan-500 border border-slate-200 shadow-sm">
-          <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-            <Bath size={22} className="text-cyan-600" />
-            Banheiros
-            {isFieldRequired(selectedType, 'baths') && (
-              <span className="ml-auto text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-medium">
-                Obrigatório
-              </span>
-            )}
-          </h3>
-          <input 
-            type="number"
-            className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 text-lg"
-            value={model.baths || ''} 
-            onChange={(e) => update('baths', e.target.value)}
-            min={0}
-            placeholder="1"
-            required={isFieldRequired(selectedType, 'baths')}
-          />
-        </div>
-      )}
+            {/* Total de Andares - MINIMALISTA */}
+            <div className="bg-gradient-to-br from-slate-50 to-gray-50 rounded-2xl p-6 border-2 border-slate-200 hover:border-slate-300 transition-all">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-12 h-12 bg-slate-700 rounded-xl flex items-center justify-center shadow-md">
+                  <Building2 size={24} className="text-white" />
+                </div>
+                <div>
+                  <label className="block text-base font-bold text-slate-900">
+                    Total de Andares
+                  </label>
+                  <span className="text-xs text-slate-600">Prédio ou casa</span>
+                </div>
+              </div>
+              
+              <input 
+                type="text"
+                value={model.totalFloors || ''}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/\D/g, '');
+                  update('totalFloors', value);
+                }}
+                className="w-full px-6 py-4 border-2 border-slate-300 rounded-xl focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all text-4xl font-bold text-slate-900 text-center bg-white placeholder:text-slate-300"
+                placeholder="12"
+              />
+              <p className="text-xs text-slate-500 mt-2 text-center">
+                💡 Andares do prédio ou sobrado
+              </p>
+            </div>
+          </div>
 
-      {/* Card 6.5: Suítes - Condicional */}
-      {shouldShowField(selectedType, 'suites') && (
-        <div className="bg-white rounded-xl p-6 border-l-4 border-l-pink-500 border border-slate-200 shadow-sm">
-          <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-            <Crown size={22} className="text-pink-600" />
-            Suítes
-            {isFieldRequired(selectedType, 'suites') && (
-              <span className="ml-auto text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-medium">
-                Obrigatório
-              </span>
-            )}
-          </h3>
-          <input 
-            type="number"
-            className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500 text-lg"
-            value={model.suites || ''} 
-            onChange={(e) => update('suites', e.target.value)}
-            min={0}
-            placeholder="1"
-            required={isFieldRequired(selectedType, 'suites')}
-          />
-          <p className="text-xs text-slate-500 mt-2 flex items-center gap-1">
-            <Info size={12} />
-            Quartos com banheiro privativo
-          </p>
+          {/* Info */}
+          <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-4 mt-4">
+            <p className="text-xs text-blue-700 leading-relaxed">
+              <strong>🏢 Apartamento/Sala:</strong> "Andar" = em qual andar está? | "Total" = quantos andares tem o prédio?<br/>
+              <strong>🏠 Sobrado:</strong> "Total" = quantos andares tem a casa?<br/>
+              <strong>🏡 Casa:</strong> "Total" = opcional, informe se tiver mais de 1 andar<br/>
+              <strong>🏗️ Terreno:</strong> Defina como 0 se não aplicável
+            </p>
+          </div>
         </div>
-      )}
 
-      {/* Card 6.6: Vagas - Condicional */}
-      {shouldShowField(selectedType, 'parkingSpaces') && (
-        <div className="bg-white rounded-xl p-6 border-l-4 border-l-slate-500 border border-slate-200 shadow-sm">
-          <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-            <Car size={22} className="text-slate-600" />
-            Vagas de Garagem
-            {isFieldRequired(selectedType, 'parkingSpaces') && (
-              <span className="ml-auto text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-medium">
-                Obrigatório
-              </span>
-            )}
-          </h3>
-          <input 
-            type="number"
-            className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 text-lg"
-            value={model.parkingSpaces || ''} 
-            onChange={(e) => update('parkingSpaces', e.target.value)}
-            min={0}
-            placeholder="2"
-            required={isFieldRequired(selectedType, 'parkingSpaces')}
-          />
-        </div>
-      )}
-    </>
+      </div>
+    </div>
   );
 }

@@ -76,7 +76,8 @@ model Property {
   longitude         Float?
   
   // Características
-  area              Int            // m²
+  area              Int            // m² - Área construída
+  totalArea         Int?           // m² - Área total do terreno/lote
   beds              Int
   baths             Int
   // guests: removido - campo não existe mais
@@ -91,7 +92,6 @@ model Property {
   // Características do imóvel
   floor             Int?                // Andar (para apartamentos)
   totalFloors       Int?                // Total de andares do prédio
-  lotSize           Int?                // Área do terreno/lote (NOVO)
   yearBuilt         Int?                // Ano de construção
   propertyCondition PropertyCondition?  // Novo, Seminovo, Usado, Reformado
   

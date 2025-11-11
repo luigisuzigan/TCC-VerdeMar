@@ -31,19 +31,23 @@ export default function IdentificationSection({
     const updatedImages = images.filter((_, i) => i !== index);
     setImages(updatedImages);
     setImagesText(updatedImages.join('\n'));
-  }
-
-  // Sistema de estrelas
-  const rating = parseFloat(model.rating) || 0;
-  const stars = Array.from({ length: 10 }, (_, i) => i + 1);
-  const getEmoji = (rating) => {
-    if (rating === 0) return '';
-    if (rating < 5) return '😐 Regular';
-    if (rating < 7) return '👍 Bom';
-    if (rating < 9) return '😃 Ótimo';
-    if (rating < 10) return '🤩 Excelente';
-    return '🏆 Perfeito';
   };
+
+  // Sistema de estrelas melhorado
+  const rating = parseFloat(model.rating) || 0;
+  const fullStars = Math.floor(rating);
+  const hasHalfStar = rating % 1 >= 0.5;
+  
+  const getEmojiAndColor = (rating) => {
+    if (rating === 0) return { emoji: '', color: 'text-slate-400', bg: 'bg-slate-100' };
+    if (rating < 5) return { emoji: '😐 Regular', color: 'text-orange-600', bg: 'bg-orange-100' };
+    if (rating < 7) return { emoji: '👍 Bom', color: 'text-blue-600', bg: 'bg-blue-100' };
+    if (rating < 9) return { emoji: '😃 Ótimo', color: 'text-green-600', bg: 'bg-green-100' };
+    if (rating < 10) return { emoji: '🤩 Excelente', color: 'text-purple-600', bg: 'bg-purple-100' };
+    return { emoji: '🏆 Perfeito', color: 'text-amber-600', bg: 'bg-amber-100' };
+  };
+  
+  const emojiData = getEmojiAndColor(rating);
 
   return (
     <div className="bg-white rounded-2xl border-2 border-slate-200 shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
@@ -62,8 +66,7 @@ export default function IdentificationSection({
         {/* 1. TÍTULO */}
         <div>
           <label className="flex items-center justify-between mb-3">
-            <span className="text-lg font-bold text-slate-900 flex items-center gap-2">
-              <Sparkles size={20} className="text-emerald-600" />
+            <span className="text-lg font-bold text-slate-900">
               Título do Anúncio
             </span>
             <span className="text-xs bg-red-100 text-red-700 px-3 py-1 rounded-full font-semibold">
@@ -74,20 +77,23 @@ export default function IdentificationSection({
             type="text"
             value={model.title}
             onChange={(e) => update('title', e.target.value)}
-            className="w-full px-6 py-4 border-2 border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-2xl font-bold text-slate-900 placeholder:text-slate-400 placeholder:font-normal transition-all"
+            className="w-full px-4 py-3 border-2 border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-slate-900 transition-all"
             placeholder="Ex: Casa de Praia Luxuosa com Vista Panorâmica do Mar"
             maxLength={120}
             required
           />
-          <p className="text-sm text-slate-500 mt-2 flex items-center justify-between">
-            <span className="flex items-center gap-1">
-              <Info size={14} />
-              Este título aparecerá em destaque nos resultados de busca
-            </span>
-            <span className={`font-semibold ${model.title.length > 100 ? 'text-amber-600' : 'text-slate-600'}`}>
+          <div className="flex items-center justify-between mt-2">
+            <p className="text-xs text-slate-500">
+              Este título aparece nos resultados de busca
+            </p>
+            <span className={`text-sm font-semibold ${
+              model.title.length > 100 
+                ? 'text-amber-600' 
+                : 'text-slate-600'
+            }`}>
               {model.title.length}/120
             </span>
-          </p>
+          </div>
         </div>
 
         <div className="border-t border-slate-200"></div>
@@ -107,13 +113,13 @@ export default function IdentificationSection({
             onChange={(e) => update('description', e.target.value)}
             className="w-full px-4 py-3 border-2 border-slate-300 rounded-xl focus:ring-2 focus:ring-slate-500 focus:border-slate-500 text-slate-900 transition-all"
             rows={6}
-            maxLength={800}
+            maxLength={7000}
             placeholder="Descreva os diferenciais do imóvel, localização privilegiada, acabamentos de luxo, infraestrutura completa do bairro, proximidade de pontos importantes, etc."
           />
           <p className="text-sm text-slate-500 mt-2 flex items-center justify-between">
             <span>Destaque os pontos fortes e diferenciais do imóvel</span>
-            <span className={`font-semibold ${model.description.length > 700 ? 'text-amber-600' : 'text-slate-600'}`}>
-              {model.description.length}/800
+            <span className={`font-semibold ${model.description.length > 6500 ? 'text-amber-600' : 'text-slate-600'}`}>
+              {model.description.length}/7000
             </span>
           </p>
         </div>
@@ -206,11 +212,11 @@ export default function IdentificationSection({
 
         <div className="border-t border-slate-200"></div>
 
-        {/* 4. AVALIAÇÃO */}
+        {/* 4. AVALIAÇÃO - ESTRELAS AMARELAS BONITAS */}
         <div>
-          <label className="flex items-center justify-between mb-3">
+          <label className="flex items-center justify-between mb-4">
             <span className="text-lg font-bold text-slate-900 flex items-center gap-2">
-              <Star size={20} className="text-slate-600" />
+              <Star size={20} className="text-amber-500" fill="#f59e0b" />
               ⭐ Avaliação do Imóvel
             </span>
             <span className="text-xs bg-slate-100 text-slate-600 px-3 py-1 rounded-full font-semibold">
@@ -218,50 +224,90 @@ export default function IdentificationSection({
             </span>
           </label>
 
-          <div className="bg-slate-50 border-2 border-slate-200 rounded-xl p-6">
-            <p className="text-sm text-slate-700 mb-4">Clique nas estrelas ou digite o valor:</p>
+          <div className="bg-gradient-to-br from-slate-50 to-slate-100 border-2 border-slate-200 rounded-2xl p-6 shadow-inner">
+            <p className="text-sm text-slate-700 mb-4 font-semibold">Clique nas estrelas ou digite o valor (0 a 10):</p>
             
-            {/* Estrelas clicáveis */}
-            <div className="flex items-center gap-2 mb-4 flex-wrap">
-              {stars.map((star) => (
-                <button
-                  key={star}
-                  type="button"
-                  onClick={() => update('rating', star.toString())}
-                  className="text-3xl transition-all hover:scale-125 focus:outline-none"
-                  title={`${star}/10`}
-                >
-                  {star <= rating ? '★' : '☆'}
-                </button>
-              ))}
+            {/* Estrelas clicáveis BONITAS + Input + Status na mesma linha */}
+            <div className="flex items-center gap-4 flex-wrap">
+              {/* Estrelas amarelas grandes */}
+              <div className="flex items-center gap-1">
+                {Array.from({ length: 10 }).map((_, index) => {
+                  const starNumber = index + 1;
+                  const isFilled = starNumber <= fullStars;
+                  const isHalf = starNumber === fullStars + 1 && hasHalfStar;
+                  
+                  return (
+                    <button
+                      key={starNumber}
+                      type="button"
+                      onClick={() => update('rating', starNumber.toString())}
+                      className="relative transition-all hover:scale-125 focus:outline-none focus:scale-125"
+                      title={`${starNumber}/10`}
+                    >
+                      {isFilled ? (
+                        <Star 
+                          size={32} 
+                          className="text-amber-400 drop-shadow-md" 
+                          fill="#fbbf24" 
+                          strokeWidth={1.5}
+                        />
+                      ) : isHalf ? (
+                        <div className="relative">
+                          <Star 
+                            size={32} 
+                            className="text-amber-400" 
+                            fill="none" 
+                            strokeWidth={1.5}
+                          />
+                          <div className="absolute inset-0 overflow-hidden" style={{ width: '50%' }}>
+                            <Star 
+                              size={32} 
+                              className="text-amber-400" 
+                              fill="#fbbf24" 
+                              strokeWidth={1.5}
+                            />
+                          </div>
+                        </div>
+                      ) : (
+                        <Star 
+                          size={32} 
+                          className="text-slate-300 hover:text-amber-300" 
+                          fill="none" 
+                          strokeWidth={1.5}
+                        />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Input numérico */}
               <input
                 type="number"
-                step="0.1"
+                step="0.5"
                 value={model.rating || 0}
                 onChange={(e) => update('rating', e.target.value)}
-                className="ml-4 w-24 px-3 py-2 border-2 border-slate-300 rounded-lg text-center font-bold text-lg"
+                className="w-28 px-4 py-3 border-2 border-slate-300 rounded-xl text-center font-black text-2xl text-slate-900 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 shadow-sm"
                 min={0}
                 max={10}
-                placeholder="8.5"
+                placeholder="0.0"
               />
+
+              {/* Status/Emoji na mesma linha */}
+              {rating > 0 && (
+                <div className={`flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-lg ${emojiData.bg} ${emojiData.color} shadow-md`}>
+                  <span className="text-2xl">{rating.toFixed(1)}</span>
+                  <span>/10</span>
+                  <span className="ml-2">{emojiData.emoji}</span>
+                </div>
+              )}
             </div>
 
-            {/* Display da avaliação */}
-            {rating > 0 && (
-              <div className="bg-white border-2 border-emerald-200 rounded-xl p-4 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl">
-                    {stars.map((star) => (star <= rating ? '★' : '☆')).join('')}
-                  </span>
-                  <span className="text-xl font-bold text-slate-900">
-                    {rating.toFixed(1)}/10
-                  </span>
-                </div>
-                <span className="text-lg font-semibold">
-                  {getEmoji(rating)}
-                </span>
-              </div>
-            )}
+            {/* Dica */}
+            <p className="text-xs text-slate-500 mt-4 flex items-center gap-1">
+              <Info size={12} />
+              Avalie de 0 a 10 considerando: localização, acabamento, conservação e custo-benefício
+            </p>
           </div>
         </div>
 

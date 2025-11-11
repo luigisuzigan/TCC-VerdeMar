@@ -88,17 +88,17 @@ export default function PropertyInfo({ property, formatCurrency, getPropertyType
         </div>
       )}
 
-      {/* Área do Lote - APENAS PARA CASAS */}
-      {isHouse && property.lotSize && (
+      {/* Área Total do Terreno/Lote */}
+      {property.totalArea && property.totalArea > 0 && (
         <div className="bg-white rounded-2xl p-5 border-2 border-slate-100 hover:border-blue-200 transition-colors shadow-sm">
           <div className="flex items-center gap-2 text-slate-600 text-sm mb-2">
             <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center">
               <Maximize2 size={16} />
             </div>
-            <span className="font-medium">Terreno</span>
+            <span className="font-medium">Área Total do Terreno</span>
           </div>
           <div className="text-lg font-bold text-slate-900">
-            {property.lotSize} m²
+            {property.totalArea} m²
           </div>
         </div>
       )}
