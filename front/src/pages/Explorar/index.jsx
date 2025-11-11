@@ -597,20 +597,6 @@ export default function Explorar() {
       {/* Filters Bar - Card branco sobre a imagem (overlap) */}
       <div className="relative -mt-10 px-4 pb-6">
         <div ref={topFiltersRef} className="mx-auto max-w-6xl">
-          {/* Logo e Nome do Site */}
-          <div className="flex items-center gap-3 mb-4 pl-2">
-            <Link to="/" className="flex items-center gap-3 group">
-              <img 
-                src="/Logo.png" 
-                alt="VerdeMar Logo" 
-                className="h-10 w-auto transition-transform group-hover:scale-105"
-              />
-              <span className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
-                VerdeMar
-              </span>
-            </Link>
-          </div>
-
           <TopFiltersBar
             filters={filters}
             onFilterClick={handleFilterClick}
