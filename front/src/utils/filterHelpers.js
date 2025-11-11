@@ -28,11 +28,17 @@ export function parseFiltersFromUrl(searchParams) {
   if (priceMin) filters.priceMin = Number(priceMin);
   if (priceMax) filters.priceMax = Number(priceMax);
 
-  // Área
+  // Área Construída
   const areaMin = searchParams.get('areaMin');
   const areaMax = searchParams.get('areaMax');
   if (areaMin) filters.areaMin = Number(areaMin);
   if (areaMax) filters.areaMax = Number(areaMax);
+
+  // Área Total
+  const totalAreaMin = searchParams.get('totalAreaMin');
+  const totalAreaMax = searchParams.get('totalAreaMax');
+  if (totalAreaMin) filters.totalAreaMin = Number(totalAreaMin);
+  if (totalAreaMax) filters.totalAreaMax = Number(totalAreaMax);
 
   // Quartos
   const bedrooms = searchParams.get('bedrooms');
@@ -60,6 +66,12 @@ export function parseFiltersFromUrl(searchParams) {
   const condoAmenities = searchParams.get('condoAmenities');
   if (condoAmenities) {
     filters.condoAmenities = condoAmenities.split(',');
+  }
+
+  // Condições Naturais
+  const naturalConditions = searchParams.get('naturalConditions');
+  if (naturalConditions) {
+    filters.naturalConditions = naturalConditions.split(',');
   }
 
   // Condição do imóvel
@@ -103,6 +115,12 @@ export function filtersToUrlParams(filters) {
   if (filters.areaMax) {
     params.append('areaMax', filters.areaMax);
   }
+  if (filters.totalAreaMin) {
+    params.append('totalAreaMin', filters.totalAreaMin);
+  }
+  if (filters.totalAreaMax) {
+    params.append('totalAreaMax', filters.totalAreaMax);
+  }
   if (filters.bedrooms) {
     params.append('bedrooms', filters.bedrooms);
   }
@@ -120,6 +138,9 @@ export function filtersToUrlParams(filters) {
   }
   if (filters.condoAmenities?.length > 0) {
     params.append('condoAmenities', filters.condoAmenities.join(','));
+  }
+  if (filters.naturalConditions?.length > 0) {
+    params.append('naturalConditions', filters.naturalConditions.join(','));
   }
   if (filters.propertyCondition) {
     params.append('condition', filters.propertyCondition);
@@ -179,11 +200,21 @@ export function getFilterDescriptions(filters) {
 
   if (filters.areaMin || filters.areaMax) {
     if (filters.areaMin && filters.areaMax) {
-      descriptions.push(`Área: ${filters.areaMin} - ${filters.areaMax} m²`);
+      descriptions.push(`Área Construída: ${filters.areaMin} - ${filters.areaMax} m²`);
     } else if (filters.areaMin) {
-      descriptions.push(`Área: Acima de ${filters.areaMin} m²`);
+      descriptions.push(`Área Construída: Acima de ${filters.areaMin} m²`);
     } else {
-      descriptions.push(`Área: Até ${filters.areaMax} m²`);
+      descriptions.push(`Área Construída: Até ${filters.areaMax} m²`);
+    }
+  }
+
+  if (filters.totalAreaMin || filters.totalAreaMax) {
+    if (filters.totalAreaMin && filters.totalAreaMax) {
+      descriptions.push(`Área Total: ${filters.totalAreaMin} - ${filters.totalAreaMax} m²`);
+    } else if (filters.totalAreaMin) {
+      descriptions.push(`Área Total: Acima de ${filters.totalAreaMin} m²`);
+    } else {
+      descriptions.push(`Área Total: Até ${filters.totalAreaMax} m²`);
     }
   }
 
@@ -201,6 +232,22 @@ export function getFilterDescriptions(filters) {
 
   if (filters.suites) {
     descriptions.push(`${filters.suites}+ suítes`);
+  }
+
+  if (filters.amenities?.length > 0) {
+    if (filters.amenities.length === 1) {
+      descriptions.push(`Comodidade: ${filters.amenities[0]}`);
+    } else {
+      descriptions.push(`${filters.amenities.length} comodidades`);
+    }
+  }
+
+  if (filters.naturalConditions?.length > 0) {
+    if (filters.naturalConditions.length === 1) {
+      descriptions.push(`Natureza: ${filters.naturalConditions[0]}`);
+    } else {
+      descriptions.push(`${filters.naturalConditions.length} condições naturais`);
+    }
   }
 
   if (filters.styles?.length > 0) {
@@ -226,12 +273,14 @@ export function countActiveFilters(filters) {
   if (filters.location) count++;
   if (filters.priceMin || filters.priceMax) count++;
   if (filters.areaMin || filters.areaMax) count++;
+  if (filters.totalAreaMin || filters.totalAreaMax) count++;
   if (filters.bedrooms) count++;
   if (filters.bathrooms) count++;
   if (filters.parkingSpaces !== null && filters.parkingSpaces !== undefined) count++;
   if (filters.suites !== null && filters.suites !== undefined) count++;
   if (filters.amenities?.length > 0) count++;
   if (filters.condoAmenities?.length > 0) count++;
+  if (filters.naturalConditions?.length > 0) count++;
   if (filters.propertyCondition) count++;
   if (filters.styles?.length > 0) count++;
 
@@ -250,12 +299,15 @@ export function clearAllFilters() {
     priceMax: '',
     areaMin: '',
     areaMax: '',
+    totalAreaMin: '',
+    totalAreaMax: '',
     bedrooms: null,
     bathrooms: null,
     parkingSpaces: null,
     suites: null,
     amenities: [],
     condoAmenities: [],
+    naturalConditions: [],
     propertyCondition: '',
     styles: [],
   };

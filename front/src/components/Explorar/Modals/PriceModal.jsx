@@ -1,201 +1,320 @@
 import { Dialog } from '@headlessui/react';
-import { X, DollarSign } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { X, DollarSign, Sparkles } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
 
 const QUICK_OPTIONS = [
   { label: 'Até 300k', min: null, max: 300000 },
   { label: '300k - 500k', min: 300000, max: 500000 },
   { label: '500k - 1M', min: 500000, max: 1000000 },
   { label: '1M - 2M', min: 1000000, max: 2000000 },
-  { label: '2M - 5M', min: 2000000, max: 5000000 },
-  { label: 'Acima de 5M', min: 5000000, max: null },
+  { label: '2M+', min: 2000000, max: null },
 ];
 
 export default function PriceModal({ isOpen, onClose, filters, onApply }) {
-  const [minPrice, setMinPrice] = useState(filters.priceMin || '');
-  const [maxPrice, setMaxPrice] = useState(filters.priceMax || '');
+  const [minPrice, setMinPrice] = useState(filters.priceMin || 0);
+  const [maxPrice, setMaxPrice] = useState(filters.priceMax || 5000000);
+  const [isDraggingMin, setIsDraggingMin] = useState(false);
+  const [isDraggingMax, setIsDraggingMax] = useState(false);
+  const sliderRef = useRef(null);
 
-  // ✅ FIX: Sincronizar quando filters mudar (via remoção de chip)
+  // Valores dinâmicos baseados nos inputs do usuário
+  const getSliderRange = () => {
+    const currentMin = Math.min(minPrice, maxPrice);
+    const currentMax = Math.max(minPrice, maxPrice);
+    
+    // Se não há valores, usar range padrão
+    if (currentMax === 0) {
+      return { min: 0, max: 5000000 };
+    }
+    
+    // Expandir o range para dar margem de ajuste
+    const range = currentMax - currentMin;
+    const padding = Math.max(range * 0.3, 500000); // 30% de margem ou no mínimo 500k
+    
+    return {
+      min: Math.max(0, currentMin - padding),
+      max: currentMax + padding
+    };
+  };
+
+  const sliderRange = getSliderRange();
+  const MIN_VALUE = sliderRange.min;
+  const MAX_VALUE = sliderRange.max;
+  const STEP = Math.max(10000, Math.round((MAX_VALUE - MIN_VALUE) / 200)); // Step adaptativo
+
+  // ✅ Sincronizar quando filters mudar
   useEffect(() => {
-    setMinPrice(filters.priceMin || '');
-    setMaxPrice(filters.priceMax || '');
+    setMinPrice(filters.priceMin || 0);
+    setMaxPrice(filters.priceMax || 5000000);
   }, [filters.priceMin, filters.priceMax]);
 
-  // Resetar valores quando o modal abre
   useEffect(() => {
     if (isOpen) {
-      setMinPrice(filters.priceMin || '');
-      setMaxPrice(filters.priceMax || '');
+      setMinPrice(filters.priceMin || 0);
+      setMaxPrice(filters.priceMax || 5000000);
     }
   }, [isOpen, filters]);
 
-  const handleApply = () => {
-    // Aplica mesmo que não tenha valores (limpa filtro)
-    const priceFilter = {
-      priceMin: minPrice || '',
-      priceMax: maxPrice || '',
-    };
-    console.log('💰 PriceModal - handleApply chamado');
-    console.log('💰 minPrice (raw):', minPrice);
-    console.log('💰 maxPrice (raw):', maxPrice);
-    console.log('💰 Enviando filtro:', priceFilter);
+  const handleSliderInteraction = (e, type) => {
+    if (!sliderRef.current) return;
     
+    const rect = sliderRef.current.getBoundingClientRect();
+    const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+    const percentage = x / rect.width;
+    const value = Math.round((MIN_VALUE + percentage * (MAX_VALUE - MIN_VALUE)) / STEP) * STEP;
+
+    if (type === 'min') {
+      setMinPrice(Math.min(value, maxPrice - STEP));
+    } else {
+      setMaxPrice(Math.max(value, minPrice + STEP));
+    }
+  };
+
+  const handleMouseDown = (type) => {
+    if (type === 'min') setIsDraggingMin(true);
+    else setIsDraggingMax(true);
+  };
+
+  const handleMouseUp = () => {
+    setIsDraggingMin(false);
+    setIsDraggingMax(false);
+  };
+
+  const handleMouseMove = (e) => {
+    if (isDraggingMin) handleSliderInteraction(e, 'min');
+    if (isDraggingMax) handleSliderInteraction(e, 'max');
+  };
+
+  useEffect(() => {
+    if (isDraggingMin || isDraggingMax) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      return () => {
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+      };
+    }
+  }, [isDraggingMin, isDraggingMax, minPrice, maxPrice]);
+
+  const handleApply = () => {
+    const priceFilter = {
+      priceMin: minPrice > 0 ? minPrice : '',
+      priceMax: maxPrice > 0 ? maxPrice : '',
+    };
     onApply(priceFilter);
     onClose();
   };
 
   const handleClear = () => {
-    setMinPrice('');
-    setMaxPrice('');
+    setMinPrice(0);
+    setMaxPrice(5000000);
   };
 
   const selectQuickOption = (option) => {
-    setMinPrice(option.min || '');
-    setMaxPrice(option.max || '');
+    setMinPrice(option.min || 0);
+    setMaxPrice(option.max || 5000000);
+  };
+
+  const formatPrice = (value) => {
+    if (!value || value === 0) return 'Mínimo';
+    if (value >= 1000000) return `R$ ${(value / 1000000).toFixed(1)}M`;
+    if (value >= 1000) return `R$ ${(value / 1000).toFixed(0)}k`;
+    return `R$ ${value.toLocaleString('pt-BR')}`;
   };
 
   const formatInput = (value) => {
-    if (!value) return '';
-    const num = value.toString().replace(/\D/g, '');
-    return new Intl.NumberFormat('pt-BR').format(num);
+    if (!value || value === 0) return '';
+    return new Intl.NumberFormat('pt-BR').format(value);
   };
 
   const handleMinChange = (e) => {
     const value = e.target.value.replace(/\D/g, '');
-    setMinPrice(value);
+    setMinPrice(value ? Math.min(parseInt(value), maxPrice - STEP) : 0);
   };
 
   const handleMaxChange = (e) => {
     const value = e.target.value.replace(/\D/g, '');
-    setMaxPrice(value);
+    const newMax = value ? parseInt(value) : 0;
+    setMaxPrice(Math.max(newMax, minPrice + STEP));
   };
+
+  // Calcular percentuais para o slider baseado no range dinâmico
+  const minPercentage = ((minPrice - MIN_VALUE) / (MAX_VALUE - MIN_VALUE)) * 100;
+  const maxPercentage = ((maxPrice - MIN_VALUE) / (MAX_VALUE - MIN_VALUE)) * 100;
 
   return (
     <Dialog open={isOpen} onClose={onClose} className="relative z-50">
       <div className="fixed inset-0 bg-black/30 backdrop-blur-sm" aria-hidden="true" />
 
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <Dialog.Panel className="mx-auto max-w-lg w-full bg-white rounded-3xl shadow-2xl overflow-hidden">
-          {/* Header com ondas decorativas */}
-          <div className="relative bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500 p-6 pb-12 overflow-hidden">
-            {/* Ondas decorativas SVG */}
-            <svg className="absolute bottom-0 left-0 w-full opacity-20" viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M0,32L48,37.3C96,43,192,53,288,58.7C384,64,480,64,576,56C672,48,768,32,864,32C960,32,1056,48,1152,53.3C1248,59,1344,53,1392,50.7L1440,48L1440,80L1392,80C1344,80,1248,80,1152,80C1056,80,960,80,864,80C768,80,672,80,576,80C480,80,384,80,288,80C192,80,96,80,48,80L0,80Z" fill="white"/>
-            </svg>
-            <svg className="absolute bottom-0 left-0 w-full opacity-10" viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" style={{transform: 'translateY(5px)'}}>
-              <path d="M0,48L48,42.7C96,37,192,27,288,32C384,37,480,59,576,64C672,69,768,59,864,48C960,37,1056,27,1152,26.7C1248,27,1344,37,1392,42.7L1440,48L1440,80L1392,80C1344,80,1248,80,1152,80C1056,80,960,80,864,80C768,80,672,80,576,80C480,80,384,80,288,80C192,80,96,80,48,80L0,80Z" fill="white"/>
-            </svg>
-
-            {/* Conteúdo do header */}
+        <Dialog.Panel className="mx-auto max-w-2xl w-full bg-white rounded-3xl shadow-2xl overflow-hidden">
+          {/* Header Vibrante */}
+          <div className="relative bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500 px-8 py-6 overflow-hidden">
+            {/* Padrão decorativo animado */}
+            <div className="absolute inset-0 opacity-10">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-white rounded-full blur-3xl animate-pulse"></div>
+              <div className="absolute bottom-0 left-0 w-48 h-48 bg-white rounded-full blur-3xl animate-pulse delay-700"></div>
+            </div>
+            
             <div className="relative flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-11 h-11 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center border-2 border-white/30">
-                  <DollarSign className="w-5 h-5 text-white" strokeWidth={2.5} />
+                <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center border-2 border-white/40 shadow-lg">
+                  <DollarSign className="w-6 h-6 text-white" strokeWidth={2.5} />
                 </div>
                 <div>
-                  <Dialog.Title className="text-xl font-bold text-white drop-shadow-md">
+                  <Dialog.Title className="text-xl font-bold text-white drop-shadow-md flex items-center gap-2">
                     Faixa de Preço
+                    <Sparkles size={18} className="text-emerald-200" />
                   </Dialog.Title>
-                  <p className="text-emerald-50 text-xs mt-0.5">Defina seu orçamento ideal</p>
+                  <p className="text-emerald-50 text-sm mt-0.5">Arraste os controles ou escolha uma opção</p>
                 </div>
               </div>
               <button
                 onClick={onClose}
-                className="p-2 text-white/80 hover:text-white hover:bg-white/20 rounded-lg transition-all"
+                className="p-2.5 text-white/90 hover:text-white hover:bg-white/20 rounded-xl transition-all backdrop-blur-sm"
               >
-                <X size={20} strokeWidth={2.5} />
+                <X size={22} strokeWidth={2.5} />
               </button>
             </div>
           </div>
 
           {/* Content */}
-          <div className="p-6 -mt-6 relative z-10">
-            {/* Inputs de preço com design premium */}
-            <div className="bg-white rounded-2xl shadow-lg border border-slate-100 p-5 mb-5">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
-                    Preço Mínimo
-                  </label>
-                  <div className="relative group">
-                    <div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-emerald-50 to-transparent rounded-l-xl flex items-center justify-center">
-                      <span className="text-emerald-600 font-bold">R$</span>
-                    </div>
-                    <input
-                      type="text"
-                      value={formatInput(minPrice)}
-                      onChange={handleMinChange}
-                      placeholder="0"
-                      className="w-full pl-14 pr-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-xl focus:outline-none focus:bg-white focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100 transition-all font-semibold text-slate-700"
-                    />
+          <div className="p-8 space-y-6">
+            {/* Slider Estilo Airbnb */}
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm font-semibold text-slate-600">Ajuste o intervalo</span>
+                <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full">
+                  {formatPrice(minPrice)} - {formatPrice(maxPrice)}
+                </span>
+              </div>
+              
+              {/* Info sobre o range atual */}
+              <div className="text-xs text-slate-500 mb-3 text-center">
+                Range: {formatPrice(MIN_VALUE)} a {formatPrice(MAX_VALUE)}
+              </div>
+
+              {/* Slider Track */}
+              <div className="relative pt-2 pb-10 px-8" ref={sliderRef}>
+                {/* Track Background */}
+                <div className="absolute top-6 left-0 right-0 h-2 bg-slate-200 rounded-full"></div>
+                
+                {/* Track Active (colorido entre os handles) */}
+                <div 
+                  className="absolute top-6 h-2 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 rounded-full shadow-md"
+                  style={{
+                    left: `${minPercentage}%`,
+                    right: `${100 - maxPercentage}%`,
+                  }}
+                ></div>
+
+                {/* Handle Mínimo */}
+                <div
+                  className="absolute top-3 -ml-5 cursor-pointer group"
+                  style={{ left: `${minPercentage}%` }}
+                  onMouseDown={() => handleMouseDown('min')}
+                >
+                  <div className={`w-10 h-10 bg-white border-4 border-emerald-500 rounded-full shadow-xl transition-all ${
+                    isDraggingMin ? 'scale-125 shadow-2xl' : 'group-hover:scale-110'
+                  }`}>
+                    <div className="w-full h-full bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full opacity-20"></div>
+                  </div>
+                  <div className={`absolute -top-12 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-slate-900 text-white text-xs font-bold rounded-lg shadow-lg transition-opacity ${
+                    isDraggingMin ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                  }`}>
+                    {formatPrice(minPrice)}
+                    <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45"></div>
                   </div>
                 </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
-                    Preço Máximo
-                  </label>
-                  <div className="relative group">
-                    <div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-emerald-50 to-transparent rounded-l-xl flex items-center justify-center">
-                      <span className="text-emerald-600 font-bold">R$</span>
-                    </div>
-                    <input
-                      type="text"
-                      value={formatInput(maxPrice)}
-                      onChange={handleMaxChange}
-                      placeholder="Sem limite"
-                      className="w-full pl-14 pr-4 py-3 bg-slate-50 border-2 border-slate-200 rounded-xl focus:outline-none focus:bg-white focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100 transition-all font-semibold text-slate-700"
-                    />
+
+                {/* Handle Máximo */}
+                <div
+                  className="absolute top-3 -ml-5 cursor-pointer group"
+                  style={{ left: `${maxPercentage}%` }}
+                  onMouseDown={() => handleMouseDown('max')}
+                >
+                  <div className={`w-10 h-10 bg-white border-4 border-cyan-500 rounded-full shadow-xl transition-all ${
+                    isDraggingMax ? 'scale-125 shadow-2xl' : 'group-hover:scale-110'
+                  }`}>
+                    <div className="w-full h-full bg-gradient-to-br from-cyan-400 to-blue-500 rounded-full opacity-20"></div>
+                  </div>
+                  <div className={`absolute -top-12 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-slate-900 text-white text-xs font-bold rounded-lg shadow-lg transition-opacity ${
+                    isDraggingMax ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                  }`}>
+                    {formatPrice(maxPrice)}
+                    <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-900 rotate-45"></div>
                   </div>
                 </div>
               </div>
-
-              {/* Indicador visual de range */}
-              {(minPrice || maxPrice) && (
-                <div className="mt-5 pt-5 border-t border-slate-100">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-slate-600 font-medium">
-                      {minPrice ? `R$ ${formatInput(minPrice)}` : 'Mínimo'}
-                    </span>
-                    <div className="flex-1 mx-4 h-2 bg-gradient-to-r from-emerald-200 via-teal-200 to-cyan-200 rounded-full relative overflow-hidden">
-                      <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 animate-pulse opacity-50"></div>
-                    </div>
-                    <span className="text-slate-600 font-medium">
-                      {maxPrice ? `R$ ${formatInput(maxPrice)}` : 'Máximo'}
-                    </span>
-                  </div>
-                </div>
-              )}
             </div>
 
-            {/* Opções rápidas */}
+            {/* Inputs Manuais */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                  Preço Mínimo
+                </label>
+                <div className="relative">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-600 font-bold">
+                    R$
+                  </span>
+                  <input
+                    type="text"
+                    value={formatInput(minPrice)}
+                    onChange={handleMinChange}
+                    placeholder="0"
+                    className="w-full pl-11 pr-4 py-3 text-slate-900 font-semibold bg-gradient-to-r from-emerald-50 to-teal-50 border-2 border-emerald-200 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition-all"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                  Preço Máximo
+                </label>
+                <div className="relative">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-cyan-600 font-bold">
+                    R$
+                  </span>
+                  <input
+                    type="text"
+                    value={formatInput(maxPrice)}
+                    onChange={handleMaxChange}
+                    placeholder="Sem limite"
+                    className="w-full pl-11 pr-4 py-3 text-slate-900 font-semibold bg-gradient-to-r from-cyan-50 to-blue-50 border-2 border-cyan-200 rounded-xl focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100 transition-all"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Opções Rápidas com Gradientes */}
             <div>
-              <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 flex items-center gap-2">
-                <div className="w-1 h-4 bg-gradient-to-b from-emerald-500 to-teal-500 rounded-full"></div>
-                Opções Rápidas
+              <h3 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
+                <div className="w-1 h-5 bg-gradient-to-b from-emerald-500 via-teal-500 to-cyan-500 rounded-full"></div>
+                Opções Populares
               </h3>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-5 gap-2">
                 {QUICK_OPTIONS.map((option, index) => {
                   const isSelected = 
-                    (option.min === null || option.min.toString() === minPrice) &&
-                    (option.max === null || option.max.toString() === maxPrice);
-                  
+                    (option.min === null || option.min === minPrice) &&
+                    (option.max === null || option.max === maxPrice);
+
                   const gradients = [
-                    'from-emerald-400 to-teal-500',
-                    'from-teal-400 to-cyan-500',
-                    'from-cyan-400 to-blue-500',
-                    'from-blue-400 to-indigo-500',
-                    'from-indigo-400 to-purple-500',
-                    'from-purple-400 to-pink-500',
+                    'from-emerald-500 to-teal-500',
+                    'from-teal-500 to-cyan-500',
+                    'from-cyan-500 to-blue-500',
+                    'from-blue-500 to-indigo-500',
+                    'from-indigo-500 to-purple-500',
                   ];
 
                   return (
                     <button
                       key={option.label}
                       onClick={() => selectQuickOption(option)}
-                      className={`relative px-4 py-3 text-sm font-bold rounded-xl transition-all transform hover:scale-105 ${
+                      className={`relative px-3 py-2.5 text-xs font-bold rounded-xl transition-all transform hover:scale-105 ${
                         isSelected
-                          ? `bg-gradient-to-r ${gradients[index % gradients.length]} text-white shadow-lg`
-                          : 'text-slate-700 bg-white border-2 border-slate-200 hover:border-slate-300 hover:shadow-md'
+                          ? `bg-gradient-to-r ${gradients[index]} text-white shadow-lg`
+                          : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border-2 border-slate-200'
                       }`}
                     >
                       {option.label}
@@ -206,24 +325,20 @@ export default function PriceModal({ isOpen, onClose, filters, onApply }) {
             </div>
           </div>
 
-          {/* Footer */}
-          <div className="relative px-6 pb-6 pt-3">
-            <div className="flex items-center gap-3">
-              <button
-                onClick={handleClear}
-                className="px-5 py-2.5 text-sm font-bold text-slate-600 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all"
-              >
-                Limpar
-              </button>
-              <button
-                onClick={handleApply}
-                className="relative flex-1 px-5 py-2.5 text-sm font-bold text-white rounded-xl transition-all overflow-hidden group"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500"></div>
-                <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                <span className="relative z-10">Aplicar Filtro</span>
-              </button>
-            </div>
+          {/* Footer com Gradiente */}
+          <div className="px-8 pb-8 flex items-center gap-3">
+            <button
+              onClick={handleClear}
+              className="px-6 py-3 text-sm font-bold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all"
+            >
+              Limpar
+            </button>
+            <button
+              onClick={handleApply}
+              className="flex-1 px-6 py-3 text-sm font-bold text-white bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:from-emerald-600 hover:via-teal-600 hover:to-cyan-600 rounded-xl shadow-lg shadow-emerald-200 hover:shadow-xl hover:shadow-emerald-300 transition-all transform hover:scale-[1.02]"
+            >
+              Aplicar Filtros
+            </button>
           </div>
         </Dialog.Panel>
       </div>

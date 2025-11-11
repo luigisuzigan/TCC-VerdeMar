@@ -100,6 +100,8 @@ export async function listProperties({
   maxPrice, 
   minArea,
   maxArea,
+  minTotalArea,
+  maxTotalArea,
   types,
   minBedrooms,
   minBathrooms,
@@ -114,6 +116,7 @@ export async function listProperties({
   category,
   amenities,
   condoAmenities,
+  naturalConditions,
   condition,
   styles,
   sortBy = 'default',
@@ -127,6 +130,8 @@ export async function listProperties({
     maxPrice,
     minArea,
     maxArea,
+    minTotalArea,
+    maxTotalArea,
     types,
     minBedrooms,
     minBathrooms,
@@ -134,6 +139,7 @@ export async function listProperties({
     minSuites,
     amenities,
     condoAmenities,
+    naturalConditions,
     condition,
     styles
   });
@@ -160,6 +166,8 @@ export async function listProperties({
       maxPrice != null ? { price: { lte: Number(maxPrice) } } : {},
       minArea != null ? { area: { gte: Number(minArea) } } : {},
       maxArea != null ? { area: { lte: Number(maxArea) } } : {},
+      minTotalArea != null ? { totalArea: { gte: Number(minTotalArea) } } : {},
+      maxTotalArea != null ? { totalArea: { lte: Number(maxTotalArea) } } : {},
       types ? { type: { in: String(types).split(',').map(t => t.trim()) } } : {},
       minBedrooms != null ? { beds: { gte: Number(minBedrooms) } } : {},
       minBathrooms != null ? { baths: { gte: Number(minBathrooms) } } : {},
@@ -208,12 +216,14 @@ export async function listProperties({
 
   // Aplicar filtro de amenities e condoAmenities no código
   // (campos JSON não podem ser filtrados diretamente no Prisma)
-  if (amenities || condoAmenities) {
+  if (amenities || condoAmenities || naturalConditions) {
     const amenitiesArr = amenities ? String(amenities).split(',').map(a => a.trim()) : [];
     const condoAmenitiesArr = condoAmenities ? String(condoAmenities).split(',').map(a => a.trim()) : [];
+    const naturalConditionsArr = naturalConditions ? String(naturalConditions).split(',').map(a => a.trim()) : [];
     
     console.log('🔍 [FILTRO] Filtrando amenities requisitadas:', amenitiesArr);
     console.log('🔍 [FILTRO] Filtrando condoAmenities requisitadas:', condoAmenitiesArr);
+    console.log('🔍 [FILTRO] Filtrando naturalConditions requisitadas:', naturalConditionsArr);
     console.log('🔍 [FILTRO] Total de imóveis ANTES do filtro:', rows.length);
 
     rows = rows.filter(row => {
@@ -268,10 +278,10 @@ export async function listProperties({
         try {
           let propertyCondoAmenities = [];
           
-          if (typeof row.naturalConditions === 'string') {
-            propertyCondoAmenities = JSON.parse(row.naturalConditions || '[]');
-          } else if (Array.isArray(row.naturalConditions)) {
-            propertyCondoAmenities = row.naturalConditions;
+          if (typeof row.condoAmenities === 'string') {
+            propertyCondoAmenities = JSON.parse(row.condoAmenities || '[]');
+          } else if (Array.isArray(row.condoAmenities)) {
+            propertyCondoAmenities = row.condoAmenities;
           }
           
           const hasAllCondoAmenities = condoAmenitiesArr.every(requiredAmenity => {
@@ -287,6 +297,47 @@ export async function listProperties({
           if (!hasAllCondoAmenities) matches = false;
         } catch (e) {
           console.error('  ⚠️ Erro ao fazer parse das condoAmenities:', e.message);
+          matches = false; // Se erro no parse, não inclui
+        }
+      }
+
+      // Filtrar por condições naturais
+      if (naturalConditionsArr.length > 0) {
+        try {
+          let propertyNaturalConditions = [];
+          
+          if (typeof row.naturalConditions === 'string') {
+            propertyNaturalConditions = JSON.parse(row.naturalConditions || '[]');
+          } else if (Array.isArray(row.naturalConditions)) {
+            propertyNaturalConditions = row.naturalConditions;
+          }
+          
+          console.log(`  🌿 [${row.title?.substring(0, 30)}] Natural Conditions no banco:`, propertyNaturalConditions.slice(0, 3));
+          
+          const hasAllNaturalConditions = naturalConditionsArr.every(requiredCondition => {
+            const found = propertyNaturalConditions.some(propertyCondition => {
+              const conditionName = typeof propertyCondition === 'string' 
+                ? propertyCondition 
+                : propertyCondition.name;
+              
+              return conditionName === requiredCondition;
+            });
+            
+            if (!found) {
+              console.log(`    ❌ Não tem "${requiredCondition}"`);
+            }
+            
+            return found;
+          });
+          
+          if (!hasAllNaturalConditions) {
+            matches = false;
+            console.log(`  ❌ [${row.title?.substring(0, 30)}] REJEITADO - não tem todas as condições naturais`);
+          } else {
+            console.log(`  ✅ [${row.title?.substring(0, 30)}] APROVADO - tem todas as condições naturais`);
+          }
+        } catch (e) {
+          console.error('  ⚠️ Erro ao fazer parse das naturalConditions:', e.message);
           matches = false; // Se erro no parse, não inclui
         }
       }

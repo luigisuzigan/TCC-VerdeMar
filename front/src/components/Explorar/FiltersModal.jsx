@@ -1,24 +1,25 @@
 import { Dialog } from '@headlessui/react';
-import { X, Maximize2, Car, Waves, Dumbbell, Trees, Building2, Calendar, DollarSign, Home, Mountain, Wind } from 'lucide-react';
+import { X, Car, Waves, Dumbbell, Trees, Building2, Calendar, Mountain, Wind, Sparkles, Filter } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 export default function FiltersModal({ isOpen, onClose, filters, onApplyFilters }) {
   const [localFilters, setLocalFilters] = useState(filters);
-  const [showAllAmenities, setShowAllAmenities] = useState(false);
-  
-  // Estados para vagas de garagem (mesmo sistema do RoomsModal)
-  const [parkingMode, setParkingMode] = useState('min');
-  const [parkingMin, setParkingMin] = useState('');
-  const [parkingMax, setParkingMax] = useState('');
-  const [parkingExact, setParkingExact] = useState('');
+  const [parkingSpaces, setParkingSpaces] = useState(filters.parkingSpaces || 0);
 
-  // ✅ FIX: Sincronizar localFilters quando filters externos mudarem
   useEffect(() => {
     setLocalFilters(filters);
+    setParkingSpaces(filters.parkingSpaces || 0);
   }, [filters]);
 
   const updateLocalFilter = (key, value) => {
     setLocalFilters(prev => ({ ...prev, [key]: value }));
+  };
+
+  const handleInputChange = (value) => {
+    const num = parseInt(value) || 0;
+    if (num >= 0) {
+      setParkingSpaces(num);
+    }
   };
 
   // Verificar se o tipo selecionado precisa de andar
@@ -29,64 +30,41 @@ export default function FiltersModal({ isOpen, onClose, filters, onApplyFilters 
 
   const handleApply = () => {
     const result = { ...localFilters };
-    
-    // Adicionar vagas baseado no modo selecionado
-    if (parkingMode === 'min' && parkingMin) {
-      result.parkingSpaces = parseInt(parkingMin);
-    } else if (parkingMode === 'exact' && parkingExact) {
-      result.parkingExact = parseInt(parkingExact);
-    } else if (parkingMode === 'range' && parkingMin && parkingMax) {
-      result.parkingMin = parseInt(parkingMin);
-      result.parkingMax = parseInt(parkingMax);
-    }
-    
+    if (parkingSpaces > 0) result.parkingSpaces = parkingSpaces;
     onApplyFilters(result);
   };
 
   const handleReset = () => {
     setLocalFilters({});
-    setParkingMode('min');
-    setParkingMin('');
-    setParkingMax('');
-    setParkingExact('');
+    setParkingSpaces(0);
     onApplyFilters({});
   };
 
-  // Comodidades resumidas (apenas as mais populares)
-  const resumedAmenities = [
-    { name: 'Piscina', icon: Waves },
-    { name: 'Academia', icon: Dumbbell },
-    { name: 'Churrasqueira', icon: '🍖' },
-    { name: 'Jardim', icon: Trees },
-    { name: 'Ar Condicionado', icon: '❄️' },
-    { name: 'Varanda', icon: '🪟' },
-    { name: 'Pet Friendly', icon: '🐾' },
-    { name: 'Portaria 24h', icon: '🛡️' },
-    { name: 'Salão de Festas', icon: '🎉' },
-    { name: 'Playground', icon: '🎪' },
-    { name: 'Elevador', icon: '🛗' },
-    { name: 'Garagem Coberta', icon: Car },
-  ];
-
-  // Todas as comodidades organizadas por categoria
-  const allAmenitiesByCategory = {
-    '🏊 Lazer': [
-      { name: 'Piscina', icon: Waves },
+  // Comodidades organizadas por categoria
+  const amenitiesByCategory = {
+    'Lazer e Área Externa': [
+      { name: 'Piscina', icon: '🏊' },
       { name: 'Piscina Aquecida', icon: '🏊' },
       { name: 'Hidromassagem', icon: '♨️' },
-      { name: 'Academia', icon: Dumbbell },
+      { name: 'Academia', icon: '💪' },
       { name: 'Sauna', icon: '♨️' },
+      { name: 'Spa', icon: '🧖' },
       { name: 'Churrasqueira', icon: '🍖' },
       { name: 'Área Gourmet', icon: '🍽️' },
-      { name: 'Jardim', icon: Trees },
-      { name: 'Varanda', icon: '🪟' },
+      { name: 'Forno de Pizza', icon: '🍕' },
+      { name: 'Jardim', icon: '🌳' },
+      { name: 'Varanda', icon: '🏞️' },
       { name: 'Sacada', icon: '🏞️' },
+      { name: 'Terraço', icon: '🏙️' },
+      { name: 'Deck', icon: '🪵' },
+      { name: 'Gazebo', icon: '⛺' },
       { name: 'Quadra Esportiva', icon: '🏀' },
       { name: 'Salão de Festas', icon: '🎉' },
       { name: 'Playground', icon: '🎪' },
       { name: 'Salão de Jogos', icon: '🎮' },
+      { name: 'Home Theater', icon: '🎬' },
     ],
-    '🌐 Tecnologia': [
+    'Tecnologia': [
       { name: 'WiFi', icon: '📡' },
       { name: 'Fibra Óptica', icon: '🌐' },
       { name: 'Smart TV', icon: '📺' },
@@ -95,21 +73,21 @@ export default function FiltersModal({ isOpen, onClose, filters, onApplyFilters 
       { name: 'Vídeo Porteiro', icon: '📹' },
       { name: 'Portão Eletrônico', icon: '🚪' },
     ],
-    '❄️ Climatização': [
+    'Climatização': [
       { name: 'Ar Condicionado', icon: '❄️' },
-      { name: 'Ar-condicionado Central', icon: '❄️' },
+      { name: 'Ar Central', icon: '❄️' },
       { name: 'Aquecimento', icon: '🔥' },
       { name: 'Aquecedor Solar', icon: '☀️' },
       { name: 'Ventilador Teto', icon: '🌀' },
       { name: 'Lareira', icon: '🔥' },
     ],
-    '🚗 Garagem': [
-      { name: 'Garagem Coberta', icon: Car },
+    'Estacionamento': [
+      { name: 'Garagem Coberta', icon: '🚗' },
       { name: 'Garagem Descoberta', icon: '🅿️' },
       { name: 'Vaga Visitantes', icon: '🚗' },
       { name: 'Carregador Elétrico', icon: '⚡' },
     ],
-    '🍳 Cozinha': [
+    'Cozinha': [
       { name: 'Cozinha Equipada', icon: '🍳' },
       { name: 'Cozinha Planejada', icon: '🏠' },
       { name: 'Cozinha Gourmet', icon: '👨‍🍳' },
@@ -120,7 +98,7 @@ export default function FiltersModal({ isOpen, onClose, filters, onApplyFilters 
       { name: 'Máquina Lavar', icon: '🧺' },
       { name: 'Adega', icon: '🍷' },
     ],
-    '🔒 Segurança': [
+    'Segurança': [
       { name: 'Portaria 24h', icon: '🛡️' },
       { name: 'Segurança 24h', icon: '👮' },
       { name: 'Câmeras', icon: '📹' },
@@ -130,20 +108,20 @@ export default function FiltersModal({ isOpen, onClose, filters, onApplyFilters 
       { name: 'Porta Blindada', icon: '🚪' },
       { name: 'Cofre', icon: '🔐' },
     ],
-    '♿ Acessibilidade': [
+    'Acessibilidade': [
       { name: 'Elevador', icon: '🛗' },
       { name: 'Elevador Social', icon: '🛗' },
       { name: 'Acessível Cadeirantes', icon: '♿' },
       { name: 'Rampa', icon: '♿' },
       { name: 'Banheiro Adaptado', icon: '🚻' },
     ],
-    '🐕 Pets': [
+    'Pets': [
       { name: 'Pet Friendly', icon: '🐾' },
       { name: 'Aceita Cães', icon: '🐕' },
       { name: 'Aceita Gatos', icon: '🐈' },
       { name: 'Pet Place', icon: '🐾' },
     ],
-    '🏠 Acabamentos': [
+    'Acabamentos': [
       { name: 'Armários Embutidos', icon: '🗄️' },
       { name: 'Closet', icon: '👔' },
       { name: 'Piso Porcelanato', icon: '◻️' },
@@ -152,366 +130,280 @@ export default function FiltersModal({ isOpen, onClose, filters, onApplyFilters 
     ],
   };
 
+  const naturalConditionsByCategory = {
+    'Vista e Localização': [
+      { name: 'Vista para o Mar', icon: '🌊' },
+      { name: 'Vista Panorâmica do Mar', icon: '🌊' },
+      { name: 'Frente para o Mar', icon: '🌅' },
+      { name: 'Pé na Areia', icon: '🏖️' },
+      { name: 'Vista para a Praia', icon: '🏖️' },
+      { name: 'Vista para Montanha', icon: '⛰️' },
+      { name: 'Vista para Lago', icon: '🏞️' },
+      { name: 'Vista para Rio', icon: '🏞️' },
+      { name: 'Vista para Cidade', icon: '🏙️' },
+      { name: 'Vista para Natureza', icon: '🌳' },
+      { name: 'Vista Desobstruída', icon: '👁️' },
+      { name: 'Vista Privilegiada', icon: '✨' },
+    ],
+    'Ventilação e Ar': [
+      { name: 'Ventilação Natural', icon: '💨' },
+      { name: 'Ventilação Cruzada', icon: '💨' },
+      { name: 'Brisa Marítima', icon: '🌊' },
+      { name: 'Brisa Constante', icon: '💨' },
+      { name: 'Circulação de Ar', icon: '🌀' },
+      { name: 'Ambientes Arejados', icon: '🪟' },
+    ],
+    'Iluminação Solar': [
+      { name: 'Sol da Manhã', icon: '🌄' },
+      { name: 'Sol da Tarde', icon: '🌇' },
+      { name: 'Sol o Dia Todo', icon: '☀️' },
+      { name: 'Muito Sol', icon: '☀️' },
+      { name: 'Iluminação Natural', icon: '💡' },
+      { name: 'Claridade Natural', icon: '✨' },
+      { name: 'Face Norte', icon: '🧭' },
+      { name: 'Face Sul', icon: '🧭' },
+      { name: 'Face Leste', icon: '🧭' },
+      { name: 'Face Oeste', icon: '🧭' },
+    ],
+    'Clima e Conforto': [
+      { name: 'Clima Ameno', icon: '🌡️' },
+      { name: 'Clima Tropical', icon: '🌴' },
+      { name: 'Temperatura Agradável', icon: '🌡️' },
+      { name: 'Fresco no Verão', icon: '❄️' },
+      { name: 'Sombra Natural', icon: '🌳' },
+      { name: 'Microclima', icon: '🌡️' },
+    ],
+    'Natureza e Verde': [
+      { name: 'Área Verde', icon: '🌳' },
+      { name: 'Arborizado', icon: '🌲' },
+      { name: 'Jardim Natural', icon: '🌿' },
+      { name: 'Mata Nativa', icon: '🌲' },
+      { name: 'Árvores Frutíferas', icon: '🍊' },
+      { name: 'Pomar', icon: '🍎' },
+      { name: 'Horta', icon: '🥬' },
+      { name: 'Contato com Natureza', icon: '🌿' },
+      { name: 'Fauna Local', icon: '🦜' },
+      { name: 'Pássaros', icon: '🐦' },
+      { name: 'Ecossistema Preservado', icon: '🌍' },
+    ],
+    'Terreno': [
+      { name: 'Terreno Plano', icon: '▬' },
+      { name: 'Terreno em Declive', icon: '⛰️' },
+      { name: 'Terreno em Aclive', icon: '⛰️' },
+      { name: 'Elevado', icon: '🏔️' },
+      { name: 'Solo Firme', icon: '🪨' },
+      { name: 'Solo Drenado', icon: '💧' },
+    ],
+    'Características Especiais': [
+      { name: 'Nascer do Sol', icon: '🌅' },
+      { name: 'Pôr do Sol', icon: '🌇' },
+      { name: 'Céu Estrelado', icon: '⭐' },
+      { name: 'Noite Tranquila', icon: '🌙' },
+      { name: 'Silêncio', icon: '🤫' },
+      { name: 'Privacidade', icon: '🔒' },
+      { name: 'Área Isolada', icon: '🏝️' },
+      { name: 'Exclusividade', icon: '💎' },
+      { name: 'Som das Ondas', icon: '🌊' },
+      { name: 'Acesso à Praia', icon: '🏖️' },
+    ],
+    'Sustentabilidade': [
+      { name: 'Casa Sustentável', icon: '🌱' },
+      { name: 'Bioconstrução', icon: '🏡' },
+      { name: 'Materiais Naturais', icon: '🪵' },
+      { name: 'Captação de Água', icon: '💧' },
+      { name: 'Compostagem', icon: '♻️' },
+      { name: 'Fossa Ecológica', icon: '🌱' },
+      { name: 'Energia Renovável', icon: '⚡' },
+      { name: 'Baixo Impacto', icon: '🌍' },
+      { name: 'Poço Artesiano', icon: '💧' },
+    ],
+  };
+
   return (
     <Dialog open={isOpen} onClose={onClose} className="relative z-50">
-      {/* Backdrop */}
-      <div className="fixed inset-0 bg-black/30 backdrop-blur-sm" aria-hidden="true" />
+      <div className="fixed inset-0 bg-black/40 backdrop-blur-md" aria-hidden="true" />
 
-      {/* Full-screen container */}
-      <div className="fixed inset-0 flex items-start justify-center overflow-y-auto">
-        <Dialog.Panel className="w-full max-w-5xl bg-white rounded-b-2xl shadow-2xl">
+      <div className="fixed inset-0 flex items-center justify-center p-4">
+        <Dialog.Panel className="mx-auto max-w-4xl w-full bg-white rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
           {/* Header */}
-          <div className="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between z-10">
-            <Dialog.Title className="text-xl font-bold text-slate-900">
-              Mais Filtros
-            </Dialog.Title>
-            <button
-              onClick={onClose}
-              className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
-            >
-              <X size={24} />
-            </button>
+          <div className="relative bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500 px-6 py-4 overflow-hidden">
+            <div className="absolute inset-0 opacity-10">
+              <div className="absolute top-0 right-0 w-48 h-48 bg-white rounded-full blur-3xl animate-pulse"></div>
+            </div>
+            
+            <div className="relative flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center border-2 border-white/40 shadow-lg">
+                  <Filter className="w-5 h-5 text-white" strokeWidth={2.5} />
+                </div>
+                <div>
+                  <Dialog.Title className="text-lg font-bold text-white drop-shadow-md flex items-center gap-2">
+                    Mais Filtros
+                    <Sparkles size={16} className="text-cyan-200" />
+                  </Dialog.Title>
+                  <p className="text-white/90 text-xs mt-0.5">Refine sua busca</p>
+                </div>
+              </div>
+              <button
+                onClick={onClose}
+                className="p-2 text-white/90 hover:text-white hover:bg-white/20 rounded-lg transition-all backdrop-blur-sm"
+              >
+                <X size={18} strokeWidth={2.5} />
+              </button>
+            </div>
           </div>
 
-          {/* Content */}
-          <div className="p-6 max-h-[calc(100vh-180px)] overflow-y-auto">
+          {/* Content - Scrollable */}
+          <div className="flex-1 overflow-y-auto p-6">
             <div className="space-y-8">
               
-              <div>
-                <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-                  <Home size={20} className="text-blue-600" />
-                  Características do Imóvel
-                </h3>
-                <div className="space-y-6">
-
-                  {/* Vagas de Garagem - NOVO SISTEMA */}
-                  <div className="pb-6 border-b border-slate-200">
-                    <label className="flex items-center gap-2 text-base font-bold text-slate-900 mb-4">
-                      <Car size={22} className="text-blue-600" />
-                      Vagas de Garagem
-                    </label>
-
-                    {/* Modo de filtro */}
-                    <div className="flex gap-2 mb-4 max-w-md">
-                      <button
-                        type="button"
-                        onClick={() => setParkingMode('min')}
-                        className={`flex-1 px-3 py-2 text-sm font-medium rounded-lg transition-all ${
-                          parkingMode === 'min'
-                            ? 'bg-blue-600 text-white'
-                            : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                        }`}
-                      >
-                        Mínimo
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setParkingMode('exact')}
-                        className={`flex-1 px-3 py-2 text-sm font-medium rounded-lg transition-all ${
-                          parkingMode === 'exact'
-                            ? 'bg-blue-600 text-white'
-                            : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                        }`}
-                      >
-                        Exato
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setParkingMode('range')}
-                        className={`flex-1 px-3 py-2 text-sm font-medium rounded-lg transition-all ${
-                          parkingMode === 'range'
-                            ? 'bg-blue-600 text-white'
-                            : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-                        }`}
-                      >
-                        Entre
-                      </button>
-                    </div>
-
-                    {/* Inputs baseados no modo */}
-                    {parkingMode === 'min' && (
-                      <div className="max-w-md">
-                        <div className="grid grid-cols-5 gap-2 mb-3">
-                          {[1, 2, 3, 4, 5].map((num) => (
-                            <button
-                              type="button"
-                              key={num}
-                              onClick={() => setParkingMin(num.toString())}
-                              className={`px-3 py-2.5 border-2 rounded-lg font-bold text-sm transition-all ${
-                                parkingMin === num.toString()
-                                  ? 'border-blue-600 bg-blue-50 text-blue-700'
-                                  : 'border-slate-200 hover:border-blue-300'
-                              }`}
-                            >
-                              {num}+
-                            </button>
-                          ))}
-                        </div>
-                        <input
-                          type="number"
-                          placeholder="Ou digite..."
-                          value={parkingMin}
-                          onChange={(e) => setParkingMin(e.target.value)}
-                          className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-                    )}
-
-                    {parkingMode === 'exact' && (
-                      <div className="max-w-md">
-                        <div className="grid grid-cols-5 gap-2 mb-3">
-                          {[1, 2, 3, 4, 5].map((num) => (
-                            <button
-                              type="button"
-                              key={num}
-                              onClick={() => setParkingExact(num.toString())}
-                              className={`px-3 py-2.5 border-2 rounded-lg font-bold text-sm transition-all ${
-                                parkingExact === num.toString()
-                                  ? 'border-blue-600 bg-blue-50 text-blue-700'
-                                  : 'border-slate-200 hover:border-blue-300'
-                              }`}
-                            >
-                              {num}
-                            </button>
-                          ))}
-                        </div>
-                        <input
-                          type="number"
-                          placeholder="Exatamente..."
-                          value={parkingExact}
-                          onChange={(e) => setParkingExact(e.target.value)}
-                          className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-                    )}
-
-                    {parkingMode === 'range' && (
-                      <div className="grid grid-cols-2 gap-3 max-w-md">
-                        <div>
-                          <label className="block text-xs text-slate-600 mb-2">De</label>
-                          <input
-                            type="number"
-                            placeholder="Min"
-                            value={parkingMin}
-                            onChange={(e) => setParkingMin(e.target.value)}
-                            className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs text-slate-600 mb-2">Até</label>
-                          <input
-                            type="number"
-                            placeholder="Max"
-                            value={parkingMax}
-                            onChange={(e) => setParkingMax(e.target.value)}
-                            className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                          />
-                        </div>
-                      </div>
-                    )}
+              {/* Vagas de Garagem e Ano de Construção - LADO A LADO */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Vagas de Garagem */}
+                <div>
+                  <div className="flex items-center gap-2 mb-4">
+                    <Car size={20} className="text-emerald-600" />
+                    <h3 className="text-base font-bold text-slate-900">Vagas de Garagem</h3>
                   </div>
-
-                  {/* Andar - CONDICIONAL */}
-                  {needsFloorFilter() && (
-                    <div className="pb-6 border-b border-slate-200">
-                      <label className="block text-sm font-semibold text-slate-900 mb-3">
-                        <div className="flex items-center gap-2">
-                          <Building2 size={18} />
-                          Andar
-                        </div>
-                      </label>
-                      <div className="grid grid-cols-2 gap-3 max-w-md">
-                        <input
-                          type="number"
-                          placeholder="Mínimo"
-                          value={localFilters.floorMin || ''}
-                          onChange={(e) => updateLocalFilter('floorMin', e.target.value)}
-                          className="px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        />
-                        <input
-                          type="number"
-                          placeholder="Máximo"
-                          value={localFilters.floorMax || ''}
-                          onChange={(e) => updateLocalFilter('floorMax', e.target.value)}
-                          className="px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        />
-                      </div>
-                      <p className="text-xs text-slate-500 mt-2">
-                        💡 Este filtro aparece porque você selecionou Apartamento ou Cobertura
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Ano de Construção */}
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-900 mb-3">
-                      <div className="flex items-center gap-2">
-                        <Calendar size={18} />
-                        Ano de Construção Mínimo
-                      </div>
-                    </label>
+                  <div className="flex items-center justify-between py-3">
+                    <span className="text-sm text-slate-600">Mínimo de vagas</span>
                     <input
                       type="number"
-                      placeholder="Ex: 2020"
+                      min="0"
+                      value={parkingSpaces === 0 ? '' : parkingSpaces}
+                      onChange={(e) => handleInputChange(e.target.value)}
+                      placeholder="0"
+                      className="w-16 h-10 text-center text-lg font-bold text-slate-900 border-2 border-slate-300 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition-all"
+                    />
+                  </div>
+                </div>
+
+                {/* Ano de Construção */}
+                <div>
+                  <div className="flex items-center gap-2 mb-4">
+                    <Calendar size={20} className="text-emerald-600" />
+                    <h3 className="text-base font-bold text-slate-900">Ano de Construção</h3>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1.5">Ano mínimo</label>
+                    <input
+                      type="number"
+                      placeholder={`Ex: ${new Date().getFullYear() - 5}`}
                       min="1900"
                       max={new Date().getFullYear()}
                       value={localFilters.yearBuilt || ''}
                       onChange={(e) => updateLocalFilter('yearBuilt', e.target.value)}
-                      className="w-full max-w-xs px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-3 py-2 text-sm border-2 border-slate-300 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition-all"
                     />
                   </div>
                 </div>
               </div>
 
-              {/* === SEÇÃO: COMODIDADES DO IMÓVEL === */}
-              <div className="border-t border-slate-200 pt-8">
-                <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-                  <Waves size={20} className="text-cyan-600" />
-                  Comodidades do Imóvel
-                </h3>
-                
-                {/* Modo Resumido */}
-                {!showAllAmenities && (
-                  <>
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                      {resumedAmenities.map((amenity) => (
-                        <label key={amenity.name} className="flex items-center gap-3 cursor-pointer hover:bg-slate-50 p-3 rounded-lg border border-slate-200 transition-colors">
-                          <input
-                            type="checkbox"
-                            checked={localFilters.amenities?.includes(amenity.name) || false}
-                            onChange={(e) => {
-                              const current = localFilters.amenities || [];
-                              const updated = e.target.checked
-                                ? [...current, amenity.name]
-                                : current.filter(a => a !== amenity.name);
-                              updateLocalFilter('amenities', updated);
-                            }}
-                            className="w-5 h-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                          />
-                          <span className="text-slate-700 flex items-center gap-2 text-sm">
-                            {typeof amenity.icon === 'string' ? (
-                              <span className="text-lg">{amenity.icon}</span>
-                            ) : (
-                              <amenity.icon size={16} className="text-blue-600" />
-                            )}
-                            {amenity.name}
-                          </span>
-                        </label>
-                      ))}
+              {/* Andar - CONDICIONAL */}
+              {needsFloorFilter() && (
+                <div className="border-t border-slate-200 pt-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Building2 size={20} className="text-emerald-600" />
+                    <h3 className="text-base font-bold text-slate-900">Andar</h3>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 max-w-sm">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1.5">Mínimo</label>
+                      <input
+                        type="number"
+                        placeholder="0"
+                        value={localFilters.floorMin || ''}
+                        onChange={(e) => updateLocalFilter('floorMin', e.target.value)}
+                        className="w-full px-3 py-2 text-sm border-2 border-slate-300 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition-all"
+                      />
                     </div>
-                    
-                    {/* Botão Ver Mais */}
-                    <div className="mt-4 text-center">
-                      <button
-                        type="button"
-                        onClick={() => setShowAllAmenities(true)}
-                        className="px-6 py-2 text-blue-600 font-semibold hover:bg-blue-50 rounded-lg transition-colors inline-flex items-center gap-2"
-                      >
-                        Ver mais comodidades
-                        <span className="text-lg">▼</span>
-                      </button>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1.5">Máximo</label>
+                      <input
+                        type="number"
+                        placeholder="20"
+                        value={localFilters.floorMax || ''}
+                        onChange={(e) => updateLocalFilter('floorMax', e.target.value)}
+                        className="w-full px-3 py-2 text-sm border-2 border-slate-300 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition-all"
+                      />
                     </div>
-                  </>
-                )}
+                  </div>
+                  <p className="text-xs text-slate-500 mt-2">Para apartamentos e coberturas</p>
+                </div>
+              )}
 
-                {/* Modo Completo - Por Categorias */}
-                {showAllAmenities && (
-                  <>
-                    <div className="space-y-6">
-                      {Object.entries(allAmenitiesByCategory).map(([category, amenities]) => (
-                        <div key={category}>
-                          <h4 className="font-bold text-slate-800 mb-3 flex items-center gap-2">
-                            <span className="text-lg">{category.split(' ')[0]}</span>
-                            <span>{category.split(' ').slice(1).join(' ')}</span>
-                          </h4>
-                          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                            {amenities.map((amenity) => (
-                              <label key={amenity.name} className="flex items-center gap-3 cursor-pointer hover:bg-slate-50 p-3 rounded-lg border border-slate-200 transition-colors">
-                                <input
-                                  type="checkbox"
-                                  checked={localFilters.amenities?.includes(amenity.name) || false}
-                                  onChange={(e) => {
-                                    const current = localFilters.amenities || [];
-                                    const updated = e.target.checked
-                                      ? [...current, amenity.name]
-                                      : current.filter(a => a !== amenity.name);
-                                    updateLocalFilter('amenities', updated);
-                                  }}
-                                  className="w-5 h-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                                />
-                                <span className="text-slate-700 flex items-center gap-2 text-sm">
-                                  {typeof amenity.icon === 'string' ? (
-                                    <span className="text-lg">{amenity.icon}</span>
-                                  ) : (
-                                    <amenity.icon size={16} className="text-blue-600" />
-                                  )}
-                                  {amenity.name}
-                                </span>
-                              </label>
-                            ))}
-                          </div>
-                        </div>
-                      ))}
+              {/* Comodidades */}
+              <div className="border-t border-slate-200 pt-6">
+                <div className="flex items-center gap-2 mb-5">
+                  <Waves size={20} className="text-emerald-600" />
+                  <h3 className="text-base font-bold text-slate-900">Comodidades</h3>
+                </div>
+                
+                <div className="space-y-5">
+                  {Object.entries(amenitiesByCategory).map(([category, items]) => (
+                    <div key={category} className="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                      <h4 className="text-sm font-bold text-slate-700 mb-3 pb-2 border-b border-slate-300">{category}</h4>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                        {items.map((item) => (
+                          <label key={item.name} className="flex items-center gap-2 cursor-pointer hover:bg-white p-2 rounded-lg transition-colors">
+                            <input
+                              type="checkbox"
+                              checked={localFilters.amenities?.includes(item.name) || false}
+                              onChange={(e) => {
+                                const current = localFilters.amenities || [];
+                                const updated = e.target.checked
+                                  ? [...current, item.name]
+                                  : current.filter(a => a !== item.name);
+                                updateLocalFilter('amenities', updated);
+                              }}
+                              className="w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                            />
+                            <span className="text-sm text-slate-700 flex items-center gap-1.5">
+                              <span>{item.icon}</span>
+                              {item.name}
+                            </span>
+                          </label>
+                        ))}
+                      </div>
                     </div>
-                    
-                    {/* Botão Ver Menos */}
-                    <div className="mt-6 text-center">
-                      <button
-                        type="button"
-                        onClick={() => setShowAllAmenities(false)}
-                        className="px-6 py-2 text-blue-600 font-semibold hover:bg-blue-50 rounded-lg transition-colors inline-flex items-center gap-2"
-                      >
-                        Ver menos comodidades
-                        <span className="text-lg">▲</span>
-                      </button>
-                    </div>
-                  </>
-                )}
+                  ))}
+                </div>
               </div>
 
-              {/* === SEÇÃO: CONDIÇÕES NATURAIS === */}
-              <div className="border-t border-slate-200 pt-8">
-                <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+              {/* Condições Naturais */}
+              <div className="border-t border-slate-200 pt-6">
+                <div className="flex items-center gap-2 mb-5">
                   <Mountain size={20} className="text-green-600" />
-                  Condições Naturais
-                </h3>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                  {[
-                    { name: 'Vista para o Mar', icon: '🌊' },
-                    { name: 'Vista para Montanha', icon: '⛰️' },
-                    { name: 'Pé na Areia', icon: '🏖️' },
-                    { name: 'Frente para o Mar', icon: '🌅' },
-                    { name: 'Área Verde', icon: '🌳' },
-                    { name: 'Lago', icon: '🏞️' },
-                    { name: 'Rio', icon: '🏞️' },
-                    { name: 'Mata Nativa', icon: '🌲' },
-                    { name: 'Sol da Manhã', icon: '🌄' },
-                    { name: 'Sol da Tarde', icon: '🌇' },
-                    { name: 'Ventilação Natural', icon: Wind },
-                    { name: 'Iluminação Natural', icon: '☀️' },
-                  ].map((condition) => (
-                    <label key={condition.name} className="flex items-center gap-3 cursor-pointer hover:bg-slate-50 p-3 rounded-lg border border-slate-200 transition-colors">
-                      <input
-                        type="checkbox"
-                        checked={localFilters.naturalConditions?.includes(condition.name) || false}
-                        onChange={(e) => {
-                          const current = localFilters.naturalConditions || [];
-                          const updated = e.target.checked
-                            ? [...current, condition.name]
-                            : current.filter(c => c !== condition.name);
-                          updateLocalFilter('naturalConditions', updated);
-                        }}
-                        className="w-5 h-5 rounded border-slate-300 text-green-600 focus:ring-green-500"
-                      />
-                      <span className="text-slate-700 flex items-center gap-2 text-sm">
-                        {typeof condition.icon === 'string' ? (
-                          <span className="text-lg">{condition.icon}</span>
-                        ) : (
-                          <condition.icon size={16} className="text-green-600" />
-                        )}
-                        {condition.name}
-                      </span>
-                    </label>
+                  <h3 className="text-base font-bold text-slate-900">Natureza & Vista</h3>
+                </div>
+                
+                <div className="space-y-5">
+                  {Object.entries(naturalConditionsByCategory).map(([category, items]) => (
+                    <div key={category} className="bg-green-50 rounded-xl p-4 border border-green-200">
+                      <h4 className="text-sm font-bold text-green-700 mb-3 pb-2 border-b border-green-300">{category}</h4>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                        {items.map((item) => (
+                          <label key={item.name} className="flex items-center gap-2 cursor-pointer hover:bg-white p-2 rounded-lg transition-colors">
+                            <input
+                              type="checkbox"
+                              checked={localFilters.naturalConditions?.includes(item.name) || false}
+                              onChange={(e) => {
+                                const current = localFilters.naturalConditions || [];
+                                const updated = e.target.checked
+                                  ? [...current, item.name]
+                                  : current.filter(c => c !== item.name);
+                                updateLocalFilter('naturalConditions', updated);
+                              }}
+                              className="w-4 h-4 rounded border-slate-300 text-green-600 focus:ring-green-500"
+                            />
+                            <span className="text-sm text-slate-700 flex items-center gap-1.5">
+                              <span>{item.icon}</span>
+                              {item.name}
+                            </span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
                   ))}
                 </div>
               </div>
@@ -519,27 +411,19 @@ export default function FiltersModal({ isOpen, onClose, filters, onApplyFilters 
           </div>
 
           {/* Footer */}
-          <div className="sticky bottom-0 bg-white border-t border-slate-200 px-6 py-4 flex items-center justify-between">
+          <div className="px-6 pb-6 flex items-center gap-3 border-t border-slate-200 pt-4">
             <button
               onClick={handleReset}
-              className="px-6 py-3 text-slate-700 font-semibold hover:bg-slate-100 rounded-xl transition-colors"
+              className="px-5 py-2.5 text-sm font-bold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-lg transition-all"
             >
-              Limpar tudo
+              Limpar
             </button>
-            <div className="flex gap-3">
-              <button
-                onClick={onClose}
-                className="px-6 py-3 border border-slate-300 text-slate-700 font-semibold rounded-xl hover:bg-slate-50 transition-colors"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={handleApply}
-                className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-colors shadow-sm"
-              >
-                Aplicar filtros
-              </button>
-            </div>
+            <button
+              onClick={handleApply}
+              className="flex-1 px-5 py-2.5 text-sm font-bold text-white bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:from-emerald-600 hover:via-teal-600 hover:to-cyan-600 rounded-lg shadow-lg shadow-emerald-200 hover:shadow-xl hover:shadow-emerald-300 transition-all transform hover:scale-[1.02]"
+            >
+              Aplicar Filtros
+            </button>
           </div>
         </Dialog.Panel>
       </div>

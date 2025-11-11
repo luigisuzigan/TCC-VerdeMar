@@ -1,5 +1,5 @@
 import { Dialog } from '@headlessui/react';
-import { X, BedDouble, Bath, Sparkles, Minus, Plus } from 'lucide-react';
+import { X, BedDouble, Bath, Sparkles } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 export default function RoomsModal({ isOpen, onClose, filters, onApply }) {
@@ -7,7 +7,7 @@ export default function RoomsModal({ isOpen, onClose, filters, onApply }) {
   const [bathrooms, setBathrooms] = useState(filters.bathrooms || 0);
   const [suites, setSuites] = useState(filters.suites || 0);
 
-  // ✅ FIX: Sincronizar quando filters mudar (via remoção de chip)
+  // Sincronizar quando filters mudar
   useEffect(() => {
     setBedrooms(filters.bedrooms || 0);
     setBathrooms(filters.bathrooms || 0);
@@ -37,194 +37,133 @@ export default function RoomsModal({ isOpen, onClose, filters, onApply }) {
     setSuites(0);
   };
 
-  const hasFilters = bedrooms > 0 || bathrooms > 0 || suites > 0;
+  const handleInputChange = (setter, value) => {
+    const num = parseInt(value) || 0;
+    if (num >= 0) {
+      setter(num);
+    }
+  };
 
   return (
     <Dialog open={isOpen} onClose={onClose} className="relative z-50">
       <div className="fixed inset-0 bg-black/40 backdrop-blur-md" aria-hidden="true" />
 
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <Dialog.Panel className="w-full max-w-lg bg-white rounded-3xl shadow-2xl transform transition-all">
-          {/* Header Premium */}
-          <div className="relative border-b border-slate-200 bg-gradient-to-r from-emerald-50 to-teal-50 px-6 py-5 rounded-t-3xl">
-            <div className="flex items-center justify-between">
-              <Dialog.Title className="flex items-center gap-3">
-                <div className="p-2.5 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl shadow-lg shadow-emerald-200/50">
-                  <BedDouble size={24} className="text-white" />
+        <Dialog.Panel className="mx-auto max-w-md w-full bg-white rounded-3xl shadow-2xl overflow-hidden">
+          {/* Header */}
+          <div className="relative bg-gradient-to-br from-blue-500 via-cyan-500 to-teal-500 px-6 py-4 overflow-hidden">
+            <div className="absolute inset-0 opacity-10">
+              <div className="absolute top-0 right-0 w-48 h-48 bg-white rounded-full blur-3xl animate-pulse"></div>
+            </div>
+            
+            <div className="relative flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center border-2 border-white/40 shadow-lg">
+                  <BedDouble className="w-5 h-5 text-white" strokeWidth={2.5} />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold text-slate-900">Quartos e Banheiros</h2>
-                  <p className="text-sm text-slate-600 mt-0.5">Quantidade mínima desejada</p>
+                  <Dialog.Title className="text-lg font-bold text-white drop-shadow-md flex items-center gap-2">
+                    Quartos e Banheiros
+                    <Sparkles size={16} className="text-cyan-200" />
+                  </Dialog.Title>
+                  <p className="text-white/90 text-xs mt-0.5">Mínimo desejado</p>
                 </div>
-              </Dialog.Title>
-              <button 
-                onClick={onClose} 
-                className="p-2 hover:bg-white/80 rounded-xl transition-colors group"
-                aria-label="Fechar"
+              </div>
+              <button
+                onClick={onClose}
+                className="p-2 text-white/90 hover:text-white hover:bg-white/20 rounded-lg transition-all backdrop-blur-sm"
               >
-                <X size={22} className="text-slate-600 group-hover:text-slate-900 group-hover:rotate-90 transition-all duration-300" />
+                <X size={18} strokeWidth={2.5} />
               </button>
             </div>
           </div>
 
-          <div className="p-8 space-y-8">
+          {/* Content */}
+          <div className="p-6 space-y-5">
             {/* Quartos */}
-            <div>
-              <div className="flex items-center gap-2.5 mb-5">
-                <div className="p-2 bg-blue-100 rounded-lg">
-                  <BedDouble size={20} className="text-blue-600" />
+            <div className="flex items-center justify-between py-3">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center shadow-md">
+                  <BedDouble size={18} className="text-white" strokeWidth={2.5} />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-slate-900">Quartos</h3>
-                  <p className="text-xs text-slate-500">Mínimo de quartos</p>
+                  <h3 className="text-sm font-bold text-slate-900">Quartos</h3>
+                  <p className="text-xs text-slate-500">Mínimo</p>
                 </div>
               </div>
-              <div className="flex items-center gap-4">
-                <button
-                  type="button"
-                  onClick={() => decrementValue(setBedrooms, bedrooms)}
-                  disabled={bedrooms === 0}
-                  className="w-12 h-12 flex items-center justify-center bg-white border-2 border-slate-300 rounded-xl hover:border-emerald-500 hover:bg-emerald-50 transition-all disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:border-slate-300 disabled:hover:bg-white"
-                >
-                  <Minus size={20} className="text-slate-700" />
-                </button>
-                <div className="flex-1 flex items-center justify-center">
-                  <span className="text-4xl font-bold text-slate-900">
-                    {bedrooms === 0 ? 'Qualquer' : bedrooms}
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => incrementValue(setBedrooms, bedrooms)}
-                  disabled={bedrooms >= 10}
-                  className="w-12 h-12 flex items-center justify-center bg-white border-2 border-slate-300 rounded-xl hover:border-emerald-500 hover:bg-emerald-50 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-                >
-                  <Plus size={20} className="text-slate-700" />
-                </button>
-              </div>
-              {bedrooms > 0 && (
-                <p className="text-center text-sm text-slate-600 mt-3">
-                  Imóveis com <span className="font-bold text-emerald-600">{bedrooms}+</span> quarto{bedrooms > 1 ? 's' : ''}
-                </p>
-              )}
+              <input
+                type="number"
+                min="0"
+                value={bedrooms === 0 ? '' : bedrooms}
+                onChange={(e) => handleInputChange(setBedrooms, e.target.value)}
+                placeholder="0"
+                className="w-16 h-10 text-center text-lg font-bold text-slate-900 border-2 border-slate-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
+              />
             </div>
 
             {/* Divider */}
             <div className="border-t border-slate-200"></div>
 
             {/* Banheiros */}
-            <div>
-              <div className="flex items-center gap-2.5 mb-5">
-                <div className="p-2 bg-cyan-100 rounded-lg">
-                  <Bath size={20} className="text-cyan-600" />
+            <div className="flex items-center justify-between py-3">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 bg-gradient-to-br from-cyan-500 to-teal-500 rounded-lg flex items-center justify-center shadow-md">
+                  <Bath size={18} className="text-white" strokeWidth={2.5} />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-slate-900">Banheiros</h3>
-                  <p className="text-xs text-slate-500">Mínimo de banheiros</p>
+                  <h3 className="text-sm font-bold text-slate-900">Banheiros</h3>
+                  <p className="text-xs text-slate-500">Mínimo</p>
                 </div>
               </div>
-              <div className="flex items-center gap-4">
-                <button
-                  type="button"
-                  onClick={() => decrementValue(setBathrooms, bathrooms)}
-                  disabled={bathrooms === 0}
-                  className="w-12 h-12 flex items-center justify-center bg-white border-2 border-slate-300 rounded-xl hover:border-emerald-500 hover:bg-emerald-50 transition-all disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:border-slate-300 disabled:hover:bg-white"
-                >
-                  <Minus size={20} className="text-slate-700" />
-                </button>
-                <div className="flex-1 flex items-center justify-center">
-                  <span className="text-4xl font-bold text-slate-900">
-                    {bathrooms === 0 ? 'Qualquer' : bathrooms}
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => incrementValue(setBathrooms, bathrooms)}
-                  disabled={bathrooms >= 10}
-                  className="w-12 h-12 flex items-center justify-center bg-white border-2 border-slate-300 rounded-xl hover:border-emerald-500 hover:bg-emerald-50 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-                >
-                  <Plus size={20} className="text-slate-700" />
-                </button>
-              </div>
-              {bathrooms > 0 && (
-                <p className="text-center text-sm text-slate-600 mt-3">
-                  Imóveis com <span className="font-bold text-emerald-600">{bathrooms}+</span> banheiro{bathrooms > 1 ? 's' : ''}
-                </p>
-              )}
+              <input
+                type="number"
+                min="0"
+                value={bathrooms === 0 ? '' : bathrooms}
+                onChange={(e) => handleInputChange(setBathrooms, e.target.value)}
+                placeholder="0"
+                className="w-16 h-10 text-center text-lg font-bold text-slate-900 border-2 border-slate-300 rounded-lg focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-100 transition-all"
+              />
             </div>
 
             {/* Divider */}
             <div className="border-t border-slate-200"></div>
 
             {/* Suítes */}
-            <div>
-              <div className="flex items-center gap-2.5 mb-5">
-                <div className="p-2 bg-purple-100 rounded-lg">
-                  <Sparkles size={20} className="text-purple-600" />
+            <div className="flex items-center justify-between py-3">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 bg-gradient-to-br from-teal-500 to-emerald-500 rounded-lg flex items-center justify-center shadow-md">
+                  <Sparkles size={18} className="text-white" strokeWidth={2.5} />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-slate-900">Suítes</h3>
-                  <p className="text-xs text-slate-500">Mínimo de suítes</p>
+                  <h3 className="text-sm font-bold text-slate-900">Suítes</h3>
+                  <p className="text-xs text-slate-500">Mínimo</p>
                 </div>
               </div>
-              <div className="flex items-center gap-4">
-                <button
-                  type="button"
-                  onClick={() => decrementValue(setSuites, suites)}
-                  disabled={suites === 0}
-                  className="w-12 h-12 flex items-center justify-center bg-white border-2 border-slate-300 rounded-xl hover:border-emerald-500 hover:bg-emerald-50 transition-all disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:border-slate-300 disabled:hover:bg-white"
-                >
-                  <Minus size={20} className="text-slate-700" />
-                </button>
-                <div className="flex-1 flex items-center justify-center">
-                  <span className="text-4xl font-bold text-slate-900">
-                    {suites === 0 ? 'Qualquer' : suites}
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => incrementValue(setSuites, suites)}
-                  disabled={suites >= 10}
-                  className="w-12 h-12 flex items-center justify-center bg-white border-2 border-slate-300 rounded-xl hover:border-emerald-500 hover:bg-emerald-50 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-                >
-                  <Plus size={20} className="text-slate-700" />
-                </button>
-              </div>
-              {suites > 0 && (
-                <p className="text-center text-sm text-slate-600 mt-3">
-                  Imóveis com <span className="font-bold text-emerald-600">{suites}+</span> suíte{suites > 1 ? 's' : ''}
-                </p>
-              )}
+              <input
+                type="number"
+                min="0"
+                value={suites === 0 ? '' : suites}
+                onChange={(e) => handleInputChange(setSuites, e.target.value)}
+                placeholder="0"
+                className="w-16 h-10 text-center text-lg font-bold text-slate-900 border-2 border-slate-300 rounded-lg focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-100 transition-all"
+              />
             </div>
           </div>
 
-          {/* Footer com Botões */}
-          <div className="border-t border-slate-200 px-6 py-5 flex items-center justify-between bg-slate-50/50 rounded-b-3xl">
-            <button 
-              onClick={handleReset} 
-              className="px-5 py-2.5 text-slate-700 font-bold hover:bg-white border-2 border-transparent hover:border-slate-300 rounded-xl transition-all duration-200 hover:shadow-sm"
+          {/* Footer */}
+          <div className="px-6 pb-6 flex items-center gap-3">
+            <button
+              onClick={handleReset}
+              className="px-5 py-2.5 text-sm font-bold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-lg transition-all"
             >
-              🗑️ Limpar
+              Limpar
             </button>
-            <div className="flex gap-3">
-              <button 
-                onClick={onClose} 
-                className="px-6 py-2.5 border-2 border-slate-300 text-slate-700 font-bold rounded-xl hover:bg-white hover:border-slate-400 transition-all duration-200 hover:shadow-sm"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={handleApply}
-                disabled={!hasFilters}
-                className={`px-8 py-2.5 font-bold rounded-xl transition-all duration-200 ${
-                  hasFilters
-                    ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white hover:from-emerald-700 hover:to-teal-700 shadow-lg shadow-emerald-200/50 hover:shadow-xl hover:shadow-emerald-300/50 hover:scale-105 active:scale-95'
-                    : 'bg-slate-200 text-slate-400 cursor-not-allowed'
-                }`}
-              >
-                ✓ Aplicar Filtros
-              </button>
-            </div>
+            <button
+              onClick={handleApply}
+              className="flex-1 px-5 py-2.5 text-sm font-bold text-white bg-gradient-to-r from-blue-500 via-cyan-500 to-teal-500 hover:from-blue-600 hover:via-cyan-600 hover:to-teal-600 rounded-lg shadow-lg shadow-blue-200 hover:shadow-xl hover:shadow-blue-300 transition-all transform hover:scale-[1.02]"
+            >
+              Aplicar Filtros
+            </button>
           </div>
         </Dialog.Panel>
       </div>

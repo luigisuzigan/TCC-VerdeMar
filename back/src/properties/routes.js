@@ -16,6 +16,8 @@ const listValidators = [
   query('maxPrice').optional().isFloat({ min: 0 }),
   query('minArea').optional().isInt({ min: 0 }),
   query('maxArea').optional().isInt({ min: 0 }),
+  query('minTotalArea').optional().isInt({ min: 0 }),
+  query('maxTotalArea').optional().isInt({ min: 0 }),
   query('types').optional().isString(),
   query('minBedrooms').optional().isInt({ min: 0 }),
   query('minBathrooms').optional().isInt({ min: 0 }),
@@ -51,6 +53,8 @@ router.get('/', listValidators, async (req, res) => {
     maxPrice,
     minArea,
     maxArea,
+    minTotalArea,
+    maxTotalArea,
     types,
     minBedrooms,
     minBathrooms,
@@ -75,7 +79,7 @@ router.get('/', listValidators, async (req, res) => {
   
   console.log('📋 List properties request:', { 
     limit, offset, published, city, search, category, neighborhood, styles,
-    amenities, condoAmenities, condition
+    amenities, condoAmenities, condition, minArea, maxArea, minTotalArea, maxTotalArea
   });
   
   const result = await listProperties({ 
@@ -86,6 +90,8 @@ router.get('/', listValidators, async (req, res) => {
     maxPrice,
     minArea,
     maxArea,
+    minTotalArea,
+    maxTotalArea,
     types,
     minBedrooms,
     minBathrooms,

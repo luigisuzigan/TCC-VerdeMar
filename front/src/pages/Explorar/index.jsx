@@ -223,6 +223,16 @@ export default function Explorar() {
       params.set('maxArea', filters.areaMax);
     }
     
+    // Total Area
+    if (filters.totalAreaMin) {
+      console.log('📐 Adicionando minTotalArea:', filters.totalAreaMin);
+      params.set('minTotalArea', filters.totalAreaMin);
+    }
+    if (filters.totalAreaMax) {
+      console.log('📐 Adicionando maxTotalArea:', filters.totalAreaMax);
+      params.set('maxTotalArea', filters.totalAreaMax);
+    }
+    
     // Property Types
     if (filters.propertyTypes?.length > 0) {
       console.log('🏠 Adicionando types:', filters.propertyTypes);
@@ -263,6 +273,12 @@ export default function Explorar() {
     if (filters.condoAmenities?.length > 0) {
       console.log('🏢 Adicionando condoAmenities:', filters.condoAmenities);
       params.set('condoAmenities', filters.condoAmenities.join(','));
+    }
+    
+    // Natural Conditions
+    if (filters.naturalConditions?.length > 0) {
+      console.log('🌿 Adicionando naturalConditions:', filters.naturalConditions);
+      params.set('naturalConditions', filters.naturalConditions.join(','));
     }
     
     // Property Condition

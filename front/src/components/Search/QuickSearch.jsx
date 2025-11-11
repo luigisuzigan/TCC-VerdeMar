@@ -7,6 +7,7 @@ import PriceModal from '../Explorar/Modals/PriceModal';
 import FiltersModal from '../Explorar/FiltersModal';
 import StyleModal from '../Explorar/Modals/StyleModal';
 import RoomsModal from '../Explorar/Modals/RoomsModal';
+import AreaModal from '../Explorar/Modals/AreaModal';
 import { api } from '../../api/client';
 
 export default function QuickSearch() {
@@ -19,6 +20,8 @@ export default function QuickSearch() {
     priceMax: '',
     areaMin: '',
     areaMax: '',
+    totalAreaMin: '',
+    totalAreaMax: '',
     styles: [], // NOVO: Estilos
     // Filtros avançados
     bedrooms: null,
@@ -112,6 +115,12 @@ export default function QuickSearch() {
     if (filters.areaMax) {
       params.append('areaMax', filters.areaMax);
     }
+    if (filters.totalAreaMin) {
+      params.append('totalAreaMin', filters.totalAreaMin);
+    }
+    if (filters.totalAreaMax) {
+      params.append('totalAreaMax', filters.totalAreaMax);
+    }
     if (filters.bedrooms) {
       params.append('bedrooms', filters.bedrooms);
     }
@@ -201,7 +210,7 @@ export default function QuickSearch() {
       {/* Container da busca */}
       <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-4 md:p-6">
         {/* Grid dos campos de busca */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-3 mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-6 gap-3 mb-4">
           {/* Tipo do Imóvel */}
           <SearchField
             label="Tipo do Imóvel"
@@ -227,6 +236,14 @@ export default function QuickSearch() {
               setActiveModal('price');
             }}
             icon="💰"
+          />
+
+          {/* Área - NOVO */}
+          <SearchField
+            label="Área"
+            value={getAreaLabel()}
+            onClick={() => setActiveModal('area')}
+            icon="📏"
           />
 
           {/* Estilo - NOVO */}
@@ -320,6 +337,16 @@ export default function QuickSearch() {
 
       <RoomsModal
         isOpen={activeModal === 'rooms'}
+        onClose={() => setActiveModal(null)}
+        filters={filters}
+        onApply={(newFilters) => {
+          setFilters({ ...filters, ...newFilters });
+          setActiveModal(null);
+        }}
+      />
+
+      <AreaModal
+        isOpen={activeModal === 'area'}
         onClose={() => setActiveModal(null)}
         filters={filters}
         onApply={(newFilters) => {

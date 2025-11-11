@@ -206,6 +206,24 @@ export default function ActiveFilters({ filters, onRemove, onClearAll, filteredP
       });
     }
 
+    // Natural Conditions
+    if (filters.naturalConditions?.length > 0) {
+      filters.naturalConditions.forEach((condition) => {
+        items.push({
+          key: `natural-${condition}`,
+          label: condition,
+          icon: null,
+          emoji: '🌿',
+          iconColor: 'text-green-600',
+          color: 'green',
+          onRemove: () => {
+            const updated = filters.naturalConditions.filter((c) => c !== condition);
+            onRemove('naturalConditions', updated);
+          },
+        });
+      });
+    }
+
     // Property Condition
     if (filters.propertyCondition) {
       items.push({
