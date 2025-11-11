@@ -19,9 +19,9 @@ export default function PriceAndStats({ property, formatCurrency }) {
         <h1 className="text-4xl md:text-5xl font-bold text-slate-900">
           {formatCurrency(property.price)}
         </h1>
-        {property.area && (
+        {property.totalArea && (
           <span className="text-xl text-slate-600">
-            {formatCurrency(Math.round(property.price / property.area))}/m²
+            {formatCurrency(Math.round(property.price / property.totalArea))}/m²
           </span>
         )}
       </div>

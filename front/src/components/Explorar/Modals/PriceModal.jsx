@@ -129,13 +129,24 @@ export default function PriceModal({ isOpen, onClose, filters, onApply }) {
 
   const handleMinChange = (e) => {
     const value = e.target.value.replace(/\D/g, '');
-    setMinPrice(value ? Math.min(parseInt(value), maxPrice - STEP) : 0);
+    // Permite apagar completamente (valor vazio = 0)
+    if (value === '') {
+      setMinPrice(0);
+    } else {
+      const numValue = parseInt(value);
+      setMinPrice(numValue);
+    }
   };
 
   const handleMaxChange = (e) => {
     const value = e.target.value.replace(/\D/g, '');
-    const newMax = value ? parseInt(value) : 0;
-    setMaxPrice(Math.max(newMax, minPrice + STEP));
+    // Permite apagar completamente (valor vazio = 0)
+    if (value === '') {
+      setMaxPrice(0);
+    } else {
+      const numValue = parseInt(value);
+      setMaxPrice(numValue);
+    }
   };
 
   // Calcular percentuais para o slider baseado no range dinâmico

@@ -56,6 +56,10 @@ export function parseFiltersFromUrl(searchParams) {
   const suites = searchParams.get('suites');
   if (suites) filters.suites = Number(suites);
 
+  // Ano de Construção
+  const yearBuilt = searchParams.get('yearBuilt');
+  if (yearBuilt) filters.yearBuilt = Number(yearBuilt);
+
   // Comodidades
   const amenities = searchParams.get('amenities');
   if (amenities) {
@@ -132,6 +136,9 @@ export function filtersToUrlParams(filters) {
   }
   if (filters.suites !== null && filters.suites !== undefined) {
     params.append('suites', filters.suites);
+  }
+  if (filters.yearBuilt) {
+    params.append('yearBuilt', filters.yearBuilt);
   }
   if (filters.amenities?.length > 0) {
     params.append('amenities', filters.amenities.join(','));
@@ -234,6 +241,10 @@ export function getFilterDescriptions(filters) {
     descriptions.push(`${filters.suites}+ suítes`);
   }
 
+  if (filters.yearBuilt) {
+    descriptions.push(`Construído após ${filters.yearBuilt}`);
+  }
+
   if (filters.amenities?.length > 0) {
     if (filters.amenities.length === 1) {
       descriptions.push(`Comodidade: ${filters.amenities[0]}`);
@@ -278,6 +289,7 @@ export function countActiveFilters(filters) {
   if (filters.bathrooms) count++;
   if (filters.parkingSpaces !== null && filters.parkingSpaces !== undefined) count++;
   if (filters.suites !== null && filters.suites !== undefined) count++;
+  if (filters.yearBuilt) count++;
   if (filters.amenities?.length > 0) count++;
   if (filters.condoAmenities?.length > 0) count++;
   if (filters.naturalConditions?.length > 0) count++;
@@ -305,6 +317,7 @@ export function clearAllFilters() {
     bathrooms: null,
     parkingSpaces: null,
     suites: null,
+    yearBuilt: null,
     amenities: [],
     condoAmenities: [],
     naturalConditions: [],

@@ -40,7 +40,7 @@ export default function BasicCharacteristics({ property }) {
             <Maximize2 size={20} className="text-purple-600" />
           </div>
           <div>
-            <span className="font-semibold text-slate-900 block">{property.area || 0}</span>
+            <span className="font-semibold text-slate-900 block">{property.totalArea || 0}</span>
             <span className="text-sm text-slate-600">m²</span>
           </div>
         </div>

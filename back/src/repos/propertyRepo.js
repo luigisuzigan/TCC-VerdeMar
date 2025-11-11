@@ -98,8 +98,6 @@ export async function listProperties({
   country, 
   minPrice, 
   maxPrice, 
-  minArea,
-  maxArea,
   minTotalArea,
   maxTotalArea,
   types,
@@ -128,8 +126,6 @@ export async function listProperties({
     city,
     minPrice,
     maxPrice,
-    minArea,
-    maxArea,
     minTotalArea,
     maxTotalArea,
     types,
@@ -164,8 +160,6 @@ export async function listProperties({
       condition ? { propertyCondition: String(condition) } : {},
       minPrice != null ? { price: { gte: Number(minPrice) } } : {},
       maxPrice != null ? { price: { lte: Number(maxPrice) } } : {},
-      minArea != null ? { area: { gte: Number(minArea) } } : {},
-      maxArea != null ? { area: { lte: Number(maxArea) } } : {},
       minTotalArea != null ? { totalArea: { gte: Number(minTotalArea) } } : {},
       maxTotalArea != null ? { totalArea: { lte: Number(maxTotalArea) } } : {},
       types ? { type: { in: String(types).split(',').map(t => t.trim()) } } : {},
@@ -241,10 +235,11 @@ export async function listProperties({
             propertyAmenities = row.amenities;
           }
           
-          console.log(`  📋 [${row.title?.substring(0, 30)}] Amenities no banco:`, propertyAmenities.slice(0, 3));
+          console.log(`  📋 [${row.title?.substring(0, 30)}] Amenities no banco:`, propertyAmenities);
+          console.log(`     Amenities requisitadas:`, amenitiesArr);
           
-          // Verificar se tem TODAS as amenities solicitadas
-          const hasAllAmenities = amenitiesArr.every(requiredAmenity => {
+          // Verificar se tem PELO MENOS UMA das amenities solicitadas (OR)
+          const hasSomeAmenities = amenitiesArr.some(requiredAmenity => {
             const found = propertyAmenities.some(propertyAmenity => {
               // Suportar tanto objetos {name: "..."} quanto strings diretas
               const amenityName = typeof propertyAmenity === 'string' 
@@ -254,18 +249,18 @@ export async function listProperties({
               return amenityName === requiredAmenity;
             });
             
-            if (!found) {
-              console.log(`    ❌ Não tem "${requiredAmenity}"`);
+            if (found) {
+              console.log(`    ✅ TEM "${requiredAmenity}"`);
             }
             
             return found;
           });
           
-          if (!hasAllAmenities) {
+          if (!hasSomeAmenities) {
             matches = false;
-            console.log(`  ❌ [${row.title?.substring(0, 30)}] REJEITADO - não tem todas as amenities`);
+            console.log(`  ❌ [${row.title?.substring(0, 30)}] REJEITADO - não tem nenhuma das amenities`);
           } else {
-            console.log(`  ✅ [${row.title?.substring(0, 30)}] APROVADO - tem todas as amenities`);
+            console.log(`  ✅ [${row.title?.substring(0, 30)}] APROVADO - tem pelo menos uma amenity`);
           }
         } catch (e) {
           console.error(`  ⚠️ Erro ao fazer parse das amenities:`, e.message);
@@ -284,17 +279,32 @@ export async function listProperties({
             propertyCondoAmenities = row.condoAmenities;
           }
           
-          const hasAllCondoAmenities = condoAmenitiesArr.every(requiredAmenity => {
-            return propertyCondoAmenities.some(propertyAmenity => {
+          console.log(`  🏢 [${row.title?.substring(0, 30)}] CondoAmenities no banco:`, propertyCondoAmenities);
+          console.log(`     CondoAmenities requisitadas:`, condoAmenitiesArr);
+          
+          // Verificar se tem PELO MENOS UMA das amenities de condomínio (OR)
+          const hasSomeCondoAmenities = condoAmenitiesArr.some(requiredAmenity => {
+            const found = propertyCondoAmenities.some(propertyAmenity => {
               const amenityName = typeof propertyAmenity === 'string' 
                 ? propertyAmenity 
                 : propertyAmenity.name;
               
               return amenityName === requiredAmenity;
             });
+            
+            if (found) {
+              console.log(`    ✅ TEM "${requiredAmenity}"`);
+            }
+            
+            return found;
           });
           
-          if (!hasAllCondoAmenities) matches = false;
+          if (!hasSomeCondoAmenities) {
+            matches = false;
+            console.log(`  ❌ [${row.title?.substring(0, 30)}] REJEITADO - não tem nenhuma das condo amenities`);
+          } else {
+            console.log(`  ✅ [${row.title?.substring(0, 30)}] APROVADO - tem pelo menos uma condo amenity`);
+          }
         } catch (e) {
           console.error('  ⚠️ Erro ao fazer parse das condoAmenities:', e.message);
           matches = false; // Se erro no parse, não inclui
@@ -312,29 +322,32 @@ export async function listProperties({
             propertyNaturalConditions = row.naturalConditions;
           }
           
-          console.log(`  🌿 [${row.title?.substring(0, 30)}] Natural Conditions no banco:`, propertyNaturalConditions.slice(0, 3));
+          console.log(`  🌿 [${row.title?.substring(0, 30)}]`);
+          console.log(`     Conditions no banco:`, propertyNaturalConditions);
+          console.log(`     Conditions requisitadas:`, naturalConditionsArr);
           
-          const hasAllNaturalConditions = naturalConditionsArr.every(requiredCondition => {
+          // Verificar se tem PELO MENOS UMA das condições naturais (OR)
+          const hasSomeNaturalConditions = naturalConditionsArr.some(requiredCondition => {
             const found = propertyNaturalConditions.some(propertyCondition => {
               const conditionName = typeof propertyCondition === 'string' 
                 ? propertyCondition 
                 : propertyCondition.name;
               
-              return conditionName === requiredCondition;
+              const match = conditionName === requiredCondition;
+              if (match) {
+                console.log(`     ✅ TEM "${conditionName}"`);
+              }
+              return match;
             });
-            
-            if (!found) {
-              console.log(`    ❌ Não tem "${requiredCondition}"`);
-            }
             
             return found;
           });
           
-          if (!hasAllNaturalConditions) {
+          if (!hasSomeNaturalConditions) {
             matches = false;
-            console.log(`  ❌ [${row.title?.substring(0, 30)}] REJEITADO - não tem todas as condições naturais`);
+            console.log(`  ❌ [${row.title?.substring(0, 30)}] REJEITADO - não tem nenhuma das condições naturais`);
           } else {
-            console.log(`  ✅ [${row.title?.substring(0, 30)}] APROVADO - tem todas as condições naturais`);
+            console.log(`  ✅ [${row.title?.substring(0, 30)}] APROVADO - tem pelo menos uma condição natural`);
           }
         } catch (e) {
           console.error('  ⚠️ Erro ao fazer parse das naturalConditions:', e.message);

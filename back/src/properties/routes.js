@@ -14,8 +14,6 @@ const listValidators = [
   query('offset').optional().isInt({ min: 0 }),
   query('minPrice').optional().isFloat({ min: 0 }),
   query('maxPrice').optional().isFloat({ min: 0 }),
-  query('minArea').optional().isInt({ min: 0 }),
-  query('maxArea').optional().isInt({ min: 0 }),
   query('minTotalArea').optional().isInt({ min: 0 }),
   query('maxTotalArea').optional().isInt({ min: 0 }),
   query('types').optional().isString(),
@@ -32,6 +30,7 @@ const listValidators = [
   query('category').optional().isString(),
   query('amenities').optional().isString(),
   query('condoAmenities').optional().isString(),
+  query('naturalConditions').optional().isString(),
   query('condition').optional().isString(),
   query('styles').optional().isString(),
   query('sortBy').optional().isString(),
@@ -51,8 +50,6 @@ router.get('/', listValidators, async (req, res) => {
     country, 
     minPrice, 
     maxPrice,
-    minArea,
-    maxArea,
     minTotalArea,
     maxTotalArea,
     types,
@@ -69,6 +66,7 @@ router.get('/', listValidators, async (req, res) => {
     category,
     amenities,
     condoAmenities,
+    naturalConditions,
     condition,
     styles,
     sortBy,
@@ -79,7 +77,7 @@ router.get('/', listValidators, async (req, res) => {
   
   console.log('📋 List properties request:', { 
     limit, offset, published, city, search, category, neighborhood, styles,
-    amenities, condoAmenities, condition, minArea, maxArea, minTotalArea, maxTotalArea
+    amenities, condoAmenities, naturalConditions, condition, minTotalArea, maxTotalArea, minYearBuilt
   });
   
   const result = await listProperties({ 
@@ -88,8 +86,6 @@ router.get('/', listValidators, async (req, res) => {
     country, 
     minPrice, 
     maxPrice,
-    minArea,
-    maxArea,
     minTotalArea,
     maxTotalArea,
     types,
@@ -106,6 +102,7 @@ router.get('/', listValidators, async (req, res) => {
     category,
     amenities,
     condoAmenities,
+    naturalConditions,
     condition,
     styles,
     sortBy,
@@ -248,14 +245,30 @@ router.post('/', authMiddleware, requireAdmin, propertyValidators, async (req, r
       type: data.type,
       price: data.price,
       city: data.city,
-      area: data.area,
+      totalArea: data.totalArea,
       beds: data.beds,
       baths: data.baths,
-      // guests: removido
-      userId: data.userId
+      userId: data.userId,
+      latitude: data.latitude,
+      longitude: data.longitude
     });
     
     const item = await createProperty(data);
+    
+    // 🔍 Buscar lugares próximos automaticamente se tiver coordenadas
+    if (item.latitude && item.longitude) {
+      try {
+        console.log(`🔍 Buscando lugares próximos para imóvel ${item.id}...`);
+        await updatePropertyNearbyPlaces(prisma, item.id);
+        console.log(`✅ Lugares próximos atualizados para imóvel ${item.id}`);
+      } catch (error) {
+        console.error(`⚠️ Erro ao buscar lugares próximos para imóvel ${item.id}:`, error.message);
+        // Não falha a criação do imóvel se places falhar
+      }
+    } else {
+      console.log(`ℹ️ Imóvel ${item.id} sem coordenadas - lugares próximos não foram buscados`);
+    }
+    
     res.status(201).json(item);
   } catch (error) {
     console.error('❌ [POST /properties] Erro ao criar imóvel:', error);
@@ -295,6 +308,18 @@ router.put('/:id', authMiddleware, requireAdmin, [param('id').isString(), ...pro
     if (!updated) {
       console.error(`❌ Imóvel ${req.params.id} não encontrado`);
       return res.status(404).json({ error: 'Imóvel não encontrado' });
+    }
+    
+    // 🔍 Atualizar lugares próximos se coordenadas foram alteradas
+    if ((req.body.latitude || req.body.longitude) && updated.latitude && updated.longitude) {
+      try {
+        console.log(`🔍 Atualizando lugares próximos para imóvel ${req.params.id}...`);
+        await updatePropertyNearbyPlaces(prisma, req.params.id);
+        console.log(`✅ Lugares próximos atualizados para imóvel ${req.params.id}`);
+      } catch (error) {
+        console.error(`⚠️ Erro ao atualizar lugares próximos:`, error.message);
+        // Não falha a atualização do imóvel se places falhar
+      }
     }
     
     console.log(`✅ Imóvel ${req.params.id} atualizado com sucesso`);

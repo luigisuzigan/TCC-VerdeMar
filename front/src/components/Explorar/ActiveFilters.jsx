@@ -1,13 +1,24 @@
-import { X, Trash2, MapPin, Filter } from 'lucide-react';
+import { X, Trash2, MapPin, Filter, ChevronDown, ChevronUp, Folder, FolderOpen } from 'lucide-react';
+import { useState } from 'react';
 import './ActiveFilters.module.css';
 
-export default function ActiveFilters({ filters, onRemove, onClearAll, filteredPropertyIds }) {
-  const getFilterItems = () => {
-    const items = [];
+export default function ActiveFilters({ filters, onRemove, onRemoveMultiple, onClearAll, filteredPropertyIds }) {
+  const [expandedGroups, setExpandedGroups] = useState({});
 
-    // Área Desenhada no Mapa (prioridade máxima)
+  const toggleGroup = (groupKey) => {
+    setExpandedGroups(prev => ({
+      ...prev,
+      [groupKey]: !prev[groupKey]
+    }));
+  };
+
+  const getFilterGroups = () => {
+    const groups = [];
+    const standalone = [];
+
+    // Área Desenhada no Mapa (standalone - não agrupa)
     if (filteredPropertyIds && filteredPropertyIds.length > 0) {
-      items.push({
+      standalone.push({
         key: 'map-area',
         label: `${filteredPropertyIds.length} ${filteredPropertyIds.length === 1 ? 'imóvel' : 'imóveis'} na área selecionada`,
         icon: MapPin,
@@ -22,9 +33,9 @@ export default function ActiveFilters({ filters, onRemove, onClearAll, filteredP
       });
     }
 
-    // Location (cidade/bairro) - NÃO mostrar se já tem área do mapa
+    // Location (standalone)
     if (filters.location && !(filteredPropertyIds && filteredPropertyIds.length > 0)) {
-      items.push({
+      standalone.push({
         key: 'location',
         label: filters.location,
         icon: MapPin,
@@ -34,16 +45,14 @@ export default function ActiveFilters({ filters, onRemove, onClearAll, filteredP
       });
     }
 
-    // Property Types
+    // GRUPO: Tipo de Imóvel + Estilo
+    const typeStyleItems = [];
     if (filters.propertyTypes?.length > 0) {
       filters.propertyTypes.forEach((type) => {
-        items.push({
+        typeStyleItems.push({
           key: `type-${type}`,
           label: getPropertyTypeLabel(type),
-          icon: null,
           emoji: '🏠',
-          iconColor: 'text-purple-600',
-          color: 'purple',
           onRemove: () => {
             const updated = filters.propertyTypes.filter((t) => t !== type);
             onRemove('propertyTypes', updated);
@@ -51,8 +60,80 @@ export default function ActiveFilters({ filters, onRemove, onClearAll, filteredP
         });
       });
     }
+    if (filters.styles?.length > 0) {
+      filters.styles.forEach((style) => {
+        typeStyleItems.push({
+          key: `style-${style}`,
+          label: style,
+          emoji: '✨',
+          onRemove: () => {
+            const updated = filters.styles.filter((s) => s !== style);
+            onRemove('styles', updated);
+          },
+        });
+      });
+    }
+    if (typeStyleItems.length > 0) {
+      groups.push({
+        key: 'type-style',
+        label: 'Categoria & Estilo',
+        emoji: '🏠',
+        color: 'purple',
+        items: typeStyleItems,
+        onRemoveAll: () => {
+          onRemoveMultiple(['propertyTypes', 'styles']);
+        }
+      });
+    }
 
-    // Price Range
+    // GRUPO: Áreas (Área Construída + Área Total)
+    const areaItems = [];
+    if (filters.areaMin || filters.areaMax) {
+      let label = 'Área Construída: ';
+      if (filters.areaMin && filters.areaMax) {
+        label += `${filters.areaMin}-${filters.areaMax}m²`;
+      } else if (filters.areaMin) {
+        label += `Acima de ${filters.areaMin}m²`;
+      } else {
+        label += `Até ${filters.areaMax}m²`;
+      }
+      areaItems.push({
+        key: 'area-built',
+        label,
+        emoji: '📐',
+        onRemove: () => onRemove('areaRange', { areaMin: '', areaMax: '' }),
+      });
+    }
+    if (filters.totalAreaMin || filters.totalAreaMax) {
+      let label = 'Área Total: ';
+      if (filters.totalAreaMin && filters.totalAreaMax) {
+        label += `${filters.totalAreaMin}-${filters.totalAreaMax}m²`;
+      } else if (filters.totalAreaMin) {
+        label += `Acima de ${filters.totalAreaMin}m²`;
+      } else {
+        label += `Até ${filters.totalAreaMax}m²`;
+      }
+      areaItems.push({
+        key: 'area-total',
+        label,
+        emoji: '📏',
+        onRemove: () => onRemove('totalAreaRange', { totalAreaMin: '', totalAreaMax: '' }),
+      });
+    }
+    if (areaItems.length > 0) {
+      groups.push({
+        key: 'areas',
+        label: 'Áreas',
+        emoji: '📐',
+        color: 'amber',
+        items: areaItems,
+        onRemoveAll: () => {
+          onRemoveMultiple(['areaRange', 'totalAreaRange']);
+        }
+      });
+    }
+
+    // Price Range (standalone)
     if (filters.priceMin || filters.priceMax) {
       let label = '';
       if (filters.priceMin && filters.priceMax) {
@@ -62,124 +143,81 @@ export default function ActiveFilters({ filters, onRemove, onClearAll, filteredP
       } else {
         label = `Até ${formatCurrency(filters.priceMax)}`;
       }
-      items.push({
+      standalone.push({
         key: 'price',
         label,
-        icon: null,
         emoji: '💰',
-        iconColor: 'text-green-600',
         color: 'green',
-        onRemove: () => {
-          // ✅ FIX: Remover ambos de uma vez criando novo objeto
-          onRemove('priceRange', { priceMin: '', priceMax: '' });
-        },
+        onRemove: () => onRemove('priceRange', { priceMin: '', priceMax: '' }),
       });
     }
 
-    // Area
-    if (filters.areaMin || filters.areaMax) {
-      let label = '';
-      if (filters.areaMin && filters.areaMax) {
-        label = `${filters.areaMin}m² - ${filters.areaMax}m²`;
-      } else if (filters.areaMin) {
-        label = `A partir de ${filters.areaMin}m²`;
-      } else {
-        label = `Até ${filters.areaMax}m²`;
-      }
-      items.push({
-        key: 'area',
-        label,
-        icon: null,
-        emoji: '📐',
-        iconColor: 'text-amber-600',
-        color: 'amber',
-        onRemove: () => {
-          // ✅ FIX: Remover ambos de uma vez criando novo objeto
-          onRemove('areaRange', { areaMin: '', areaMax: '' });
-        },
-      });
-    }
-
-    // Bedrooms
+    // GRUPO: Quartos (Quartos + Banheiros + Suítes)
+    const roomItems = [];
     if (filters.bedrooms) {
-      items.push({
+      roomItems.push({
         key: 'bedrooms',
         label: `${filters.bedrooms}+ quarto${filters.bedrooms > 1 ? 's' : ''}`,
-        icon: null,
         emoji: '🛏',
-        iconColor: 'text-rose-600',
-        color: 'rose',
         onRemove: () => onRemove('bedrooms', null),
       });
     }
-
-    // Bathrooms
     if (filters.bathrooms) {
-      items.push({
+      roomItems.push({
         key: 'bathrooms',
         label: `${filters.bathrooms}+ banheiro${filters.bathrooms > 1 ? 's' : ''}`,
-        icon: null,
         emoji: '🚿',
-        iconColor: 'text-cyan-600',
-        color: 'cyan',
         onRemove: () => onRemove('bathrooms', null),
       });
     }
-
-    // Styles (Estilos Arquitetônicos)
-    if (filters.styles?.length > 0) {
-      filters.styles.forEach((style) => {
-        items.push({
-          key: `style-${style}`,
-          label: style,
-          icon: null,
-          emoji: '✨',
-          iconColor: 'text-purple-600',
-          color: 'purple',
-          onRemove: () => {
-            const updated = filters.styles.filter((s) => s !== style);
-            onRemove('styles', updated);
-          },
-        });
+    if (filters.suites !== null && filters.suites !== undefined) {
+      roomItems.push({
+        key: 'suites',
+        label: `${filters.suites}+ suíte${filters.suites !== 1 ? 's' : ''}`,
+        emoji: '🛁',
+        onRemove: () => onRemove('suites', null),
+      });
+    }
+    if (roomItems.length > 0) {
+      groups.push({
+        key: 'rooms',
+        label: 'Quartos & Banheiros',
+        emoji: '🛏',
+        color: 'rose',
+        items: roomItems,
+        onRemoveAll: () => {
+          onRemoveMultiple(['bedrooms', 'bathrooms', 'suites']);
+        }
       });
     }
 
-    // Parking
+    // GRUPO: Mais Filtros (Amenities, Natural Conditions, Parking, Year, Condition)
+    const moreFiltersItems = [];
+    
     if (filters.parkingSpaces !== null && filters.parkingSpaces !== undefined) {
-      items.push({
+      moreFiltersItems.push({
         key: 'parking',
         label: `${filters.parkingSpaces}${filters.parkingSpaces > 0 ? '+' : ''} vaga${filters.parkingSpaces !== 1 ? 's' : ''}`,
-        icon: null,
         emoji: '🚗',
-        iconColor: 'text-slate-600',
-        color: 'slate',
         onRemove: () => onRemove('parkingSpaces', null),
       });
     }
 
-    // Suites
-    if (filters.suites !== null && filters.suites !== undefined) {
-      items.push({
-        key: 'suites',
-        label: `${filters.suites}${filters.suites > 0 ? '+' : ''} suíte${filters.suites !== 1 ? 's' : ''}`,
-        icon: null,
-        emoji: '🛁',
-        iconColor: 'text-indigo-600',
-        color: 'indigo',
-        onRemove: () => onRemove('suites', null),
+    if (filters.yearBuilt) {
+      moreFiltersItems.push({
+        key: 'yearBuilt',
+        label: `Construído após ${filters.yearBuilt}`,
+        emoji: '📅',
+        onRemove: () => onRemove('yearBuilt', null),
       });
     }
 
-    // Amenities
     if (filters.amenities?.length > 0) {
       filters.amenities.forEach((amenity) => {
-        items.push({
+        moreFiltersItems.push({
           key: `amenity-${amenity}`,
           label: amenity,
-          icon: null,
           emoji: '✨',
-          iconColor: 'text-violet-600',
-          color: 'violet',
           onRemove: () => {
             const updated = filters.amenities.filter((a) => a !== amenity);
             onRemove('amenities', updated);
@@ -188,16 +226,12 @@ export default function ActiveFilters({ filters, onRemove, onClearAll, filteredP
       });
     }
 
-    // Condo Amenities
     if (filters.condoAmenities?.length > 0) {
       filters.condoAmenities.forEach((amenity) => {
-        items.push({
+        moreFiltersItems.push({
           key: `condo-${amenity}`,
           label: amenity,
-          icon: null,
           emoji: '🏢',
-          iconColor: 'text-sky-600',
-          color: 'sky',
           onRemove: () => {
             const updated = filters.condoAmenities.filter((a) => a !== amenity);
             onRemove('condoAmenities', updated);
@@ -206,16 +240,12 @@ export default function ActiveFilters({ filters, onRemove, onClearAll, filteredP
       });
     }
 
-    // Natural Conditions
     if (filters.naturalConditions?.length > 0) {
       filters.naturalConditions.forEach((condition) => {
-        items.push({
+        moreFiltersItems.push({
           key: `natural-${condition}`,
           label: condition,
-          icon: null,
           emoji: '🌿',
-          iconColor: 'text-green-600',
-          color: 'green',
           onRemove: () => {
             const updated = filters.naturalConditions.filter((c) => c !== condition);
             onRemove('naturalConditions', updated);
@@ -224,25 +254,34 @@ export default function ActiveFilters({ filters, onRemove, onClearAll, filteredP
       });
     }
 
-    // Property Condition
     if (filters.propertyCondition) {
-      items.push({
+      moreFiltersItems.push({
         key: 'condition',
         label: getConditionLabel(filters.propertyCondition),
-        icon: null,
         emoji: '🏗',
-        iconColor: 'text-orange-600',
-        color: 'orange',
         onRemove: () => onRemove('propertyCondition', ''),
       });
     }
 
-    return items;
+    if (moreFiltersItems.length > 0) {
+      groups.push({
+        key: 'more-filters',
+        label: 'Mais Filtros',
+        emoji: '⚙️',
+        color: 'violet',
+        items: moreFiltersItems,
+        onRemoveAll: () => {
+          onRemoveMultiple(['parkingSpaces', 'yearBuilt', 'amenities', 'condoAmenities', 'naturalConditions', 'propertyCondition']);
+        }
+      });
+    }
+
+    return { groups, standalone };
   };
 
-  const filterItems = getFilterItems();
+  const { groups, standalone } = getFilterGroups();
 
-  if (filterItems.length === 0) return null;
+  if (groups.length === 0 && standalone.length === 0) return null;
 
   // Cores para os chips - Estilo Premium
   const getColorClasses = (color, featured = false) => {
@@ -267,12 +306,13 @@ export default function ActiveFilters({ filters, onRemove, onClearAll, filteredP
     return colors[color] || colors.slate;
   };
 
-  const featuredItems = filterItems.filter(item => item.featured);
-  const regularItems = filterItems.filter(item => !item.featured);
+  // Separar standalone featured (área do mapa) dos outros
+  const featuredStandalone = standalone.filter(item => item.featured);
+  const regularStandalone = standalone.filter(item => !item.featured);
 
   return (
     <div className="filtersContainer bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden">
-      {/* Header com fundo sutil */}
+      {/* Header */}
       <div className="bg-gradient-to-r from-slate-50 to-slate-100/50 px-6 py-4 border-b border-slate-200/60">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -283,11 +323,11 @@ export default function ActiveFilters({ filters, onRemove, onClearAll, filteredP
               <h3 className="text-base font-bold text-slate-800 flex items-center gap-2">
                 Filtros Aplicados
                 <span className="badge inline-flex items-center justify-center min-w-[24px] h-6 px-2 bg-emerald-500 text-white text-xs font-bold rounded-full shadow-sm">
-                  {filterItems.length}
+                  {groups.reduce((acc, g) => acc + g.items.length, 0) + standalone.length}
                 </span>
               </h3>
               <p className="text-xs text-slate-500 mt-0.5">
-                Clique para remover
+                Clique para remover ou expandir pastas
               </p>
             </div>
           </div>
@@ -303,82 +343,154 @@ export default function ActiveFilters({ filters, onRemove, onClearAll, filteredP
       </div>
 
       {/* Container de Chips */}
-      <div className="px-6 py-5">
-        {/* Featured Filters (Área Desenhada) */}
-        {featuredItems.length > 0 && (
-          <div className="mb-4">
-            <div className="flex flex-wrap gap-2.5">
-              {featuredItems.map((item) => {
-                const IconComponent = item.icon;
-                return (
-                  <button
-                    key={item.key}
-                    onClick={item.onRemove}
-                    className={`
-                      filterChip rippleEffect
-                      inline-flex items-center gap-2.5 px-4 py-2.5
-                      rounded-xl text-sm font-semibold
-                      transition-all duration-300 ease-out
-                      transform hover:scale-[1.02] active:scale-[0.98]
-                      ${getColorClasses(item.color, item.featured)}
-                      group relative overflow-hidden
-                    `}
-                    title={`Clique para remover: ${item.label}`}
-                  >
-                    {IconComponent && (
-                      <IconComponent className={`w-4 h-4 ${item.iconColor} group-hover:scale-110 transition-transform duration-300`} />
-                    )}
-                    {item.emoji && (
-                      <span className="text-lg leading-none">{item.emoji}</span>
-                    )}
-                    <span className="leading-none font-medium">{item.label}</span>
-                    <div className="ml-1 w-5 h-5 rounded-full bg-emerald-500/10 group-hover:bg-emerald-500/20 flex items-center justify-center transition-colors duration-300">
-                      <X className="w-3 h-3 text-emerald-600 group-hover:rotate-90 transition-all duration-300" />
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
+      <div className="px-6 py-5 space-y-3">
+        {/* Featured Standalone (Área do Mapa) */}
+        {featuredStandalone.length > 0 && (
+          <div className="flex flex-wrap gap-2.5">
+            {featuredStandalone.map((item) => {
+              const IconComponent = item.icon;
+              return (
+                <button
+                  key={item.key}
+                  onClick={item.onRemove}
+                  className={`
+                    filterChip rippleEffect
+                    inline-flex items-center gap-2.5 px-4 py-2.5
+                    rounded-xl text-sm font-semibold
+                    transition-all duration-300 ease-out
+                    transform hover:scale-[1.02] active:scale-[0.98]
+                    ${getColorClasses(item.color, item.featured)}
+                    group relative overflow-hidden
+                  `}
+                  title={`Clique para remover: ${item.label}`}
+                >
+                  {IconComponent && (
+                    <IconComponent className={`w-4 h-4 ${item.iconColor} group-hover:scale-110 transition-transform duration-300`} />
+                  )}
+                  {item.emoji && (
+                    <span className="text-lg leading-none">{item.emoji}</span>
+                  )}
+                  <span className="leading-none font-medium">{item.label}</span>
+                  <div className="ml-1 w-5 h-5 rounded-full bg-emerald-500/10 group-hover:bg-emerald-500/20 flex items-center justify-center transition-colors duration-300">
+                    <X className="w-3 h-3 text-emerald-600 group-hover:rotate-90 transition-all duration-300" />
+                  </div>
+                </button>
+              );
+            })}
           </div>
         )}
 
-        {/* Regular Filters */}
-        <div className="flex flex-wrap gap-2">
-          {regularItems.map((item) => {
-            const IconComponent = item.icon;
-            return (
-              <button
-                key={item.key}
-                onClick={item.onRemove}
-                className={`
-                  filterChip rippleEffect
-                  inline-flex items-center gap-2 px-3.5 py-2
-                  rounded-xl text-sm font-medium
-                  transition-all duration-300 ease-out
-                  transform hover:scale-[1.02] active:scale-[0.98]
-                  ${getColorClasses(item.color)}
-                  group relative overflow-hidden
-                `}
-                title={`Clique para remover: ${item.label}`}
-              >
-                {IconComponent && (
-                  <IconComponent className={`w-3.5 h-3.5 ${item.iconColor} group-hover:scale-110 transition-transform duration-300`} />
-                )}
-                {item.emoji && (
-                  <span className="text-base leading-none opacity-80">{item.emoji}</span>
-                )}
-                <span className="leading-none">{item.label}</span>
-                <X className="w-3 h-3 text-slate-400 group-hover:text-slate-600 group-hover:rotate-90 transition-all duration-300" />
-              </button>
-            );
-          })}
-        </div>
+        {/* Groups (Pastas) */}
+        {groups.map((group) => {
+          const isExpanded = expandedGroups[group.key];
+          const FolderIcon = isExpanded ? FolderOpen : Folder;
+          const ChevronIcon = isExpanded ? ChevronUp : ChevronDown;
+
+          return (
+            <div key={group.key} className="space-y-2">
+              {/* Group Header (Pasta Fechada) */}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => toggleGroup(group.key)}
+                  className={`
+                    flex-1 inline-flex items-center gap-2.5 px-4 py-2.5
+                    rounded-xl text-sm font-semibold
+                    transition-all duration-300 ease-out
+                    transform hover:scale-[1.01] active:scale-[0.99]
+                    ${getColorClasses(group.color)}
+                    group relative overflow-hidden
+                  `}
+                  title={`Clique para ${isExpanded ? 'recolher' : 'expandir'}`}
+                >
+                  <FolderIcon className={`w-4 h-4 text-${group.color}-600 group-hover:scale-110 transition-transform duration-300`} />
+                  <span className="text-lg leading-none">{group.emoji}</span>
+                  <span className="leading-none font-medium flex-1 text-left">{group.label}</span>
+                  <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 bg-slate-200 text-slate-700 text-xs font-bold rounded-full">
+                    {group.items.length}
+                  </span>
+                  <ChevronIcon className={`w-4 h-4 text-${group.color}-600 transition-transform duration-300`} />
+                </button>
+                <button
+                  onClick={group.onRemoveAll}
+                  className="w-9 h-9 rounded-xl bg-rose-50 hover:bg-rose-500 border border-rose-300 hover:border-rose-500 flex items-center justify-center transition-all duration-300 group"
+                  title="Remover todos deste grupo"
+                >
+                  <X className="w-4 h-4 text-rose-600 group-hover:text-white group-hover:rotate-90 transition-all duration-300" />
+                </button>
+              </div>
+
+              {/* Group Items (Quando Expandido) */}
+              {isExpanded && (
+                <div className="pl-4 flex flex-wrap gap-2">
+                  {group.items.map((item) => (
+                    <button
+                      key={item.key}
+                      onClick={item.onRemove}
+                      className={`
+                        filterChip rippleEffect
+                        inline-flex items-center gap-2 px-3 py-2
+                        rounded-lg text-sm font-medium
+                        transition-all duration-300 ease-out
+                        transform hover:scale-[1.02] active:scale-[0.98]
+                        ${getColorClasses(group.color)}
+                        group relative overflow-hidden
+                      `}
+                      title={`Clique para remover: ${item.label}`}
+                    >
+                      {item.emoji && (
+                        <span className="text-base leading-none">{item.emoji}</span>
+                      )}
+                      <span className="leading-none">{item.label}</span>
+                      <X className="w-3 h-3 group-hover:rotate-90 transition-all duration-300" />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })}
+
+        {/* Regular Standalone (Location, Price) */}
+        {regularStandalone.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {regularStandalone.map((item) => {
+              const IconComponent = item.icon;
+              return (
+                <button
+                  key={item.key}
+                  onClick={item.onRemove}
+                  className={`
+                    filterChip rippleEffect
+                    inline-flex items-center gap-2.5 px-4 py-2.5
+                    rounded-xl text-sm font-semibold
+                    transition-all duration-300 ease-out
+                    transform hover:scale-[1.02] active:scale-[0.98]
+                    ${getColorClasses(item.color)}
+                    group relative overflow-hidden
+                  `}
+                  title={`Clique para remover: ${item.label}`}
+                >
+                  {IconComponent && (
+                    <IconComponent className={`w-4 h-4 ${item.iconColor} group-hover:scale-110 transition-transform duration-300`} />
+                  )}
+                  {item.emoji && (
+                    <span className="text-lg leading-none">{item.emoji}</span>
+                  )}
+                  <span className="leading-none font-medium">{item.label}</span>
+                  <div className="ml-1 w-5 h-5 rounded-full bg-slate-200 group-hover:bg-slate-300 flex items-center justify-center transition-colors duration-300">
+                    <X className="w-3 h-3 text-slate-600 group-hover:rotate-90 transition-all duration-300" />
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
-// Helper functions
+// Helper: Formatar preços
 function formatCurrency(value) {
   if (!value) return 'R$ 0';
   const num = Number(value);
@@ -390,7 +502,7 @@ function formatCurrency(value) {
   return `R$ ${new Intl.NumberFormat('pt-BR').format(num)}`;
 }
 
-// Helper functions
+// Helper: Labels de tipo de imóvel
 function getPropertyTypeLabel(type) {
   const labels = {
     casa: 'Casa',
@@ -406,6 +518,7 @@ function getPropertyTypeLabel(type) {
   return labels[type] || type;
 }
 
+// Helper: Labels de condição
 function getConditionLabel(condition) {
   const labels = {
     novo: 'Novo/Na planta',
@@ -416,6 +529,7 @@ function getConditionLabel(condition) {
   return labels[condition] || condition;
 }
 
+// Helper: Formatar números
 function formatNumber(value) {
   if (!value) return '0';
   return new Intl.NumberFormat('pt-BR').format(value);

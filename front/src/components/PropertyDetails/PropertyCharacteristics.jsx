@@ -20,7 +20,7 @@ export default function PropertyCharacteristics({ property, formatCurrency, getP
       
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {/* Área - sempre exibir */}
-        {property.area && (
+        {property.totalArea && (
           <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
             <div className="flex items-center gap-2 text-slate-600 mb-2">
               <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
@@ -29,7 +29,7 @@ export default function PropertyCharacteristics({ property, formatCurrency, getP
               <span className="text-sm font-medium text-slate-600">Área</span>
             </div>
             <div className="text-2xl font-bold text-slate-900">
-              {property.area} m²
+              {property.totalArea} m²
             </div>
           </div>
         )}

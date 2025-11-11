@@ -42,14 +42,14 @@ export default function TopFiltersBar({ filters, onFilterClick }) {
   };
 
   const getAreaText = () => {
-    if (filters.areaMin && filters.areaMax) {
-      return `${filters.areaMin} - ${filters.areaMax}m²`;
+    if (filters.totalAreaMin && filters.totalAreaMax) {
+      return `${filters.totalAreaMin} - ${filters.totalAreaMax}m²`;
     }
-    if (filters.areaMin) {
-      return `A partir de ${filters.areaMin}m²`;
+    if (filters.totalAreaMin) {
+      return `A partir de ${filters.totalAreaMin}m²`;
     }
-    if (filters.areaMax) {
-      return `Até ${filters.areaMax}m²`;
+    if (filters.totalAreaMax) {
+      return `Até ${filters.totalAreaMax}m²`;
     }
     return 'Área';
   };
@@ -77,7 +77,7 @@ export default function TopFiltersBar({ filters, onFilterClick }) {
       case 'propertyType':
         return filters.propertyTypes?.length > 0;
       case 'area':
-        return filters.areaMin || filters.areaMax;
+        return filters.totalAreaMin || filters.totalAreaMax;
       case 'rooms':
         return filters.bedrooms || filters.bathrooms;
       default:

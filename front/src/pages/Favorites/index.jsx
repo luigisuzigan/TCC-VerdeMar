@@ -129,10 +129,10 @@ export default function Favorites() {
                         <span>{property.baths}</span>
                       </div>
                     )}
-                    {property.area > 0 && (
+                    {property.totalArea > 0 && (
                       <div className="flex items-center gap-1">
                         <Maximize size={16} />
-                        <span>{property.area}m²</span>
+                        <span>{property.totalArea}m²</span>
                       </div>
                     )}
                   </div>

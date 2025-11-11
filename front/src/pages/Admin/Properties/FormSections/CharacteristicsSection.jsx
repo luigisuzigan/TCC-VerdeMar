@@ -30,54 +30,24 @@ export default function CharacteristicsSection({
 
       <div className="p-8 space-y-6">
         
-        {/* 1. ÁREAS - MINIMALISTA TIPO DASHBOARD */}
+        {/* 1. ÁREA TOTAL - MINIMALISTA TIPO DASHBOARD */}
         <div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Área Construída - Minimalista */}
-            <div className="bg-white rounded-xl p-6 border-2 border-slate-200 hover:border-blue-300 transition-all shadow-sm">
+          <div className="grid grid-cols-1 gap-6">
+            {/* Área Total - Destaque Principal */}
+            <div className="bg-white rounded-xl p-8 border-2 border-slate-200 hover:border-green-300 transition-all shadow-sm">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
-                  <Home size={20} className="text-white" />
+                <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl flex items-center justify-center shadow-lg">
+                  <Ruler size={24} className="text-white" />
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-slate-900">
-                    Área Construída
+                  <label className="block text-lg font-bold text-slate-900">
+                    Área Total do Terreno
                   </label>
-                  <span className="text-xs text-slate-500">Espaço edificado</span>
+                  <span className="text-sm text-slate-500">Tamanho completo do lote em m²</span>
                 </div>
               </div>
               
-              <div className="flex items-center justify-center gap-2">
-                <input 
-                  type="text"
-                  value={formatNumber(model.area || '')}
-                  onChange={(e) => {
-                    const value = unformatNumber(e.target.value);
-                    update('area', value);
-                  }}
-                  placeholder="___"
-                  className="w-32 text-4xl font-black text-blue-600 border-0 border-b-4 border-blue-200 focus:border-blue-500 focus:outline-none focus:ring-0 placeholder:text-slate-200 text-center pb-2"
-                  required
-                />
-                <span className="text-3xl font-bold text-slate-600 flex-shrink-0">m²</span>
-              </div>
-            </div>
-
-            {/* Área Total - Minimalista */}
-            <div className="bg-white rounded-xl p-6 border-2 border-slate-200 hover:border-green-300 transition-all shadow-sm">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center">
-                  <Ruler size={20} className="text-white" />
-                </div>
-                <div>
-                  <label className="block text-sm font-bold text-slate-900">
-                    Área Total Terreno
-                  </label>
-                  <span className="text-xs text-slate-500">Lote completo (opcional)</span>
-                </div>
-              </div>
-              
-              <div className="flex items-center justify-center gap-2">
+              <div className="flex items-center justify-center gap-3 mt-6">
                 <input 
                   type="text"
                   value={formatNumber(model.totalArea || '')}
@@ -86,9 +56,10 @@ export default function CharacteristicsSection({
                     update('totalArea', value);
                   }}
                   placeholder="___"
-                  className="w-32 text-4xl font-black text-green-600 border-0 border-b-4 border-green-200 focus:border-green-500 focus:outline-none focus:ring-0 placeholder:text-slate-200 text-center pb-2"
+                  className="w-40 text-5xl font-black text-green-600 border-0 border-b-4 border-green-200 focus:border-green-500 focus:outline-none focus:ring-0 placeholder:text-slate-200 text-center pb-2"
+                  required
                 />
-                <span className="text-3xl font-bold text-slate-600 flex-shrink-0">m²</span>
+                <span className="text-4xl font-bold text-slate-600 flex-shrink-0">m²</span>
               </div>
             </div>
           </div>

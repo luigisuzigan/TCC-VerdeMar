@@ -213,17 +213,7 @@ export default function Explorar() {
       params.set('maxPrice', filters.priceMax);
     }
     
-    // Area
-    if (filters.areaMin) {
-      console.log('📏 Adicionando minArea:', filters.areaMin);
-      params.set('minArea', filters.areaMin);
-    }
-    if (filters.areaMax) {
-      console.log('📏 Adicionando maxArea:', filters.areaMax);
-      params.set('maxArea', filters.areaMax);
-    }
-    
-    // Total Area
+    // Area Total
     if (filters.totalAreaMin) {
       console.log('📐 Adicionando minTotalArea:', filters.totalAreaMin);
       params.set('minTotalArea', filters.totalAreaMin);
@@ -261,6 +251,12 @@ export default function Explorar() {
     if (filters.suites !== null && filters.suites !== undefined) {
       console.log('🛁 Adicionando minSuites:', filters.suites);
       params.set('minSuites', filters.suites);
+    }
+    
+    // Year Built
+    if (filters.yearBuilt) {
+      console.log('📅 Adicionando minYearBuilt:', filters.yearBuilt);
+      params.set('minYearBuilt', filters.yearBuilt);
     }
     
     // Amenities
@@ -495,10 +491,10 @@ export default function Explorar() {
     if (key === 'priceRange') {
       delete newFilters.priceMin;
       delete newFilters.priceMax;
-    } else if (key === 'areaRange') {
-      delete newFilters.areaMin;
-      delete newFilters.areaMax;
-    } 
+    } else if (key === 'totalAreaRange') {
+      delete newFilters.totalAreaMin;
+      delete newFilters.totalAreaMax;
+    }
     // Se o valor for null/undefined ou string vazia, deletar a chave
     else if (value === null || value === undefined || value === '') {
       delete newFilters[key];
@@ -516,6 +512,37 @@ export default function Explorar() {
     navigate(`/explorar?${params.toString()}`, { replace: true });
     
     // ✅ FIX: Disparar busca após remover filtro
+    setShouldSearch(true);
+  };
+
+  // Remover múltiplos filtros de uma vez (para grupos)
+  const removeMultipleFilters = (keysToRemove) => {
+    console.log('🗑️🗑️ removeMultipleFilters chamado:', keysToRemove);
+    
+    const newFilters = { ...filters };
+    
+    keysToRemove.forEach(key => {
+      if (key === 'priceRange') {
+        delete newFilters.priceMin;
+        delete newFilters.priceMax;
+      } else if (key === 'totalAreaRange') {
+        delete newFilters.totalAreaMin;
+        delete newFilters.totalAreaMax;
+      } else {
+        delete newFilters[key];
+      }
+    });
+    
+    console.log('🔄 Novos filtros após remoção múltipla:', newFilters);
+    
+    setFilters(newFilters);
+    setCurrentPage(1);
+    
+    // Atualizar URL
+    const params = filtersToUrlParams(newFilters);
+    navigate(`/explorar?${params.toString()}`, { replace: true });
+    
+    // Disparar busca
     setShouldSearch(true);
   };
 
@@ -570,6 +597,20 @@ export default function Explorar() {
       {/* Filters Bar - Card branco sobre a imagem (overlap) */}
       <div className="relative -mt-10 px-4 pb-6">
         <div ref={topFiltersRef} className="mx-auto max-w-6xl">
+          {/* Logo e Nome do Site */}
+          <div className="flex items-center gap-3 mb-4 pl-2">
+            <Link to="/" className="flex items-center gap-3 group">
+              <img 
+                src="/Logo.png" 
+                alt="VerdeMar Logo" 
+                className="h-10 w-auto transition-transform group-hover:scale-105"
+              />
+              <span className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+                VerdeMar
+              </span>
+            </Link>
+          </div>
+
           <TopFiltersBar
             filters={filters}
             onFilterClick={handleFilterClick}
@@ -584,6 +625,7 @@ export default function Explorar() {
           filters={filters}
           filteredPropertyIds={filteredPropertyIds}
           onRemove={removeFilter}
+          onRemoveMultiple={removeMultipleFilters}
           onClearAll={clearAllFilters}
         />
 
@@ -934,12 +976,12 @@ function PropertyCard({ property }) {
               </div>
             )}
 
-            {property.area > 0 && (
+            {property.totalArea > 0 && (
               <div className="flex items-center gap-1.5">
                 <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
                 </svg>
-                <span className="whitespace-nowrap">{property.area}m²</span>
+                <span className="whitespace-nowrap">{property.totalArea}m²</span>
               </div>
             )}
 

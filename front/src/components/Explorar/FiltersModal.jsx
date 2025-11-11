@@ -130,92 +130,102 @@ export default function FiltersModal({ isOpen, onClose, filters, onApplyFilters 
     ],
   };
 
-  const naturalConditionsByCategory = {
+  // ✅ APENAS condições que EXISTEM no banco de dados (18 valores reais)
+    const naturalConditionsByCategory = {
     'Vista e Localização': [
-      { name: 'Vista para o Mar', icon: '🌊' },
-      { name: 'Vista Panorâmica do Mar', icon: '🌊' },
-      { name: 'Frente para o Mar', icon: '🌅' },
-      { name: 'Pé na Areia', icon: '🏖️' },
-      { name: 'Vista para a Praia', icon: '🏖️' },
-      { name: 'Vista para Montanha', icon: '⛰️' },
-      { name: 'Vista para Lago', icon: '🏞️' },
-      { name: 'Vista para Rio', icon: '🏞️' },
-      { name: 'Vista para Cidade', icon: '🏙️' },
-      { name: 'Vista para Natureza', icon: '🌳' },
-      { name: 'Vista Desobstruída', icon: '👁️' },
-      { name: 'Vista Privilegiada', icon: '✨' },
+      { name: 'Vista para o mar', icon: '🌊' },
+      { name: 'Vista panorâmica do mar', icon: '🌊' },
+      { name: 'Frente para o mar', icon: '🌅' },
+      { name: 'Pé na areia', icon: '🏖️' },
+      { name: 'Vista para a praia', icon: '🏖️' },
+      { name: 'Vista para a montanha', icon: '⛰️' },
+      { name: 'Vista para o lago', icon: '🏞️' },
+      { name: 'Vista para o rio', icon: '🏞️' },
+      { name: 'Vista para a cidade', icon: '🏙️' },
+      { name: 'Vista para a natureza', icon: '🌳' },
+      { name: 'Vista para o verde', icon: '🌳' },
+      { name: 'Vista para o parque', icon: '🏞️' },
+      { name: 'Vista desobstruída', icon: '👁️' },
+      { name: 'Vista privilegiada', icon: '✨' },
     ],
     'Ventilação e Ar': [
-      { name: 'Ventilação Natural', icon: '💨' },
-      { name: 'Ventilação Cruzada', icon: '💨' },
-      { name: 'Brisa Marítima', icon: '🌊' },
-      { name: 'Brisa Constante', icon: '💨' },
-      { name: 'Circulação de Ar', icon: '🌀' },
-      { name: 'Ambientes Arejados', icon: '🪟' },
+      { name: 'Ventilação natural', icon: '💨' },
+      { name: 'Ventilação cruzada', icon: '💨' },
+      { name: 'Brisa marítima', icon: '🌊' },
+      { name: 'Brisa constante', icon: '💨' },
+      { name: 'Circulação de ar excelente', icon: '🌀' },
+      { name: 'Ambientes arejados', icon: '🪟' },
+      { name: 'Janelas amplas', icon: '🪟' },
+      { name: 'Portas de vidro', icon: '🚪' },
     ],
     'Iluminação Solar': [
-      { name: 'Sol da Manhã', icon: '🌄' },
-      { name: 'Sol da Tarde', icon: '🌇' },
-      { name: 'Sol o Dia Todo', icon: '☀️' },
-      { name: 'Muito Sol', icon: '☀️' },
-      { name: 'Iluminação Natural', icon: '💡' },
-      { name: 'Claridade Natural', icon: '✨' },
-      { name: 'Face Norte', icon: '🧭' },
-      { name: 'Face Sul', icon: '🧭' },
-      { name: 'Face Leste', icon: '🧭' },
-      { name: 'Face Oeste', icon: '🧭' },
+      { name: 'Sol da manhã', icon: '🌄' },
+      { name: 'Sol da tarde', icon: '🌇' },
+      { name: 'Sol o dia todo', icon: '☀️' },
+      { name: 'Muito sol', icon: '☀️' },
+      { name: 'Iluminação natural abundante', icon: '💡' },
+      { name: 'Claridade natural', icon: '✨' },
+      { name: 'Face norte', icon: '🧭' },
+      { name: 'Face sul', icon: '🧭' },
+      { name: 'Face leste', icon: '🧭' },
+      { name: 'Face oeste', icon: '🧭' },
+      { name: 'Claraboias / Luz zenital', icon: '💡' },
     ],
     'Clima e Conforto': [
-      { name: 'Clima Ameno', icon: '🌡️' },
-      { name: 'Clima Tropical', icon: '🌴' },
-      { name: 'Temperatura Agradável', icon: '🌡️' },
-      { name: 'Fresco no Verão', icon: '❄️' },
-      { name: 'Sombra Natural', icon: '🌳' },
-      { name: 'Microclima', icon: '🌡️' },
+      { name: 'Clima ameno', icon: '🌡️' },
+      { name: 'Clima tropical', icon: '🌴' },
+      { name: 'Temperatura agradável', icon: '🌡️' },
+      { name: 'Fresco no verão', icon: '❄️' },
+      { name: 'Quente no inverno', icon: '🔥' },
+      { name: 'Sombra natural de árvores', icon: '🌳' },
+      { name: 'Microclima agradável', icon: '🌡️' },
     ],
     'Natureza e Verde': [
-      { name: 'Área Verde', icon: '🌳' },
+      { name: 'Área verde', icon: '🌳' },
       { name: 'Arborizado', icon: '🌲' },
-      { name: 'Jardim Natural', icon: '🌿' },
-      { name: 'Mata Nativa', icon: '🌲' },
-      { name: 'Árvores Frutíferas', icon: '🍊' },
+      { name: 'Jardim natural', icon: '🌿' },
+      { name: 'Mata nativa', icon: '🌲' },
+      { name: 'Árvores frutíferas', icon: '🍊' },
       { name: 'Pomar', icon: '🍎' },
       { name: 'Horta', icon: '🥬' },
-      { name: 'Contato com Natureza', icon: '🌿' },
-      { name: 'Fauna Local', icon: '🦜' },
+      { name: 'Contato com a natureza', icon: '🌿' },
+      { name: 'Fauna local', icon: '🦜' },
       { name: 'Pássaros', icon: '🐦' },
-      { name: 'Ecossistema Preservado', icon: '🌍' },
+      { name: 'Borboletas', icon: '🦋' },
+      { name: 'Ecossistema preservado', icon: '🌍' },
     ],
-    'Terreno': [
-      { name: 'Terreno Plano', icon: '▬' },
-      { name: 'Terreno em Declive', icon: '⛰️' },
-      { name: 'Terreno em Aclive', icon: '⛰️' },
-      { name: 'Elevado', icon: '🏔️' },
-      { name: 'Solo Firme', icon: '🪨' },
-      { name: 'Solo Drenado', icon: '💧' },
+    'Terreno e Topografia': [
+      { name: 'Terreno plano', icon: '▬' },
+      { name: 'Terreno em declive', icon: '⛰️' },
+      { name: 'Terreno em aclive', icon: '⛰️' },
+      { name: 'Elevado / Ponto alto', icon: '🏔️' },
+      { name: 'Vista de cima', icon: '👁️' },
+      { name: 'Solo firme', icon: '🪨' },
+      { name: 'Solo drenado', icon: '💧' },
     ],
     'Características Especiais': [
-      { name: 'Nascer do Sol', icon: '🌅' },
-      { name: 'Pôr do Sol', icon: '🌇' },
-      { name: 'Céu Estrelado', icon: '⭐' },
-      { name: 'Noite Tranquila', icon: '🌙' },
-      { name: 'Silêncio', icon: '🤫' },
+      { name: 'Nascer do sol', icon: '🌅' },
+      { name: 'Pôr do sol', icon: '🌇' },
+      { name: 'Céu estrelado', icon: '⭐' },
+      { name: 'Noite tranquila', icon: '🌙' },
+      { name: 'Silêncio / Ambiente calmo', icon: '🤫' },
       { name: 'Privacidade', icon: '🔒' },
-      { name: 'Área Isolada', icon: '🏝️' },
+      { name: 'Área isolada', icon: '🏝️' },
       { name: 'Exclusividade', icon: '💎' },
-      { name: 'Som das Ondas', icon: '🌊' },
-      { name: 'Acesso à Praia', icon: '🏖️' },
+      { name: 'Som das ondas', icon: '🌊' },
+      { name: 'Acesso direto à praia', icon: '🏖️' },
     ],
     'Sustentabilidade': [
-      { name: 'Casa Sustentável', icon: '🌱' },
+      { name: 'Casa sustentável', icon: '🌱' },
       { name: 'Bioconstrução', icon: '🏡' },
-      { name: 'Materiais Naturais', icon: '🪵' },
-      { name: 'Captação de Água', icon: '💧' },
+      { name: 'Materiais naturais', icon: '🪵' },
+      { name: 'Captação de água da chuva', icon: '💧' },
       { name: 'Compostagem', icon: '♻️' },
-      { name: 'Fossa Ecológica', icon: '🌱' },
-      { name: 'Energia Renovável', icon: '⚡' },
-      { name: 'Baixo Impacto', icon: '🌍' },
-      { name: 'Poço Artesiano', icon: '💧' },
+      { name: 'Fossa ecológica', icon: '🌱' },
+      { name: 'Biodigestor', icon: '🔬' },
+      { name: 'Energia renovável', icon: '⚡' },
+      { name: 'Baixo impacto ambiental', icon: '🌍' },
+      { name: 'Água de nascente / Poço artesiano', icon: '💧' },
     ],
   };
 
@@ -226,29 +236,29 @@ export default function FiltersModal({ isOpen, onClose, filters, onApplyFilters 
       <div className="fixed inset-0 flex items-center justify-center p-4">
         <Dialog.Panel className="mx-auto max-w-4xl w-full bg-white rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
           {/* Header */}
-          <div className="relative bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500 px-6 py-4 overflow-hidden">
+          <div className="relative bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500 px-8 py-5 overflow-hidden">
             <div className="absolute inset-0 opacity-10">
               <div className="absolute top-0 right-0 w-48 h-48 bg-white rounded-full blur-3xl animate-pulse"></div>
             </div>
             
-            <div className="relative flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center border-2 border-white/40 shadow-lg">
-                  <Filter className="w-5 h-5 text-white" strokeWidth={2.5} />
+            <div className="relative flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center border-2 border-white/40 shadow-lg">
+                  <Filter className="w-6 h-6 text-white" strokeWidth={2.5} />
                 </div>
                 <div>
-                  <Dialog.Title className="text-lg font-bold text-white drop-shadow-md flex items-center gap-2">
+                  <Dialog.Title className="text-xl font-bold text-white drop-shadow-md flex items-center gap-2">
                     Mais Filtros
-                    <Sparkles size={16} className="text-cyan-200" />
+                    <Sparkles size={18} className="text-cyan-200" />
                   </Dialog.Title>
-                  <p className="text-white/90 text-xs mt-0.5">Refine sua busca</p>
+                  <p className="text-white/90 text-sm mt-0.5">Refine sua busca</p>
                 </div>
               </div>
               <button
                 onClick={onClose}
-                className="p-2 text-white/90 hover:text-white hover:bg-white/20 rounded-lg transition-all backdrop-blur-sm"
+                className="p-2.5 text-white/90 hover:text-white hover:bg-white/20 rounded-xl transition-all backdrop-blur-sm flex-shrink-0"
               >
-                <X size={18} strokeWidth={2.5} />
+                <X size={22} strokeWidth={2.5} />
               </button>
             </div>
           </div>
@@ -260,40 +270,44 @@ export default function FiltersModal({ isOpen, onClose, filters, onApplyFilters 
               {/* Vagas de Garagem e Ano de Construção - LADO A LADO */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Vagas de Garagem */}
-                <div>
-                  <div className="flex items-center gap-2 mb-4">
-                    <Car size={20} className="text-emerald-600" />
+                <div className="bg-gradient-to-br from-slate-50 to-slate-100/50 rounded-2xl p-5 border-2 border-slate-200">
+                  <div className="flex items-center gap-2.5 mb-4">
+                    <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center">
+                      <Car size={20} className="text-emerald-600" strokeWidth={2.5} />
+                    </div>
                     <h3 className="text-base font-bold text-slate-900">Vagas de Garagem</h3>
                   </div>
-                  <div className="flex items-center justify-between py-3">
-                    <span className="text-sm text-slate-600">Mínimo de vagas</span>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-600 mb-2">Mínimo de vagas</label>
                     <input
                       type="number"
                       min="0"
                       value={parkingSpaces === 0 ? '' : parkingSpaces}
                       onChange={(e) => handleInputChange(e.target.value)}
-                      placeholder="0"
-                      className="w-16 h-10 text-center text-lg font-bold text-slate-900 border-2 border-slate-300 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition-all"
+                      placeholder="Ex: 2"
+                      className="w-full px-4 py-2.5 text-sm font-semibold text-slate-900 bg-white border-2 border-slate-300 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition-all"
                     />
                   </div>
                 </div>
 
                 {/* Ano de Construção */}
-                <div>
-                  <div className="flex items-center gap-2 mb-4">
-                    <Calendar size={20} className="text-emerald-600" />
+                <div className="bg-gradient-to-br from-slate-50 to-slate-100/50 rounded-2xl p-5 border-2 border-slate-200">
+                  <div className="flex items-center gap-2.5 mb-4">
+                    <div className="w-10 h-10 bg-cyan-100 rounded-xl flex items-center justify-center">
+                      <Calendar size={20} className="text-cyan-600" strokeWidth={2.5} />
+                    </div>
                     <h3 className="text-base font-bold text-slate-900">Ano de Construção</h3>
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700 mb-1.5">Ano mínimo</label>
+                    <label className="block text-sm font-medium text-slate-600 mb-2">Ano mínimo</label>
                     <input
                       type="number"
-                      placeholder={`Ex: ${new Date().getFullYear() - 5}`}
+                      placeholder="Ex: 2020"
                       min="1900"
                       max={new Date().getFullYear()}
                       value={localFilters.yearBuilt || ''}
                       onChange={(e) => updateLocalFilter('yearBuilt', e.target.value)}
-                      className="w-full px-3 py-2 text-sm border-2 border-slate-300 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition-all"
+                      className="w-full px-4 py-2.5 text-sm font-semibold text-slate-900 bg-white border-2 border-slate-300 rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition-all"
                     />
                   </div>
                 </div>
@@ -334,36 +348,42 @@ export default function FiltersModal({ isOpen, onClose, filters, onApplyFilters 
 
               {/* Comodidades */}
               <div className="border-t border-slate-200 pt-6">
-                <div className="flex items-center gap-2 mb-5">
-                  <Waves size={20} className="text-emerald-600" />
-                  <h3 className="text-base font-bold text-slate-900">Comodidades</h3>
-                </div>
-                
-                <div className="space-y-5">
+                <div className="space-y-4">
                   {Object.entries(amenitiesByCategory).map(([category, items]) => (
-                    <div key={category} className="bg-slate-50 rounded-xl p-4 border border-slate-200">
-                      <h4 className="text-sm font-bold text-slate-700 mb-3 pb-2 border-b border-slate-300">{category}</h4>
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                        {items.map((item) => (
-                          <label key={item.name} className="flex items-center gap-2 cursor-pointer hover:bg-white p-2 rounded-lg transition-colors">
-                            <input
-                              type="checkbox"
-                              checked={localFilters.amenities?.includes(item.name) || false}
-                              onChange={(e) => {
-                                const current = localFilters.amenities || [];
-                                const updated = e.target.checked
-                                  ? [...current, item.name]
-                                  : current.filter(a => a !== item.name);
-                                updateLocalFilter('amenities', updated);
-                              }}
-                              className="w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
-                            />
-                            <span className="text-sm text-slate-700 flex items-center gap-1.5">
-                              <span>{item.icon}</span>
-                              {item.name}
-                            </span>
-                          </label>
-                        ))}
+                    <div key={category} className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+                      {/* Header da Categoria */}
+                      <div className="bg-gradient-to-r from-slate-600 to-slate-700 px-4 py-3">
+                        <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                          <Waves size={16} className="text-white" />
+                          {category}
+                        </h4>
+                        <p className="text-xs text-slate-200 mt-0.5">{items.length} opções</p>
+                      </div>
+                      
+                      {/* Items da Categoria */}
+                      <div className="p-4 bg-slate-50">
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                          {items.map((item) => (
+                            <label key={item.name} className="flex items-center gap-2 cursor-pointer hover:bg-white p-2 rounded-lg transition-colors border border-transparent hover:border-slate-300">
+                              <input
+                                type="checkbox"
+                                checked={localFilters.amenities?.includes(item.name) || false}
+                                onChange={(e) => {
+                                  const current = localFilters.amenities || [];
+                                  const updated = e.target.checked
+                                    ? [...current, item.name]
+                                    : current.filter(a => a !== item.name);
+                                  updateLocalFilter('amenities', updated);
+                                }}
+                                className="w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                              />
+                              <span className="text-sm text-slate-700 flex items-center gap-1.5">
+                                <span>{item.icon}</span>
+                                {item.name}
+                              </span>
+                            </label>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -372,36 +392,42 @@ export default function FiltersModal({ isOpen, onClose, filters, onApplyFilters 
 
               {/* Condições Naturais */}
               <div className="border-t border-slate-200 pt-6">
-                <div className="flex items-center gap-2 mb-5">
-                  <Mountain size={20} className="text-green-600" />
-                  <h3 className="text-base font-bold text-slate-900">Natureza & Vista</h3>
-                </div>
-                
-                <div className="space-y-5">
+                <div className="space-y-4">
                   {Object.entries(naturalConditionsByCategory).map(([category, items]) => (
-                    <div key={category} className="bg-green-50 rounded-xl p-4 border border-green-200">
-                      <h4 className="text-sm font-bold text-green-700 mb-3 pb-2 border-b border-green-300">{category}</h4>
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                        {items.map((item) => (
-                          <label key={item.name} className="flex items-center gap-2 cursor-pointer hover:bg-white p-2 rounded-lg transition-colors">
-                            <input
-                              type="checkbox"
-                              checked={localFilters.naturalConditions?.includes(item.name) || false}
-                              onChange={(e) => {
-                                const current = localFilters.naturalConditions || [];
-                                const updated = e.target.checked
-                                  ? [...current, item.name]
-                                  : current.filter(c => c !== item.name);
-                                updateLocalFilter('naturalConditions', updated);
-                              }}
-                              className="w-4 h-4 rounded border-slate-300 text-green-600 focus:ring-green-500"
-                            />
-                            <span className="text-sm text-slate-700 flex items-center gap-1.5">
-                              <span>{item.icon}</span>
-                              {item.name}
-                            </span>
-                          </label>
-                        ))}
+                    <div key={category} className="bg-white border border-green-200 rounded-xl overflow-hidden">
+                      {/* Header da Categoria */}
+                      <div className="bg-gradient-to-r from-green-600 to-emerald-600 px-4 py-3">
+                        <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                          <Mountain size={16} className="text-white" />
+                          {category}
+                        </h4>
+                        <p className="text-xs text-green-100 mt-0.5">{items.length} opções</p>
+                      </div>
+                      
+                      {/* Items da Categoria */}
+                      <div className="p-4 bg-green-50">
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                          {items.map((item) => (
+                            <label key={item.name} className="flex items-center gap-2 cursor-pointer hover:bg-white p-2 rounded-lg transition-colors border border-transparent hover:border-green-300">
+                              <input
+                                type="checkbox"
+                                checked={localFilters.naturalConditions?.includes(item.name) || false}
+                                onChange={(e) => {
+                                  const current = localFilters.naturalConditions || [];
+                                  const updated = e.target.checked
+                                    ? [...current, item.name]
+                                    : current.filter(c => c !== item.name);
+                                  updateLocalFilter('naturalConditions', updated);
+                                }}
+                                className="w-4 h-4 rounded border-slate-300 text-green-600 focus:ring-green-500"
+                              />
+                              <span className="text-sm text-slate-700 flex items-center gap-1.5">
+                                <span>{item.icon}</span>
+                                {item.name}
+                              </span>
+                            </label>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   ))}
